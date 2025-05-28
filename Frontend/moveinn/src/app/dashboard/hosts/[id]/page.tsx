@@ -141,7 +141,7 @@ export default function HostProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#E7ECF0]/30">
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-6">
         {/* Breadcrumb */}
         <div className="mb-4 flex items-center text-sm">
@@ -150,7 +150,7 @@ export default function HostProfilePage() {
             Back to Hosts
           </Link>
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-800">{host.name}</span>
+          <span className="text-gray-800 dark:text-text">{host.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -176,15 +176,15 @@ export default function HostProfilePage() {
                 </div>
 
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-2xl font-bold text-[#0E1E40] mb-1">{host.name}</h1>
+                  <h1 className="text-2xl font-bold text-[#0E1E40] mb-1 dark:text-text">{host.name}</h1>
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
                     <div className="flex items-center justify-center md:justify-start">
-                      <GraduationCap className="h-4 w-4 text-[#4C69DD] mr-1" />
-                      <span className="text-gray-700">{host.university}</span>
+                      <GraduationCap className="h-4 w-4 text-[#4C69DD] dark:text-text-secondary mr-1" />
+                      <span className="text-gray-700 dark:text-gray-300 text-xs">{host.university}</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start">
-                      <MapPin className="h-4 w-4 text-[#4C69DD] mr-1" />
-                      <span className="text-gray-700">{host.location}</span>
+                      <MapPin className="h-4 w-4 text-[#4C69DD] dark:text-text-secondary mr-1" />
+                      <span className="text-gray-700 dark:text-gray-300 text-xs">{host.location}</span>
                     </div>
                   </div>
 
@@ -195,10 +195,10 @@ export default function HostProfilePage() {
                         variant="outline"
                         className={`${
                           index === 0
-                            ? "border-[#4C69DD] text-[#4C69DD]"
+                            ? "border-[#4C69DD] text-[#4C69DD] dark:border-text-secondary dark:text-text-secondary"
                             : index === 1
                               ? "border-[#62C3BA] text-[#62C3BA]"
-                              : "border-[#0E1E40] text-[#0E1E40]"
+                              : "border-accent text-accent"
                         }`}
                       >
                         <Globe className="h-3 w-3 mr-1" />
@@ -206,61 +206,30 @@ export default function HostProfilePage() {
                       </Badge>
                     ))}
                   </div>
-
-                  <div className="flex items-center justify-center md:justify-start gap-4">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-[#FFBF00] fill-[#FFBF00] mr-1" />
-                      <span className="font-medium">{host.rating}</span>
-                      <span className="text-gray-500 text-sm ml-1">({host.reviewCount} reviews)</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 text-[#4C69DD] mr-1" />
-                      <span>Helped {host.helpedStudents} students</span>
-                    </div>
+                  <div className="flex items-center justify-center md:justify-start gap-4">  
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Button className="bg-[#4C69DD] hover:bg-[#4C69DD]/90">
+                  <Button className="bg-[#4C69DD] hover:bg-[#4C69DD]/90 text-white">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Contact Host
-                  </Button>
-                  <Button variant="outline" className="border-[#4C69DD] text-[#4C69DD]">
-                    <Heart className="mr-2 h-4 w-4" />
-                    Save
                   </Button>
                 </div>
               </div>
 
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Response Rate</div>
-                    <div className="flex items-center">
-                      <Progress value={host.responseRate} className="h-2 flex-1 mr-2" />
-                      <span className="font-medium text-[#0E1E40]">{host.responseRate}%</span>
-                    </div>
-                  </div>
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Response Time</div>
-                    <div className="font-medium text-[#0E1E40]">{host.responseTime}</div>
-                  </div>
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Member Since</div>
-                    <div className="font-medium text-[#0E1E40]">{host.joinedDate}</div>
-                  </div>
+
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-primary dark:text-text-secondary mb-2">About Me</h2>
+                  <p className="text-gray-700 dark:text-gray-200">{host.bio}</p>
                 </div>
 
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-[#0E1E40] mb-2">About Me</h2>
-                  <p className="text-gray-700">{host.bio}</p>
-                </div>
-
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-[#0E1E40] mb-2">Areas of Expertise</h2>
+                  <h2 className="text-lg font-semibold text-primary dark:text-text-secondary mb-2">Areas of Expertise</h2>
                   <div className="flex flex-wrap gap-2">
                     {host.expertise.map((area) => (
-                      <Badge key={area} className="bg-[#E7ECF0] text-[#0E1E40]">
+                      <Badge key={area} className="bg-[#E7ECF0] text-gray-600 dark:bg-background/50 dark:text-secondary">
                         {area}
                       </Badge>
                     ))}
@@ -268,10 +237,10 @@ export default function HostProfilePage() {
                 </div>
 
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-[#0E1E40] mb-2">Interests</h2>
+                  <h2 className="text-lg font-semibold text-primary dark:text-text-secondary mb-2">Interests</h2>
                   <div className="flex flex-wrap gap-2">
                     {host.interests.map((interest) => (
-                      <Badge key={interest} variant="outline" className="border-[#FFBF00] text-[#FFBF00]">
+                      <Badge key={interest} variant="outline" className="border-primary text-primary dark:text-accent dark:border-accent">
                         {interest}
                       </Badge>
                     ))}
@@ -280,22 +249,22 @@ export default function HostProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-[#0E1E40] mb-2">My Favorite Spots</h2>
+                    <h2 className="text-lg font-semibold text-primary dark:text-text-secondary mb-2">My Favorite Spots</h2>
                     <ul className="space-y-2">
                       {host.favoriteSpots.map((spot, index) => (
                         <li key={index} className="flex items-start">
                           <div className="w-5 h-5 rounded-full bg-[#FFBF00]/20 flex items-center justify-center mt-0.5 mr-2 flex-shrink-0">
                             <MapPin className="h-3 w-3 text-[#FFBF00]" />
                           </div>
-                          <span className="text-gray-700">{spot}</span>
+                          <span className="text-gray-700 dark:text-gray-200">{spot}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   <div>
-                    <h2 className="text-lg font-semibold text-[#0E1E40] mb-2">My Hosting Style</h2>
-                    <p className="text-gray-700">{host.hostingStyle}</p>
+                    <h2 className="text-lg font-semibold text-primary dark:text-text-secondary mb-2">My Hosting Style</h2>
+                    <p className="text-gray-700 dark:text-gray-200">{host.hostingStyle}</p>
                   </div>
                 </div>
               </CardContent>
@@ -304,18 +273,18 @@ export default function HostProfilePage() {
             {/* Reviews */}
             <Card className="border-none shadow-md mb-6 bg-foreground">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl text-[#0E1E40]">Reviews</CardTitle>
-                <CardDescription>What students say about {host.name}</CardDescription>
+                <CardTitle className="text-xl text-primary dark:text-text-secondary">Reviews</CardTitle>
+                <CardDescription className="text-gray-400">What students say about {host.name}</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-[#FFBF00] fill-[#FFBF00] mr-1" />
                     <span className="font-medium text-lg">{host.rating}</span>
-                    <span className="text-gray-500 ml-1">({host.reviewCount} reviews)</span>
+                    <span className="text-gray-500 dark:text-gray-200 ml-1">({host.reviewCount} reviews)</span>
                   </div>
 
-                  <Button variant="outline" className="border-[#4C69DD] text-[#4C69DD]">
+                  <Button variant="outline" className="text-white bg-primary">
                     Write a Review
                   </Button>
                 </div>
@@ -325,22 +294,22 @@ export default function HostProfilePage() {
                     <div key={review.id} className="border-b border-gray-200 pb-6">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center">
-                          <Avatar className="h-10 w-10 mr-3">
+                          <Avatar className="h-10 w-10 mr-3 bg-background/50 text-gray-500 dark:text-gray-200">
                             <AvatarImage src={review.author.avatar} alt={review.author.name} />
                             <AvatarFallback>{review.author.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium text-[#0E1E40]">{review.author.name}</div>
+                            <div className="font-medium text-primary dark:text-secondary">{review.author.name}</div>
                             <div className="text-sm text-gray-500">{review.author.university}</div>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-[#FFBF00] fill-[#FFBF00] mr-1" />
-                          <span className="font-medium">{review.rating}</span>
+                          <span className="font-medium dark:text-accent">{review.rating}</span>
                           <span className="text-gray-500 text-sm ml-2">{review.date}</span>
                         </div>
                       </div>
-                      <p className="text-gray-700">{review.content}</p>
+                      <p className="text-gray-700 dark:text-text">{review.content}</p>
                       <div className="flex items-center mt-3 space-x-4">
                         <Button variant="ghost" size="sm" className="h-8 text-gray-500">
                           <ThumbsUp className="mr-1 h-3 w-3" />
@@ -357,7 +326,7 @@ export default function HostProfilePage() {
 
                 {host.reviewCount > reviews.length && (
                   <div className="mt-6 text-center">
-                    <Button variant="outline" className="border-[#4C69DD] text-[#4C69DD]">
+                    <Button variant="outline" className="text-white bg-primary">
                       See All {host.reviewCount} Reviews
                     </Button>
                   </div>
@@ -371,25 +340,21 @@ export default function HostProfilePage() {
           <div className="space-y-6">
             {/* Contact Card */}
             <Card className="border-none shadow-md bg-foreground py-0 rounded-var(--radius-md)">
-              <CardHeader className="bg-gradient-to-r from-[#4C69DD] to-[#62C3BA] rounded-t-[10px] text-white p-4">
+              <CardHeader className="bg-gradient-to-r from-[#4C69DD] to-[#62C3BA] dark:to-foreground rounded-t-[10px] text-white p-4">
                 <CardTitle className="text-lg">Contact {host.name}</CardTitle>
                 <CardDescription className="text-white/80">Send a message to start the conversation</CardDescription>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="mb-4">
-                  <div className="text-sm text-gray-600 mb-1">Availability</div>
-                  <div className="font-medium text-[#0E1E40]">{host.availability}</div>
-                </div>
 
                 <Textarea
                   placeholder={`Hi ${host.name}, I'm interested in connecting with you about my upcoming Erasmus semester in Barcelona...`}
-                  className="min-h-32 mb-4"
+                  className="min-h-32 mb-4 text-text"
                   value={messageContent}
                   onChange={(e) => setMessageContent(e.target.value)}
                 />
 
                 <Button
-                  className="w-full bg-[#4C69DD] hover:bg-[#4C69DD]/90"
+                  className="w-full bg-[#4C69DD] text-white hover:bg-[#4C69DD]/70"
                   onClick={handleMessageSubmit}
                   disabled={!messageContent.trim()}
                 >
@@ -397,28 +362,25 @@ export default function HostProfilePage() {
                   Send Message
                 </Button>
               </CardContent>
-              <CardFooter className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500 text-center">
-                Typically responds {host.responseTime}
-              </CardFooter>
             </Card>
 
             {/* Host Details */}
             <Card className="border-none shadow-md bg-foreground">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-[#0E1E40]">Host Details</CardTitle>
+                <CardTitle className="text-lg text-primary dark:text-text-secondary">Host Details</CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="px-4">
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Study Program</div>
-                    <div className="font-medium text-[#0E1E40]">{host.studyProgram}</div>
+                    <div className="text-sm text-gray-600 mb-1 dark:text-gray-300">Study Program</div>
+                    <div className="font-medium text-[#0E1E40] dark:text-secondary">{host.studyProgram}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Hometown</div>
-                    <div className="font-medium text-[#0E1E40]">{host.hometown}</div>
+                    <div className="text-sm text-gray-600 mb-1 dark:text-gray-300">Hometown</div>
+                    <div className="font-medium text-[#0E1E40] dark:text-secondary">{host.hometown}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Languages</div>
+                    <div className="text-sm text-gray-600 mb-1 dark:text-gray-300">Languages</div>
                     <div className="flex flex-wrap gap-1">
                       {host.languages.map((language, index) => (
                         <Badge
@@ -426,10 +388,10 @@ export default function HostProfilePage() {
                           variant="outline"
                           className={`text-xs ${
                             index === 0
-                              ? "border-[#4C69DD] text-[#4C69DD]"
+                              ? "border-[#4C69DD] text-[#4C69DD] dark:text-text-secondary dark:border-text-secondary"
                               : index === 1
                                 ? "border-[#62C3BA] text-[#62C3BA]"
-                                : "border-[#0E1E40] text-[#0E1E40]"
+                                : "border-accent text-accent"
                           }`}
                         >
                           {language}
@@ -438,58 +400,12 @@ export default function HostProfilePage() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Member Since</div>
-                    <div className="font-medium text-[#0E1E40]">{host.joinedDate}</div>
+                    <div className="text-sm text-gray-600 mb-1 dark:text-gray-300">Member Since</div>
+                    <div className="font-medium text-[#0E1E40] dark:text-secondary">{host.joinedDate}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Host Achievements */}
-            <Card className="border-none shadow-md bg-foreground">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-[#0E1E40]">Achievements</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-[#FFBF00]/20 flex items-center justify-center mr-3">
-                      <Star className="h-5 w-5 text-[#FFBF00]" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-[#0E1E40]">Super Host</div>
-                      <div className="text-sm text-gray-600">Consistently highly rated</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-[#4C69DD]/20 flex items-center justify-center mr-3">
-                      <Users className="h-5 w-5 text-[#4C69DD]" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-[#0E1E40]">Community Builder</div>
-                      <div className="text-sm text-gray-600">Helped 30+ students</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-[#62C3BA]/20 flex items-center justify-center mr-3">
-                      <Clock className="h-5 w-5 text-[#62C3BA]" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-[#0E1E40]">Quick Responder</div>
-                      <div className="text-sm text-gray-600">Responds within hours</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Report */}
-            <div className="text-center">
-              <Button variant="ghost" size="sm" className="text-gray-500 text-xs">
-                <Flag className="h-3 w-3 mr-1" />
-                Report this host
-              </Button>
-            </div>
           </div>
         </div>
       </main>

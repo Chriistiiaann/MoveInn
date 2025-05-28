@@ -1,4 +1,5 @@
-﻿using Backend.Models.Database.Entities;
+﻿using Backend.Models.Database;
+using Backend.Models.Database.Entities;
 using Backend.Models.Database.Enum;
 using Backend.Models.Database.Repositories;
 using Backend.Models.Dtos;
@@ -111,8 +112,24 @@ public class ReviewService : IReviewService
         return response;
     }
 
-    public async Task DeleteReviewAsync(Guid id)
+    public async Task<bool> DeleteReviewAsync(Guid reviewId, Guid userId)
     {
-        await _reviewRepository.DeleteReviewAsync(id);
+        try
+        {
+            return await _reviewRepository.DeleteReviewAsync(reviewId, userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("There was a problem until the Review was being deleted", ex);
+        }
+    }
+
+    public async Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId)
+    {
+        return await _reviewRepository.GetReviewsByUserIdAsync(userId);
     }
 }

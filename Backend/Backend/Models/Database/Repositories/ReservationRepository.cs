@@ -39,9 +39,28 @@ namespace Backend.Models.Database.Repositories
             _context.Reservations.Update(reservation);
         }
 
-        public async Task DeleteAsync(Reservation reservation)
+        public async Task<IEnumerable<Reservation>> GetByUserAsync(Guid userId)
         {
+            return await _context.Reservations
+                .Include(r => r.Accommodation)
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> DeleteReservationAsync(Guid reservationId, Guid userId)
+        {
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+            if (reservation == null)
+                throw new KeyNotFoundException("This reservation doesn’t exist");
+
+            if (reservation.UserId != userId)
+                return false;
+
             _context.Reservations.Remove(reservation);
+            var changes = await _context.SaveChangesAsync();
+            return changes > 0;
         }
     }
 }

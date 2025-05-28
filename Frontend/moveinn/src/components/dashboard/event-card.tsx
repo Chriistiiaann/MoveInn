@@ -3,93 +3,108 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 interface EventCardProps {
-    title: string
-    date: string
-    location: string
-    attendees: number
-    category: string
-    joined: boolean
+  title: string
+  date: string
+  location: string
+  attendees: number
+  category: string
+  joined: boolean
 }
 
 export function EventCard({ title, date, location, attendees, category, joined }: EventCardProps) {
-  // Generate a consistent color based on the category
-    const getCategoryColor = () => {
-        switch (category.toLowerCase()) {
-        case "social":
-            return "from-[#B7F8C8]/20 to-[#B7F8C8]/5"
-        case "trip":
-            return "from-[#4C69DD]/20 to-[#4C69DD]/5"
-        case "cultural":
-            return "from-[#62C3BA]/20 to-[#62C3BA]/5"
-        default:
-            return "from-gray-100 to-white"
-        }
+  const getCategoryColor = () => {
+    switch (category.toLowerCase()) {
+      case "social":
+        return "from-pink-100 to-foreground dark:from-[#ffbfea]/50"
+      case "trip":
+        return "from-[#4C69DD]/20 to-foreground"
+      case "cultural":
+        return "from-[#62C3BA]/30 to-foreground"
+      case "academic":
+        return "from-amber-200 to-foreground dark:from-[#723917]/50"
+      case "sports":
+        return "from-purple-100 to-foreground dark:from-[#ccb1ef]/50"
+      case "workshop":
+        return "from-yellow-100 to-foreground dark:from-yellow-200/50"
+      case "party":
+        return "from-[#0E1E40]/30 to-foreground dark:from-[#0E1E40]/50"
+      case "other":
+        return "from-gray-200 to-foreground dark:from-gray-400/20"
+      default:
+        return "from-gray-100 to-foreground"
     }
+  }
 
-    const getCategoryIconColor = () => {
-        switch (category.toLowerCase()) {
-        case "social":
-            return "text-[#0E1E40] bg-[#B7F8C8]"
-        case "trip":
-            return "text-white bg-[#4C69DD]"
-        case "cultural":
-            return "text-[#0E1E40] bg-[#62C3BA]"
-        default:
-            return "text-[#4C69DD] bg-[#B7F8C8]/20"
-        }
+  const getBadgeColor = () => {
+    switch (category.toLowerCase()) {
+      case "social":
+        return "bg-pink-200 text-pink-900"
+      case "trip":
+        return "bg-primary text-white"
+      case "cultural":
+        return "bg-secondary-greenblue text-green-900"
+      case "academic":
+        return "bg-amber-400 text-amber-900"
+      case "sports":
+        return "bg-purple-200 text-purple-900"
+      case "workshop":
+        return "bg-yellow-200 text-yellow-900"
+      case "party":
+        return "bg-[#0E1E40] text-white"
+      case "other":
+        return "bg-gray-300 text-gray-800"
+      default:
+        return "bg-gray-200 text-gray-700"
     }
+  }
 
-    return (
-        <div
-        className={`flex flex-col md:flex-row items-start md:items-center gap-4 p-4 rounded-[var(--radius-lg)] hover:border-gray-200 bg-gradient-to-r ${getCategoryColor()} transition-all hover:shadow-md`}
-        >
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCategoryIconColor()}`}>
-            <CalendarIcon className="h-6 w-6" />
+  const truncate = (text: string, maxLength = 28) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text
+  }
+
+  return (
+    <div
+      className={`flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-[var(--radius-lg)] bg-gradient-to-r ${getCategoryColor()} hover:shadow-md transition-all min-h-[110px]`}
+    >
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getBadgeColor()}`}>
+        <CalendarIcon className="h-6 w-6" />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
+          <h3 className="font-medium text-text truncate max-w-[200px]">{title}</h3>
+          <Badge className={joined ? "bg-secondary text-[#0E1E40]" : getBadgeColor()}>
+            {joined ? "Joined" : category}
+          </Badge>
         </div>
 
-        <div className="flex-1">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
-            <h3 className="font-medium text-text">{title}</h3>
-            <Badge
-                className={
-                joined
-                    ? "bg-secondary text-[#0E1E40]"
-                    : category.toLowerCase() === "social"
-                    ? "bg-secondary text-[#0E1E40]"
-                    : category.toLowerCase() === "trip"
-                        ? "bg-[#4C69DD] text-white"
-                        : "bg-secondary-greenblue text-[#0E1E40]"
-                }
-            >
-                {joined ? "Joined" : category}
-            </Badge>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center text-sm text-text-secondary gap-y-1 sm:gap-x-4">
-            <div className="flex items-center">
-                <CalendarIcon className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-                <span>{date}</span>
-            </div>
-            <div className="flex items-center">
-                <MapPinIcon className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-                <span>{location}</span>
-            </div>
-            <div className="flex items-center">
-                <Users2Icon className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-                <span>{attendees} attendees</span>
-            </div>
-            </div>
+        <div className="flex flex-wrap sm:flex-nowrap text-sm text-gray-800 dark:text-text-secondary gap-y-1 gap-x-4">
+          <div className="flex text-xs items-center bg-background/20 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
+            <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">{date}</span>
+          </div>
+          <div className="flex text-xs items-center bg-background/20 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
+            <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">{truncate(location)}</span>
+          </div>
+          <div className="flex text-xs items-center bg-background/20 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
+            <Users2Icon className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>{attendees}</span>
+          </div>
         </div>
+      </div>
 
-        <Button
-            variant={joined ? "outline" : "default"}
-            size="sm"
-            className={
-            joined ? "border-[#4C69DD] text-[#4C69DD] hover:bg-[#4C69DD]/10" : "bg-[#4C69DD] hover:bg-[#4C69DD]/90"
-            }
-        >
-            {joined ? "View Details" : "Join Event"}
-        </Button>
-        </div>
-    )
+      <Button
+        variant={joined ? "ghost" : "default"}
+        size="sm"
+        className={
+          joined
+            ? "border-[#4C69DD] text-[#4C69DD] dark:text-text-secondary hover:bg-primary/10"
+            : "bg-[#4C69DD] hover:bg-[#4C69DD]/90 text-white"
+        }
+      >
+        {joined ? "View Details" : "Join Event"}
+      </Button>
+    </div>
+  )
 }

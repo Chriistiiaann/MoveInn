@@ -56,4 +56,28 @@ public class ReviewRepository : IReviewRepository
             .Where(r => r.Reservation.AccommodationId == accommodationId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId)
+    {
+        return await _context.Reviews
+                             .Where(f => f.UserId == userId)
+                             .ToListAsync();
+    }
+
+
+    public async Task<bool> DeleteReviewAsync(Guid reviewId, Guid userId)
+    {
+        var review = await _context.Reviews
+            .FirstOrDefaultAsync(f => f.Id == reviewId);
+
+        if (review == null)
+            throw new KeyNotFoundException("The Review doesn't exists");
+
+        if (review.UserId != userId)
+            return false;
+
+        _context.Reviews.Remove(review);
+        var changes = await _context.SaveChangesAsync();
+        return changes > 0;
+    }
 }

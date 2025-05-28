@@ -33,30 +33,31 @@ const categoryLabels: Record<number, string> = {
 }
 
 const forumCategoryBadgeColors: Record<number, string> = {
-  0: 'bg-green-600 text-white',
-  1: 'bg-blue-600 text-white',
-  2: 'bg-pink-600 text-white',
-  3: 'bg-yellow-600 text-white',
-  4: 'bg-purple-600 text-white',
-  5: 'bg-rose-600 text-white',
-  6: 'bg-orange-600 text-white',
-  7: 'bg-teal-600 text-white',
-  8: 'bg-gray-700 text-white',
-  9: 'bg-gray-500 text-white',
+  0: "bg-secondary text-green-900", // Procedures & Docs
+  1: "bg-yellow-200 text-yellow-900", // University Life
+  2: "bg-pink-200 text-pink-900", // Cultural & Social
+  3: "bg-purple-200 text-purple-900", // Scholarships
+  4: "bg-secondary-greenblue text-green-900", // Transport
+  5: "bg-amber-400 text-amber-900", // Tourism & Nightlife
+  6: "bg-[#0E1E40] text-white", // Events
+  7: "bg-primary text-white", // Tips
+  8: "bg-gray-300 text-gray-800", // FAQ
+  9: "bg-gray-200 text-gray-700", // Other
 }
 
 const forumCategoryGradients: Record<number, string> = {
-  0: 'from-green-100 to-white',
-  1: 'from-blue-100 to-white',
-  2: 'from-pink-100 to-white',
-  3: 'from-yellow-100 to-white',
-  4: 'from-purple-100 to-white',
-  5: 'from-rose-100 to-white',
-  6: 'from-orange-100 to-white',
-  7: 'from-teal-100 to-white',
-  8: 'from-gray-200 to-white',
-  9: 'from-gray-100 to-white',
+  0: "from-[#B7F8C8]/30 to-foreground", // Procedures & Docs
+  1: "from-yellow-100 dark:from-yellow-200/50 to-foreground", // University Life
+  2: "from-pink-100 dark:from-[#ffbfea]/50 to-foreground", // Cultural & Social
+  3: "from-purple-100 dark:from-[#ccb1ef]/50 to-foreground", // Scholarships
+  4: "from-green-100 dark:from-secondary-greenblue/30 to-foreground", // Transport
+  5: "from-amber-200 dark:from-[#723917]/50 to-foreground", // Tourism & Nightlife
+  6: "from-[#0E1E40]/30 dark:from-[#0E1E40]/50 to-foreground", // Events
+  7: "from-[#4C69DD]/20 to-foreground", // Tips
+  8: "from-gray-200 dark:from-gray-400/20 to-foreground", // FAQ
+  9: "from-gray-200 dark:from-gray-400/20 to-foreground", // Other
 }
+
 
 
 export default function ForumDetailPage() {
@@ -240,7 +241,7 @@ export default function ForumDetailPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="text-xs text-blue-600 ml-8 mt-1 hover:bg-background"
+          className="text-xs text-blue-600 dark:text-text-secondary ml-8 mt-1 hover:bg-background"
           onClick={() => setActiveReply(msg.id)}
         >
           <ReplyIcon className="h-4 w-4 mr-1" />Reply
@@ -271,15 +272,15 @@ export default function ForumDetailPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Forum Header */}
         <div className="shadow-lg rounded-lg p-6 bg-foreground">
-          <div className={`rounded-t-lg mb-6 -mx-6 -mt-6 px-6 pt-6 pb-4 bg-gradient-to-br ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white'} border-b border-gray-200`}>
+          <div className={`rounded-t-lg mb-6 -mx-6 -mt-6 px-6 pt-6 pb-4 bg-gradient-to-br ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white'} border-b border-gray-200 dark:border-gray-700`}>
             <div className="flex items-center justify-between mb-4">
               <Badge className={`text-sm px-3 py-1 rounded-full ${forumCategoryBadgeColors[forum.category] || 'bg-gray-300 text-gray-800'}`}>
                 {categoryLabels[forum.category] || 'Other'}
               </Badge>
               <span className="text-sm text-gray-500">{format(new Date(forum.createdAt), 'PPP')}</span>
             </div>
-            <h1 className="text-2xl font-bold text-[#0E1E40] mb-4">{forum.title}</h1>
-            <div className="flex items-center text-sm text-gray-600 mb-2">
+            <h1 className="text-2xl font-bold text-text mb-4">{forum.title}</h1>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2 bg-gray-200 dark:bg-foreground rounded-full px-2 py-1 w-fit">
               <MapPin className="h-4 w-4 mr-1 text-[#4C69DD]" />
               {forum.country}
             </div>
@@ -292,15 +293,15 @@ export default function ForumDetailPage() {
             </Avatar>
             <span className="text-sm font-medium text-text">{forum.creatorName}</span>
           </div>
-          <div className="border-t mt-9 pt-6">
+          <div className="border-t mt-9 pt-6 dark:border-gray-700">
             <Textarea
               value={newThread}
               onChange={(e) => setNewThread(e.target.value)}
               placeholder="Share something with the community..."
-              className="mb-3 text-primary-dark"
+              className="mb-3 text-text"
             />
             <div className="flex justify-end">
-              <Button onClick={handleSubmitThread} disabled={isSubmitting}>
+              <Button onClick={handleSubmitThread} disabled={isSubmitting} className="bg-primary text-white hover:bg-primary/90">
                 {isSubmitting ? 'Posting...' : 'Post Thread'}
               </Button>
             </div>
@@ -318,7 +319,7 @@ export default function ForumDetailPage() {
                 <div key={thread.id} className="bg-foreground shadow-sm rounded-lg overflow-hidden">
                   
                   {/* Barra de color */}
-                  <div className={`h-3 w-full bg-gradient-to-r ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white border-b border-gray-200'}`} />
+                  <div className={`h-3 w-full bg-gradient-to-r ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white border-b border-gray-200 dark:border-gray-700'}`} />
 
             
                   {/* Contenido del hilo */}
@@ -337,7 +338,7 @@ export default function ForumDetailPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-blue-600 ml-3 hover:bg-background"
+                      className="text-xs text-blue-600 dark:text-text-secondary ml-3 hover:bg-background"
                       onClick={() => setActiveReply(thread.id)}
                     >
                       <ReplyIcon className="h-4 w-4 mr-1" />Reply
@@ -358,7 +359,7 @@ export default function ForumDetailPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-xs text-blue-600 ml-8 mt-1 hover:bg-background"
+                          className="text-xs text-blue-600 dark:text-text-secondary ml-8 mt-1 hover:bg-background"
                           onClick={() => setActiveReply(msg.id)}
                         >
                           <ReplyIcon className="h-4 w-4 mr-1" />Reply
@@ -369,7 +370,7 @@ export default function ForumDetailPage() {
                     ))}
             
                     {rootReplies.length > 5 && (
-                      <button className="text-sm text-blue-600 hover:underline ml-6 mt-2">
+                      <button className="text-sm text-blue-600 dark:text-text-secondary hover:underline ml-6 mt-2">
                         Show more replies...
                       </button>
                     )}

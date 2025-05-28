@@ -2,19 +2,19 @@ import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
     return (
-        <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-[#E7ECF0]/50 to-white z-0"></div>
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#B7F8C8]/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#62C3BA]/20 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-[#FFBF00]/20 rounded-full blur-3xl"></div>
+        <section className="relative overflow-hidden bg-background">
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-foreground/50 to-background z-0"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#B7F8C8]/20 dark:bg-primary/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#62C3BA]/20 dark:bg-primary/20 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-[#FFBF00]/20 dark:bg-primary/20 rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[#0E1E40]">
-                Welcome to <span className="text-[#4C69DD] font-extrabold text-xxl">MoveInn</span>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[#0E1E40] dark:text-text">
+                Welcome to <span className="text-[#4C69DD] dark:text-primary font-extrabold text-xxl">MoveInn</span>
                 </h1>
-                <p className="text-xl mb-8 text-[#0E1E40]">
+                <p className="text-xl mb-8 text-[#0E1E40] dark:text-gray-300">
                 Your all-in-one platform for making the most of your Erasmus experience. Find accommodation, connect with
                 hosts, join events, and more!
                 </p>
@@ -42,13 +42,13 @@ export function HeroSection() {
                     </div>
                     ))}
                 </div>
-                <p className="text-sm text-[#0E1E40]">
+                <p className="text-sm text-[#0E1E40] dark:text-gray-400">
                     Join <span className="font-bold">5,000+</span> Erasmus students already on the platform
                 </p>
                 </div>
             </div>
             <div className="relative">
-                <div className="bg-gradient-to-br from-[#4C69DD] to-[#62C3BA] rounded-xl p-6 shadow-xl">
+                <div className="bg-gradient-to-br from-[#4C69DD] dark:from-[#4C69DD]/80 to-[#62C3BA] dark:to-foreground/50 rounded-xl p-6 shadow-xl">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-[#B7F8C8] flex items-center justify-center mb-2">

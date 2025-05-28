@@ -55,8 +55,17 @@ namespace Backend.Controllers
             }
             return Ok(UserMapper.ToDto(updatedUser));
         }
+
+        [HttpPut("{id}/Languages")]
+        public async Task<IActionResult> UpdateSocialMedias(Guid id, [FromBody] UserLanguageUpdateRequest req)
+        {
+            var dto = await _userService.UpdateUserLanguageAsync(id, req.UserLanguages);
+            if (dto == null) return NotFound();
+            return Ok(dto);
+        }
+
         [HttpPut("{id}/SocialMedias")]
-        public async Task<IActionResult> UpdateSocialMedias(Guid id, [FromBody] SocialMediasUpdateRequest req)
+        public async Task<IActionResult> UpdateLanguages(Guid id, [FromBody] SocialMediasUpdateRequest req)
         {
             var dto = await _userService.UpdateUserSocialMediaAsync(id, req.SocialMedias);
             if (dto == null) return NotFound();
@@ -71,6 +80,20 @@ namespace Backend.Controllers
             //if (userClaimId == null) return Unauthorized(new { Message = "Debe iniciar sesión para llevar a cabo esta acción" });
 
             return Ok(await _userService.GetAllAsync());
+        }
+
+        [HttpGet("{id:guid}/followers")]
+        public async Task<ActionResult<List<UserRelationDto>>> GetFollowers(Guid id)
+        {
+            var list = await _userService.GetFollowersAsync(id);
+            return Ok(list);
+        }
+
+        [HttpGet("{id:guid}/followings")]
+        public async Task<ActionResult<List<UserRelationDto>>> GetFollowings(Guid id)
+        {
+            var list = await _userService.GetFollowingsAsync(id);
+            return Ok(list);
         }
     }
 }

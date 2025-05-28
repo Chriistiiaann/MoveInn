@@ -29,8 +29,14 @@ export const useContacts = () => {
         );
         setContacts(data);
       } catch (err: any) {
-        console.error('Error fetching contacts:', err);
-        setError(err.message || 'Error fetching contacts');
+        if (err.response?.status === 404) {
+          // No hay contactos, no es un error real
+          setContacts([]);
+          setError(null);
+        } else {
+          console.error('Error fetching contacts:', err);
+          setError(err.message || 'Error fetching contacts');
+        }
       } finally {
         setLoading(false);
       }

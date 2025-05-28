@@ -1,10 +1,13 @@
-﻿using Backend.Models.Dtos;
+﻿using Backend.Models.Database.Enum;
+using Backend.Models.Dtos;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Backend.Controllers
 {
@@ -29,14 +32,31 @@ namespace Backend.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult> Login([FromBody] LoginRequest model)
         {
-            if (model == null) return BadRequest(new { Message = "Los datos de usuario son inválidos." });
-            bool isCorrect = await _userService.IsLoginCorrect(model.Mail, model.Password);
+            if (model == null)
+                return BadRequest(new { Message = "Invalid user data" });
 
-            if (!isCorrect) return BadRequest(new { message = "Email o contraseña incorrectos" });
+            bool isCorrect = await _userService.IsLoginCorrect(model.Mail, model.Password);
+            if (!isCorrect)
+                return BadRequest(new { message = "Mail or Password incorrect" });
 
             string stringToken = await _authService.Login(model);
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(stringToken);
+            var roleClaim = jwt.Claims.FirstOrDefault(c =>
+                c.Type == ClaimTypes.Role || c.Type == "role")?.Value;
+
+            if (roleClaim == Role.Banned.ToString())
+            {
+                return StatusCode(
+                    StatusCodes.Status403Forbidden,
+                    new { message = "Your account has been banned and you cannot log in" }
+                );
+            }
+
             return Ok(new LoginResult { AccessToken = stringToken });
         }
+
 
         [HttpPost("Register")]
         public async Task<ActionResult> Register([FromBody] RegisterRequest userRequest)

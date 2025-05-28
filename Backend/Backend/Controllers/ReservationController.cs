@@ -2,6 +2,7 @@
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Backend.Controllers
 {
@@ -51,13 +52,43 @@ namespace Backend.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteReservation(Guid id)
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetByUser(Guid userId)
         {
-            bool deleted = await _reservationService.DeleteReservationAsync(id);
-            if (!deleted)
-                return NotFound("Reserva no encontrada.");
-            return Ok("Reserva eliminada.");
+            var reservations = await _reservationService.GetReservationsByUserAsync(userId);
+
+            if (!reservations.Any())
+                return NotFound(new { message = "This user doesn't have any reservations" });
+
+            return Ok(reservations);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userIdClaim = User.FindFirstValue("id");
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                return Forbid();
+
+            bool ok;
+            try
+            {
+                ok = await _reservationService.DeleteReservationAsync(id, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = "Reservation not found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+
+            if (!ok)
+                return StatusCode(403, new { message = "Only the owner can delete this reservation." });
+
+            return Ok(new { message = "Reservation deleted successfully" });
         }
 
 

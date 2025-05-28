@@ -1,7 +1,9 @@
-﻿using Backend.Models.Database.Entities;
+﻿using Backend.Models.Database;
+using Backend.Models.Database.Entities;
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 namespace Backend.Services;
 
@@ -72,7 +74,7 @@ public class AccommodationService : IAccommodationService
                 _context.Set<ImageAccommodation>().Add(image);
             }
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
         }
 
         return AccommodationMapper.ToDto(accommodation);
@@ -163,5 +165,26 @@ public class AccommodationService : IAccommodationService
     public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
     {
         return await _repository.GetCitiesByCountryAsync(country);
+    }
+
+    public async Task<bool> DeleteAccommodationAsync(Guid forumId, Guid userId)
+    {
+        try
+        {
+            return await _repository.DeleteAccommodation(forumId, userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("There was a problem until the accomodation was being deleted", ex);
+        }
+    }
+
+    public async Task<IEnumerable<Accommodation>> GetAccommodationsByUser(Guid userId)
+    {
+        return await _repository.GetAccommodationsByUser(userId);
     }
 }

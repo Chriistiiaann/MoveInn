@@ -9,7 +9,7 @@ public interface IReviewRepository
     Task<IEnumerable<Review>> GetAllAsync();
     Task<Review> GetReviewByIdAsync(Guid id);
     Task<IEnumerable<Review>> GetReviewsByAccommodationIdAsync(Guid accommodationId);
-    Task DeleteReviewAsync(Guid id);
+    Task<bool> DeleteReviewAsync(Guid forumId, Guid userId);
     Task<Review> GetReviewByReservationAndUserAsync(Guid reservationId, Guid userId);
-
+    Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId);
 }

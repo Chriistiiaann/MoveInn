@@ -40,7 +40,7 @@
   --background: oklch(0.21 0 0);
   --foreground: oklch(0.30 0 0);
   --text: oklch(1 0 0);
-  --text-secondary: oklch(0.76 0.0706 187.67);
+  --text-secondary: oklch(0.77 0.1172 271.37);
   --primary: oklch(0.56 0.1698 271.37);
   --primary-dark: oklch(1 0 0);
   --secondary: oklch(0.92 0.0923 152.42);
@@ -61,3 +61,10 @@
   }
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

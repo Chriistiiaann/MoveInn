@@ -102,12 +102,26 @@ namespace Backend.Services
             return Path.Combine("recommendations", fileName).Replace("\\", "/");
         }
 
-        public async Task<bool> DeleteRecommendationAsync(Guid id)
+        public async Task<bool> DeleteRecommendationAsync(Guid recommendationId, Guid userId)
         {
-            var recommendation = await _unitOfWork.RecommendationRepository.GetByIdAsync(id);
-            if (recommendation == null) return false;
-            await _unitOfWork.RecommendationRepository.DeleteAsync(recommendation);
-            return await _unitOfWork.SaveAsync();
+            try
+            {
+                return await _unitOfWork.RecommendationRepository.DeleteRecommendationAsync(recommendationId, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("There was a problem deleting the recommendation", ex);
+            }
         }
+
+        public Task<IEnumerable<Recommendation>> GetRecommendationsByUserAsync(Guid userId)
+        {
+            return _unitOfWork.RecommendationRepository.GetByUserAsync(userId);
+        }
+
     }
 }

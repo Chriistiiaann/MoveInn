@@ -24,6 +24,15 @@ public class ForumRepository : IForumRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> GetAllCountriesAsync()
+    {
+        return await _context.Forum
+            .Where(a => !string.IsNullOrEmpty(a.Country))
+            .Select(a => a.Country)
+            .Distinct()
+            .ToListAsync();
+    }
+
     public async Task<Forum> GetForumByIdAsync(Guid id)
     {
         return await _context.Forum
@@ -66,6 +75,29 @@ public class ForumRepository : IForumRepository
     {
         return await _context.ForumsMessages
                              .FirstOrDefaultAsync(m => m.Id == messageId);
+    }
+    public async Task<IEnumerable<Forum>> GetForumsByUserIdAsync(Guid userId)
+    {
+        return await _context.Forum
+                             .Where(f => f.CreatedBy == userId)
+                             .ToListAsync();
+    }
+
+
+    public async Task<bool> DeleteForumAsync(Guid forumId, Guid userId)
+    {
+        var forum = await _context.Forum
+            .FirstOrDefaultAsync(f => f.Id == forumId);
+
+        if (forum == null)
+            throw new KeyNotFoundException("The Forum doesn't exists");
+
+        if (forum.CreatedBy != userId)
+            return false;
+
+        _context.Forum.Remove(forum);
+        var changes = await _context.SaveChangesAsync();
+        return changes > 0;
     }
 
 }

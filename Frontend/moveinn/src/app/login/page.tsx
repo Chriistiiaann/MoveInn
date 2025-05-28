@@ -1,20 +1,29 @@
-import LoginForm from "@/components/login/login-form";
+import LoginForm from "@/components/login/login-form"
+import { ThemeToggle } from "@/components/landing/theme-toggle-btn"
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative">
+      {/* Botón de cambio de tema en la esquina superior derecha */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+        
+      </div>
+
       <div className="grid md:grid-cols-2 h-screen">
         <div className="flex items-center justify-center p-8">
           <LoginForm />
         </div>
-        <div
-          className="h-[95%] w-[95%] mx-auto my-auto 
-         bg-[linear-gradient(to_bottom_right,_#121E3E_0%,_#5268D6_43%,_#84B0CF_77%,_#B7F8C8_100%)] rounded-[20px] flex items-center justify-center"
+
+        <div className="h-[95%] w-[95%] mx-auto my-auto 
+          bg-gradient-to-br from-[#121E3E] via-[#5268D6] to-[#B7F8C8] dark:via-[#5268D6]/80 dark:to-foreground 
+          rounded-[20px] flex items-center justify-center"
         >
+
           <div className="h-full flex flex-col justify-center p-8 text-white">
             <div className="text-center mb-8">
               <h2 className="text-5xl font-bold mb-4">
-                Move<span className="text-[#7AE582]">Inn</span>
+                Move<span className="text-secondary">Inn</span>
               </h2>
               <p className="text-2xl font-medium">
                 Connect with Erasmus students worldwide
@@ -25,12 +34,8 @@ export default function Home() {
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
-                    >
+                    {/* Icono Community */}
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                       <path
                         d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
                         stroke="currentColor"
@@ -64,12 +69,8 @@ export default function Home() {
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
-                    >
+                    {/* Icono Locations */}
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                       <path
                         d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
                         stroke="currentColor"
@@ -96,12 +97,8 @@ export default function Home() {
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
-                    >
+                    {/* Icono Global */}
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                       <circle
                         cx="12"
                         cy="12"
@@ -132,15 +129,11 @@ export default function Home() {
                 <p className="text-sm">Students from 50+ countries</p>
               </div>
 
+              {/* Puedes eliminar este div duplicado si fue por error */}
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
-                    >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                       <circle
                         cx="12"
                         cy="12"
@@ -175,5 +168,5 @@ export default function Home() {
         </div>
       </div>
     </main>
-  );
+  )
 }

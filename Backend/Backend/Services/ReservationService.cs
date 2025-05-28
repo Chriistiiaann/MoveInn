@@ -67,13 +67,26 @@ namespace Backend.Services
             return saved ? ReservationMapper.ToDto(reservation) : null;
         }
 
-        public async Task<bool> DeleteReservationAsync(Guid id)
+        public async Task<bool> DeleteReservationAsync(Guid reservationId, Guid userId)
         {
-            var reservation = await _unitOfWork.ReservationRepository.GetByIdAsync(id);
-            if (reservation == null) return false;
+            try
+            {
+                return await _unitOfWork.ReservationRepository.DeleteReservationAsync(reservationId, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("There was a problem deleting the reservation", ex);
+            }
+        }
 
-            await _unitOfWork.ReservationRepository.DeleteAsync(reservation);
-            return await _unitOfWork.SaveAsync();
+        public async Task<IEnumerable<ReservationDto>> GetReservationsByUserAsync(Guid userId)
+        {
+            var reservations = await _unitOfWork.ReservationRepository.GetByUserAsync(userId);
+            return reservations.Select(r => ReservationMapper.ToDto(r));
         }
     }
 }

@@ -2,6 +2,8 @@
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
 using Backend.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +29,7 @@ public class AccommodationsController : ControllerBase
 
     [HttpPost("CreateAccommodation")]
     public async Task<IActionResult> CreateAccommodation([FromForm] AccommodationCreateDTO dto)
-    { 
+    {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -193,5 +195,48 @@ public class AccommodationsController : ControllerBase
 
         var blockedDates = await _accommodationService.GetUnavailableDatesAsync(id);
         return Ok(blockedDates);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAccommodation(Guid id)
+    {
+        var userIdClaim = User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userIdClaim))
+            return Forbid();
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Forbid();
+
+        bool ok;
+
+        try
+        {
+            ok = await _accommodationService.DeleteAccommodationAsync(id, userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Accommodation not found" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+
+        if (!ok)
+            return Forbid(new AuthenticationProperties(), "The author is the only one who can delete de accommodation");
+
+        return Ok(new { message = "The Accommodation was eliminated correctly" });
+    }
+
+    [HttpGet("user/{userId:guid}")]
+    public async Task<ActionResult<IEnumerable<Forum>>> GetByUser(Guid userId)
+    {
+        var forums = await _accommodationService.GetAccommodationsByUser(userId);
+
+        if (!forums.Any())
+            return NotFound(new { message = "You haven’t created any Accommodations yet. Why not start one now?" });
+
+        return Ok(forums);
     }
 }

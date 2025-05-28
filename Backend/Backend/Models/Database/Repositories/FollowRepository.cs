@@ -47,10 +47,58 @@ namespace Backend.Models.Database.Repositories
             catch (Exception ex)
             {
                 if (ex.Message == "Ya sigues a este usuario.")
-                    throw; 
+                    throw;
                 else
                     throw new Exception("Ocurrió un error al intentar seguir al usuario. Por favor, inténtalo más tarde.");
             }
+        }
+
+        public async Task<bool> RemoveFollowAsync(Guid followerId, Guid followingId)
+        {
+            if (followerId == Guid.Empty)
+                throw new Exception("Falta el identificador del seguidor.");
+            if (followingId == Guid.Empty)
+                throw new Exception("Falta el identificador del usuario a dejar de seguir.");
+
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+                var follow = await context.Follows
+                    .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowingId == followingId);
+
+                if (follow == null)
+                    throw new Exception("No sigues a este usuario.");
+
+                context.Follows.Remove(follow);
+                var changes = await context.SaveChangesAsync();
+                return changes > 0;
+            }
+            catch (DbUpdateException)
+            {
+                throw new Exception("No se pudo completar el unfollow. Inténtalo de nuevo más tarde.");
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "No sigues a este usuario.")
+                    throw;
+                throw new Exception("Ocurrió un error al intentar dejar de seguir. Por favor, inténtalo más tarde.");
+            }
+        }
+
+        public async Task<int> GetFollowersCountAsync(Guid userId)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+            return await context.Follows.CountAsync(f => f.FollowingId == userId);
+        }
+
+        public async Task<int> GetFollowingsCountAsync(Guid userId)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+            return await context.Follows.CountAsync(f => f.FollowerId == userId);
         }
     }
 }

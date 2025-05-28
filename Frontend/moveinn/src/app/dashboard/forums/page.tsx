@@ -16,10 +16,14 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import Flag from 'react-world-flags'
 import axios from "axios"
-import { API_ALL_FORUMS, API_BASE_IMAGE_URL } from "@/utils/endpoints/config"
+import { API_ALL_FORUMS, API_BASE_IMAGE_URL, API_FORUM_POST_FORUM } from "@/utils/endpoints/config"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/context/authcontext"
 import { motion, AnimatePresence } from 'framer-motion'
+import countries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
+countries.registerLocale(enLocale)
+import { toast } from "sonner"
 
 const categoryLabels: Record<number, string> = {
   0: "Procedures & Docs",
@@ -35,41 +39,30 @@ const categoryLabels: Record<number, string> = {
 }
 
 const forumCategoryColors: Record<number, string> = {
-  0: "from-green-100 to-white",
-  1: "from-blue-100 to-white",
-  2: "from-pink-100 to-white",
-  3: "from-yellow-100 to-white",
-  4: "from-purple-100 to-white",
-  5: "from-rose-100 to-white",
-  6: "from-orange-100 to-white",
-  7: "from-teal-100 to-white",
-  8: "from-gray-200 to-white",
-  9: "from-gray-100 to-white",
+  0: "from-[#B7F8C8]/30 to-foreground",
+  1: "from-yellow-100 dark:from-yellow-200/50 to-foreground",
+  2: "from-pink-100 dark:from-[#ffbfea]/50 to-foreground",
+  3: "from-purple-100 dark:from-[#ccb1ef]/50 to-foreground",
+  4: "from-green-100 dark:from-secondary-greenblue/30 to-foreground",
+  5: "from-amber-200 dark:from-[#723917]/50 to-foreground",
+  6: "from-[#0E1E40]/30 dark:from-[#0E1E40]/50 to-foreground",
+  7: "from-[#4C69DD]/20 to-foreground",
+  8: "from-gray-200 dark:from-gray-400/20 to-foreground",
+  9: "from-gray-200 dark:from-gray-400/20 to-foreground",
 }
 
 const forumCategoryBadgeColors: Record<number, string> = {
-  0: "bg-primary text-white",                  // Procedures & Docs
-  1: "bg-yellow-200 text-yellow-900",          // University Life
-  2: "bg-pink-200 text-pink-900",              // Cultural & Social
-  3: "bg-purple-200 text-purple-900",          // Scholarships
-  4: "bg-secondary-greenblue text-green-900",  // Transport
-  5: "bg-amber-400 text-amber-900",            // Tourism & Nightlife
-  6: "bg-[#0E1E40] text-white",                // Events
-  7: "bg-secondary text-primary-dark",         // Tips
-  8: "bg-gray-300 text-gray-800",              // FAQ
-  9: "bg-gray-200 text-gray-700",              // Other
+  0: "bg-secondary text-green-900",
+  1: "bg-yellow-200 text-yellow-900",
+  2: "bg-pink-200 text-pink-900",
+  3: "bg-purple-200 text-purple-900",
+  4: "bg-secondary-greenblue text-green-900",
+  5: "bg-amber-400 text-amber-900",
+  6: "bg-[#0E1E40] text-white",
+  7: "bg-primary text-white",
+  8: "bg-gray-300 text-gray-800",
+  9: "bg-gray-200 text-gray-700",
 }
-
-
-const countries = [
-  { name: "Spain", code: "ES" },
-  { name: "France", code: "FR" },
-  { name: "Germany", code: "DE" },
-  { name: "Italy", code: "IT" },
-  { name: "Portugal", code: "PT" },
-  { name: "Czech", code: "CZ" },
-  { name: "Netherlands", code: "NL" },
-]
 
 export interface Forum {
   id: string
@@ -92,6 +85,7 @@ export default function ForumsPage() {
   const [newForumCategory, setNewForumCategory] = useState<number>(0);
   const [isCreatingForum, setIsCreatingForum] = useState(false);
   const [showCreateForum, setShowCreateForum] = useState(false)
+  const [countrySearch, setCountrySearch] = useState('');
 
 
   const { user } = useAuth()
@@ -102,44 +96,63 @@ export default function ForumsPage() {
       const response = await axios.get(API_ALL_FORUMS, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      console.log("Forums: ", response.data)
       setForums(Array.isArray(response.data) ? response.data : [])
     } catch {
       setForums([])
     }
   }
 
-    // Función para crear foro
-  const handleCreateForum = async () => {
-    if (!newForumTitle.trim() || !newForumDescription.trim()) return;
+  const getCountryCode = (countryName: string) => {
+    return countries.getAlpha2Code(countryName, 'en') || "UN"
+  }
+  
+  const uniqueCountries = Array.from(new Set(forums.map(f => f.country)))
+    .map(name => ({
+      name,
+      code: getCountryCode(name),
+    }))
+    .filter(c => c.code !== "UN")
+  
+  const filteredCountries = uniqueCountries.filter(c =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase())
+  )
 
-    try {
-      setIsCreatingForum(true);
-      const token = localStorage.getItem("token");
-
-      const payload = {
-        title: newForumTitle,
-        description: newForumDescription,
-        country: user?.erasmusCountry,
-        category: newForumCategory,
-        createdAt: new Date().toISOString(),
-        creatorId: user?.id
-      };
-
-      await axios.post(API_ALL_FORUMS, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setNewForumTitle('');
-      setNewForumDescription('');
-      setNewForumCategory(9);
-      getForums(); // refrescar
-    } catch (err) {
-      console.error("Error creating forum:", err);
-    } finally {
-      setIsCreatingForum(false);
+    const handleCreateForum = async () => {
+      if (!newForumTitle.trim() || !newForumDescription.trim()) {
+        toast.error("Please fill in both title and description.")
+        return
+      }
+    
+      try {
+        setIsCreatingForum(true)
+        const token = localStorage.getItem("token")
+    
+        const payload = {
+          title: newForumTitle,
+          description: newForumDescription,
+          country: user?.erasmusCountry,
+          category: newForumCategory,
+          createdAt: new Date().toISOString(),
+          creatorId: user?.id
+        }
+    
+        await axios.post(API_FORUM_POST_FORUM, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+    
+        toast.success("Forum created successfully!")
+    
+        setNewForumTitle('')
+        setNewForumDescription('')
+        setNewForumCategory(9)
+        getForums()
+      } catch (err: any) {
+        console.error("Error creating forum:", err)
+        toast.error("Failed to create forum.")
+      } finally {
+        setIsCreatingForum(false)
+      }
     }
-  };
 
   useEffect(() => { getForums() }, [])
 
@@ -148,12 +161,11 @@ export default function ForumsPage() {
     const matchCategory = activeCategory !== null ? forum.category === activeCategory : true
     return matchCountry && matchCategory
   })
-
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <section className="mb-8">
-          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] rounded-xl p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] dark:to-foreground rounded-xl p-6 md:p-8 text-white relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
@@ -183,23 +195,31 @@ export default function ForumsPage() {
           <div className="space-y-6 order-2 xl:order-1 xl:col-span-1">
             <Card className="border-none shadow-md bg-foreground border border-gray-200">
               <CardContent className="px-4">
-                <h2 className="font-semibold text-text-secondary mb-3">Countries</h2>
-                <div className="space-y-2">
-                  {countries.map((country) => (
-                    <Button
-                      key={country.name}
-                      variant="outline"
-                      className={`w-full justify-between h-auto py-2 border-none text-primary-dark ${activeFilter === country.name ? "bg-[#4C69DD] text-white" : ""} cursor-pointer`}
-                      onClick={() => setActiveFilter(activeFilter === country.name ? null : country.name)}
-                    >
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span className="mr-2">{country.name}</span>
-                        <Flag code={country.code} style={{ width: 24, height: 16 }} />
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+              <h2 className="font-semibold text-text-secondary mb-3">Countries</h2>
+
+<Input
+  placeholder="Search countries..."
+  value={countrySearch}
+  onChange={(e) => setCountrySearch(e.target.value)}
+  className="mb-3 dark:text-gray-400 dark:border-text-secondary border-primary text-gray-700"
+/>
+
+<div className={`space-y-2 ${filteredCountries.length > 10 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
+  {filteredCountries.map((country) => (
+    <Button
+      key={country.name}
+      variant="outline"
+      className={`w-full justify-between h-auto py-2 border-none text-primary-dark ${activeFilter === country.name ? "bg-[#4C69DD]/20" : ""} cursor-pointer`}
+      onClick={() => setActiveFilter(activeFilter === country.name ? null : country.name)}
+    >
+      <div className="flex items-center">
+        <Flag code={country.code} style={{ width: 24, height: 16 }} />
+        <span className="ml-2"> {country.name}</span>
+      </div>
+    </Button>
+  ))}
+</div>
+
               </CardContent>
             </Card>
 
@@ -220,7 +240,6 @@ export default function ForumsPage() {
               </CardContent>
             </Card>
           </div>
-
           <div className="order-1 xl:order-2 xl:col-span-3">
             {(activeFilter || activeCategory !== null) && (
               <div className="mb-4 flex items-center gap-2 flex-wrap">
@@ -231,7 +250,7 @@ export default function ForumsPage() {
                   </Badge>
                 )}
                 {activeCategory !== null && (
-                  <Badge className="bg-[#4C69DD]/10 text-[#4C69DD] hover:bg-[#4C69DD]/20 px-3 py-1" onClick={() => setActiveCategory(null)}>
+                  <Badge className="bg-[#4C69DD]/10 text-[#4C69DD] dark:bg-text-secondary/10 dark:text-text-secondary hover:bg-[#4C69DD]/20 px-3 py-1" onClick={() => setActiveCategory(null)}>
                     {categoryLabels[activeCategory]}
                     <X className="ml-1 h-3 w-3" />
                   </Badge>
@@ -243,11 +262,10 @@ export default function ForumsPage() {
               className={`
                 flex items-center justify-between cursor-pointer
                 rounded-lg px-4 py-3 mb-4 transition-colors duration-200
-                bg-gradient-to-r from-accent-light to-white
+                bg-gradient-to-r from-accent-light dark:from-accent/70 to-foreground
                 hover:bg-accent/80 hover:bg-none
                 border border-dashed border-accent
               `}
-              
               onClick={() => setShowCreateForum(prev => !prev)}
             >
               <div className="flex items-center gap-2">
@@ -260,7 +278,7 @@ export default function ForumsPage() {
                   {showCreateForum ? "Hide Forum Form" : "Create Forum Post"}
                 </span>
               </div>
-              <span className="text-xs text-gray-700">{user?.erasmusCountry || "Your country"}</span>
+              <span className="text-xs text-gray-700 dark:text-gray-300">{user?.erasmusCountry || "Your country"}</span>
             </div>
 
             <AnimatePresence>
@@ -276,7 +294,7 @@ export default function ForumsPage() {
                   <div className="border border-primary rounded-xl shadow p-6 mb-8 bg-foreground">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-bold text-text">Start a New Forum</h2>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-300">
                         <MapPin className="h-4 w-4 text-primary" />
                         <span>{user?.erasmusCountry || "Unknown"}</span>
                       </div>
@@ -327,9 +345,8 @@ export default function ForumsPage() {
               )}
             </AnimatePresence>
 
-
             <div className="flex flex-col gap-4 w-full">
-            {filteredForums.map((forum) => (
+              {filteredForums.map((forum) => (
                 <Link href={`/dashboard/forums/${forum.id}`} key={forum.id}>
                   <Card className="flex py-0 flex-col justify-between border border-none shadow-md transition-all hover:shadow-lg rounded-md min-h-[280px] lg:min-h-[320px]">
                     <CardContent className="p-0 flex flex-col flex-grow bg-foreground rounded-md">
@@ -337,8 +354,8 @@ export default function ForumsPage() {
                         <Badge className={`mb-2 w-fit text-xs font-medium px-2 py-1 rounded-md ${forumCategoryBadgeColors[forum.category]}`}>
                           {categoryLabels[forum.category]}
                         </Badge>
-                        <h3 className="font-bold text-[#0E1E40] text-lg mb-2">{forum.title}</h3>
-                        <div className="flex items-center text-xs text-gray-500 justify-between mb-1">
+                        <h3 className="font-bold text-text text-lg mb-2">{forum.title}</h3>
+                        <div className="flex items-center text-xs text-gray-600 bg-gray-200 dark:text-gray-300 dark:bg-foreground rounded-md px-2 py-1 justify-between mb-1">
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3 text-[#4C69DD]" />
                             {forum.country}
@@ -347,7 +364,7 @@ export default function ForumsPage() {
                         </div>
                       </div>
 
-                      <div className="p-6 pt-4 flex-grow flex flex-col bg-foreground rounded-b-md border-t border-gray-200">
+                      <div className="p-6 pt-4 flex-grow flex flex-col bg-foreground rounded-b-md border-t border-gray-200 dark:border-gray-800">
                         <p className="text-sm text-text line-clamp-3 lg:line-clamp-5 mb-4">{forum.description}</p>
                         <div className="mt-auto">
                           <div className="flex items-center gap-2 bg-[#4C69DD]/10 rounded-full px-3 py-2 w-fit">
@@ -367,9 +384,9 @@ export default function ForumsPage() {
 
             {filteredForums.length === 0 && (
               <div className="text-center py-12">
-                <h3 className="text-xl font-medium text-gray-700 mb-2">No forums found</h3>
-                <p className="text-gray-500 mb-6">Try adjusting your search or filters.</p>
-                <Button onClick={() => { setActiveFilter(null); setActiveCategory(null); }}>
+                <h3 className="text-xl font-medium text-text mb-2">No forums found</h3>
+                <p className="text-text-secondary mb-6">Try adjusting your search or filters.</p>
+                <Button className="text-white" onClick={() => { setActiveFilter(null); setActiveCategory(null); }}>
                   Clear Filters
                 </Button>
               </div>

@@ -1,5 +1,6 @@
 ﻿using Backend.Models.Database;
 using Backend.Models.Database.Entities;
+using Backend.Models.Database.Repositories;
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
 using Backend.Models.Mappers;
@@ -166,6 +167,31 @@ public class ForumService : IForumService
         }
 
         return messageDtos;
+    }
+    public async Task<IEnumerable<string>> GetAllCountriesAsync()
+    {
+        return await _unitOfWork.ForumRepository.GetAllCountriesAsync();
+    }
+
+    public async Task<bool> DeleteForumAsync(Guid forumId, Guid userId)
+    {
+        try
+        {
+            return await _unitOfWork.ForumRepository.DeleteForumAsync(forumId, userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("There was a problem until the forum was being deleted", ex);
+        }
+    }
+
+    public async Task<IEnumerable<Forum>> GetForumsByUserAsync(Guid userId)
+    {
+        return await _unitOfWork.ForumRepository.GetForumsByUserIdAsync(userId);
     }
 
 }

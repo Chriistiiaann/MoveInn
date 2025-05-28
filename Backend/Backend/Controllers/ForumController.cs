@@ -2,8 +2,10 @@
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
 using Backend.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Backend.Controllers;
 
@@ -25,17 +27,17 @@ public class ForumController : ControllerBase
     {
         if (forum == null)
         {
-            return BadRequest(new { message = "Los datos del foro no pueden ser nulos." });
+            return BadRequest(new { message = "The forum values cannot be without anything" });
         }
 
         bool creado = await _forumService.CreateForumAsync(forum);
 
         if (creado)
         {
-            return Ok(new { message = "Foro creado correctamente." });
+            return Ok(new { message = "Forum was created correctly" });
         }
 
-        return StatusCode(500, "Ocurrió un error al crear el foro.");
+        return StatusCode(500, "There was a problem unitl the forum was being created");
     }
 
     [HttpGet("forums")]
@@ -168,5 +170,55 @@ public class ForumController : ControllerBase
         {
             return StatusCode(500, "Error interno del servidor: " + ex.Message);
         }
+    }
+
+    [HttpGet("countries")]
+    public async Task<IActionResult> GetCountries()
+    {
+        var countries = await _forumService.GetAllCountriesAsync();
+        return Ok(countries);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteForum(Guid id)
+    {
+        var userIdClaim = User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userIdClaim))
+            return Forbid();
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Forbid();
+
+        bool ok;
+
+        try
+        {
+            ok = await _forumService.DeleteForumAsync(id, userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Forum not found" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+
+        if (!ok)
+            return Forbid(new AuthenticationProperties(), "Sólo el autor puede eliminar este foro.");
+
+        return Ok(new { message = "The Forum was eliminated correctly" });
+    }
+
+    [HttpGet("user/{userId:guid}")]
+    public async Task<ActionResult<IEnumerable<Forum>>> GetByUser(Guid userId)
+    {
+        var forums = await _forumService.GetForumsByUserAsync(userId);
+
+        if (!forums.Any())
+            return NotFound(new {message = "You haven’t created any forums yet. Why not start one now?" });
+
+        return Ok(forums);
     }
 }

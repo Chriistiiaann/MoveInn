@@ -10,5 +10,6 @@ public interface IReviewService
     Task<Review> GetReviewByIdAsync(Guid id);
     Task<IEnumerable<ReviewDTO>> GetReviewsByAccommodationIdAsync(Guid accommodationId);
 
-    Task DeleteReviewAsync(Guid id);
+    Task<bool> DeleteReviewAsync(Guid forumId, Guid userId);
+    Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId);
 }

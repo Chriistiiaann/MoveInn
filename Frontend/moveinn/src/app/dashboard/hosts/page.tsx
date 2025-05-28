@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Search,
@@ -31,14 +31,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { API_HOST_POST_REQUEST, API_GET_HOSTS } from "@/utils/endpoints/config";
+import axios from "axios";
+import { useAuth } from "@/context/authcontext";
 
-import { mockUser } from "@/lib/data/mockUser"
+
+
+
 
 export default function HostsPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
+  const [showHostModal, setShowHostModal] = useState(false);
+  const [reason, setReason] = useState("");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [feedbackType, setFeedbackType] = useState<"success" | "error" | null>(null);
 
-  const { hosts } = mockUser    
+
+  const { user } = useAuth()
+
+
+  const [hosts, setHosts] = useState<any[]>([])
+
+useEffect(() => {
+  const fetchHosts = async () => {
+    const token = localStorage.getItem("token")
+    try {
+      const res = await axios.get(API_GET_HOSTS, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setHosts(res.data)
+    } catch (error) {
+      console.error("Error fetching hosts:", error)
+    }
+  }
+
+  fetchHosts()
+}, [])
+   
 
   // Sample cities
   const cities = [
@@ -84,7 +115,49 @@ export default function HostsPage() {
           host.languages.includes(activeFilter) ||
           host.expertise.includes(activeFilter),
       )
-    : hosts
+  : hosts
+
+    const handleHostRequestSubmit = async () => {
+      try {
+        const token = localStorage.getItem("token");
+      
+        const body = {
+          userId: user?.id,
+          reason,
+          specialties,
+        };
+       
+        console.log("Sending host request:", body)
+        
+        await axios.post(API_HOST_POST_REQUEST, body, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      
+        setFeedbackMessage("Request submitted successfully!");
+        setFeedbackType("success");
+      
+        setTimeout(() => {
+          setFeedbackMessage(null);
+          setFeedbackType(null);
+        }, 4000);
+      
+        setShowHostModal(false);
+        setReason("");
+        setSpecialties([]);
+      } catch (error) {
+        console.error("Error submitting host request:", error);
+        setFeedbackMessage("Something went wrong. Please try again.");
+        setFeedbackType("error");
+      
+        setTimeout(() => {
+          setFeedbackMessage(null);
+          setFeedbackType(null);
+        }, 4000);
+      }
+      
+    };
 
   return (
     <div className="min-h-screen">
@@ -92,7 +165,7 @@ export default function HostsPage() {
       <main className="container mx-auto px-4 py-6">
         {/* Header Section */}
         <section className="mb-8">
-          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] rounded-xl p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] dark:to-foreground rounded-xl p-6 md:p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#B7F8C8]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#62C3BA]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('/placeholder.svg?height=100&width=100')] opacity-5 bg-repeat"></div>
@@ -107,10 +180,13 @@ export default function HostsPage() {
                 </div>
 
                 <div className="mt-4 md:mt-0">
-                  <Button className="bg-[#FFBF00] text-[#0E1E40] hover:bg-[#FFBF00]/90 font-semibold">
-                    <Users className="mr-2 h-4 w-4" />
-                    Become a Host
-                  </Button>
+                <Button
+                  className="bg-[#FFBF00] text-[#0E1E40] hover:bg-[#FFBF00]/90 font-semibold"
+                  onClick={() => setShowHostModal(true)}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Become a Host
+                </Button>
                 </div>
               </div>
 
@@ -126,27 +202,27 @@ export default function HostsPage() {
                 <div className="flex gap-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 bg-white/10">
+                      <Button variant="outline" className="border-white/20 dark:border-gray-800 text-white hover:bg-white/5 bg-white/10">
                         <Filter className="mr-2 h-4 w-4" />
                         Filter
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>Filter By</DropdownMenuLabel>
+                    <DropdownMenuContent className="w-56 text-text bg-foreground dark:border-gray-800">
+                      <DropdownMenuLabel className="text-primary dark:text-text-secondary font-bold">Filter By</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>All Hosts</DropdownMenuItem>
                       <DropdownMenuItem>Super Hosts</DropdownMenuItem>
                       <DropdownMenuItem>Online Now</DropdownMenuItem>
                       <DropdownMenuItem>Highest Rated</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuLabel>Languages</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-primary dark:text-text-secondary font-bold">Languages</DropdownMenuLabel>
                       <DropdownMenuItem>English</DropdownMenuItem>
                       <DropdownMenuItem>Spanish</DropdownMenuItem>
                       <DropdownMenuItem>French</DropdownMenuItem>
                       <DropdownMenuItem>German</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuLabel>Expertise</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-primary dark:text-text-secondary font-bold">Expertise</DropdownMenuLabel>
                       <DropdownMenuItem>Housing</DropdownMenuItem>
                       <DropdownMenuItem>Academic Support</DropdownMenuItem>
                       <DropdownMenuItem>Local Culture</DropdownMenuItem>
@@ -154,24 +230,7 @@ export default function HostsPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  <Tabs defaultValue="grid" className="w-auto">
-                    <TabsList className="bg-white/10 border border-white/20">
-                      <TabsTrigger
-                        value="grid"
-                        onClick={() => setViewMode("grid")}
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#0E1E40] text-white"
-                      >
-                        <Users className="h-4 w-4" />
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="map"
-                        onClick={() => setViewMode("map")}
-                        className="data-[state=active]:bg-white data-[state=active]:text-[#0E1E40] text-white"
-                      >
-                        <MapPin className="h-4 w-4" />
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  
                 </div>
               </div>
             </div>
@@ -186,21 +245,21 @@ export default function HostsPage() {
               <CardContent className="p-4">
                 <h2 className="font-semibold text-text-secondary mb-3">Host Community</h2>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg text-center w-full">
+                  <div className="bg-[#E7ECF0]/30 dark:bg-background/50 p-3 rounded-lg text-center w-full">
                     <div className="text-xl font-bold text-text">1,240</div>
-                    <div className="text-sm text-text-secondary">Active Hosts</div>
+                    <div className="text-xs text-secondary">Active Hosts</div>
                   </div>
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg text-center w-full">
+                  <div className="bg-[#E7ECF0]/30 dark:bg-background/50 p-3 rounded-lg text-center w-full">
                     <div className="text-xl font-bold text-text">42</div>
-                    <div className="text-sm text-text-secondary">Countries</div>
+                    <div className="text-xs text-secondary">Countries</div>
                   </div>
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg text-center">
+                  <div className="bg-[#E7ECF0]/30 dark:bg-background/50 p-3 rounded-lg text-center">
                     <div className="text-xl font-bold text-text">156</div>
-                    <div className="text-sm text-text-secondary">Universities</div>
+                    <div className="text-xs text-secondary">Universities</div>
                   </div>
-                  <div className="bg-[#E7ECF0]/30 p-3 rounded-lg text-center">
+                  <div className="bg-[#E7ECF0]/30 dark:bg-background/50 p-3 rounded-lg text-center">
                     <div className="text-xl font-bold text-text">28</div>
-                    <div className="text-sm text-text-secondary">Languages</div>
+                    <div className="text-xs text-secondary">Languages</div>
                   </div>
                 </div>
               </CardContent>
@@ -215,7 +274,7 @@ export default function HostsPage() {
                     <Button
                       key={city.name}
                       variant="outline"
-                      className={`w-full justify-between h-auto py-2 border-none text-primary-dark ${
+                      className={`w-full bg-background/50 justify-between h-auto py-2 border-none text-gray-800 dark:text-gray-200 ${
                         activeFilter === city.name ? "bg-[#4C69DD] text-white" : ""
                       }`}
                       onClick={() => setActiveFilter(activeFilter === city.name ? null : city.name)}
@@ -228,7 +287,7 @@ export default function HostsPage() {
                       </div>
                       <Badge
                         className={`${
-                          activeFilter === city.name ? "bg-white text-[#4C69DD]" : "bg-[#E7ECF0] text-[#4C69DD]"
+                          activeFilter === city.name ? "bg-white text-[#4C69DD]" : "bg-foreground text-[#4C69DD] dark:text-text-secondary"
                         }`}
                       >
                         {city.count}
@@ -236,7 +295,7 @@ export default function HostsPage() {
                     </Button>
                   ))}
                 </div>
-                <Button variant="ghost" className="w-full mt-2 text-[#4C69DD]">
+                <Button variant="ghost" className="w-full mt-2 text-primary dark:text-text-secondary">
                   View All Cities
                 </Button>
               </CardContent>
@@ -304,18 +363,21 @@ export default function HostsPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-[#FFBF00] mt-0.5 mr-2" />
-                    <span className="text-sm text-gray-500">Earn recognition in your university</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-300">Earn recognition in your university</span>
                   </div>
                   <div className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-[#FFBF00] mt-0.5 mr-2" />
-                    <span className="text-sm text-gray-500">Build your international network</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-300">Build your international network</span>
                   </div>
                   <div className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-[#FFBF00] mt-0.5 mr-2" />
-                    <span className="text-sm text-gray-500">Gain intercultural experience</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-300">Gain intercultural experience</span>
                   </div>
                 </div>
-                <Button className="w-full bg-[#FFBF00] text-[#0E1E40] hover:bg-[#FFBF00]/90">
+                <Button
+                  className="w-full bg-[#FFBF00] text-[#0E1E40] hover:bg-[#FFBF00]/90"
+                  onClick={() => setShowHostModal(true)}
+                >
                   Apply to Become a Host
                 </Button>
               </CardContent>
@@ -342,96 +404,51 @@ export default function HostsPage() {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredHosts.map((host) => (
-                  <Link href={`/dashboard/hosts/${host.id}`} key={host.id}>
-                    <Card className="border-none shadow-md hover:shadow-lg transition-all h-full w-full rounded-md py-0 bg-foreground">
-                      <div className="relative">
-                        <div className="h-48 bg-gradient-to-br from-[#4C69DD]/20 to-[#62C3BA]/20 rounded-t-md flex items-center justify-center">
-                          <Avatar className="h-32 w-32 border-4 border-white">
-                            <AvatarImage src={host.avatar} alt={host.name} />
-                            <AvatarFallback className="bg-[#4C69DD] text-white text-2xl">
-                              {host.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                        {host.isOnline && (
-                          <Badge className="absolute top-3 right-3 bg-green-500 text-white">
-                            <div className="h-2 w-2 rounded-full bg-white mr-1 animate-pulse"></div>
-                            Online
-                          </Badge>
-                        )}
-                        {host.isSuperHost && (
-                          <Badge className="absolute top-3 left-3 bg-[#FFBF00] text-[#0E1E40]">
-                            <Star className="h-3 w-3 mr-1 fill-[#0E1E40]" />
-                            Super Host
-                          </Badge>
-                        )}
-                      </div>
+  <Link href={`/dashboard/hosts/${host.hostId}`} key={host.hostId}>
+    <Card className="border-none shadow-md hover:shadow-lg transition-all h-full w-full rounded-md py-0 bg-foreground">
+      <div className="relative">
+        <div className="h-48 bg-gradient-to-br from-[#4C69DD]/20 to-[#62C3BA]/20 rounded-t-md flex items-center justify-center">
+          <Avatar className="h-32 w-32 border-4 border-white">
+            <AvatarImage
+              src={host.avatarUrl !== "default-avatar-url" ? host.avatarUrl : undefined}
+              alt={host.userName}
+            />
+            <AvatarFallback className="bg-[#4C69DD] text-white text-2xl">
+              {(host?.userName || "U").charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      </div>
 
-                      <CardContent className="p-4">
-                        <div className="text-center mb-3">
-                          <h3 className="font-semibold text-text text-lg">{host.name}</h3>
-                          <p className="text-gray-500 text-sm">{host.university}</p>
-                          <div className="flex items-center justify-center mt-1">
-                            <MapPin className="h-3 w-3 text-[#4C69DD] mr-1" />
-                            <span className="text-sm text-gray-500">{host.location}</span>
-                          </div>
-                        </div>
+      <CardContent className="p-4">
+        <div className="text-center mb-3">
+          <h3 className="font-semibold text-text text-lg">{host.userName}</h3>
+        </div>
 
-                        <div className="flex items-center justify-center mb-3">
-                          <div className="flex items-center bg-background px-2 py-1 rounded-full">
-                            <Star className="h-3 w-3 text-[#FFBF00] fill-[#FFBF00] mr-1" />
-                            <span className="font-medium text-text">{host.rating}</span>
-                            <span className="text-gray-500 text-xs ml-1">({host.reviewCount})</span>
-                          </div>
-                        </div>
+        <div className="flex items-center justify-center text-xs text-gray-500 mb-2">
+          <Clock className="h-3 w-3 text-[#4C69DD] mr-1" />
+          <p>Host since: {new Date(host.hostSince).toLocaleDateString()}</p>
+        </div>
 
-                        <div className="flex flex-wrap justify-center gap-1 mb-3">
-                          {host.languages.map((language, index) => (
-                            <Badge
-                              key={language}
-                              variant="outline"
-                              className={`text-xs ${
-                                index === 0
-                                  ? "border-[#4C69DD] text-[#4C69DD]"
-                                  : index === 1
-                                    ? "border-[#62C3BA] text-[#62C3BA]"
-                                    : "border-accent text-accent"
-                              }`}
-                            >
-                              {language}
-                            </Badge>
-                          ))}
-                        </div>
+        <div className="flex flex-wrap gap-1 justify-center mb-3">
+          {host.specialties?.slice(0, 3).map((area: string) => (
+            <Badge key={area} className="bg-background text-text text-xs">
+              {area}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
 
-                        <div className="space-y-2 mb-3">
-                          <div className="flex items-center text-xs text-gray-500">
-                            <GraduationCap className="h-3 w-3 text-[#4C69DD] mr-1" />
-                            <span>Helped {host.helpedStudents} students</span>
-                          </div>
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Clock className="h-3 w-3 text-[#4C69DD] mr-1" />
-                            <span>Responds {host.responseTime}</span>
-                          </div>
-                        </div>
+      <CardFooter className="p-3 pt-0">
+        <Button className="w-full bg-primary text-white hover:bg-primary/70">
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Contact Host
+        </Button>
+      </CardFooter>
+    </Card>
+  </Link>
+))}
 
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {host.expertise.slice(0, 3).map((area) => (
-                            <Badge key={area} className="bg-background text-text text-xs">
-                              {area}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-
-                      <CardFooter className="p-3 pt-0">
-                        <Button className="w-full bg-primary text-white hover:bg-primary/70">
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          Contact Host
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </Link>
-                ))}
               </div>
             ) : (
               // Map View
@@ -514,6 +531,66 @@ export default function HostsPage() {
           </div>
         </div>
       </main>
+
+      {feedbackMessage && (
+        <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-[999] px-6 py-3 rounded-md shadow-lg text-sm font-medium transition-opacity duration-300
+          ${feedbackType === "success" ? "bg-green-100 dark:bg-green-800 text-green-800 border border-green-300" : ""}
+          ${feedbackType === "error" ? "bg-red-100 dark:bg-red-200 text-red-800 border border-red-300" : ""}
+        `}>
+          {feedbackMessage}
+        </div>
+      )}
+
+
+      {showHostModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-foreground p-6 rounded-lg w-full max-w-lg shadow-xl relative">
+            <h2 className="text-xl font-semibold text-text mb-4">Become a Host</h2>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm text-text mb-1">Why do you want to become a host?</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-text bg-background"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text mb-1">Your specialties</label>
+                <input
+                  type="text"
+                  placeholder="Comma-separated list (e.g., Housing, Local Culture)"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-text bg-background"
+                  value={specialties.join(", ")}
+                  onChange={(e) => setSpecialties(e.target.value.split(",").map(s => s.trim()))}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="ghost" onClick={() => setShowHostModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-primary text-white hover:bg-primary/90"
+                  onClick={handleHostRequestSubmit}
+                >
+                  Submit Request
+                </Button>
+
+              </div>
+            </form>
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+              onClick={() => setShowHostModal(false)}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+
     </div>
+    
   )
 }

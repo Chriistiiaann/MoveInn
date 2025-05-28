@@ -13,8 +13,11 @@ import {
   GlobeIcon,
   SofaIcon,
   LogOutIcon,
-  MoonIcon, 
+  MoonIcon,
   SunIcon,
+  ShieldIcon,
+  BookUserIcon,
+  UsersIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -22,14 +25,37 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/authcontext"
 import { API_BASE_IMAGE_URL } from "@/utils/endpoints/config"
 import { useTheme } from "next-themes"
+import { usePathname } from "next/navigation"
 
 export function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const { user, logout } = useAuth()
-
   const { theme, setTheme } = useTheme()
+  const pathname = usePathname()
+
+  const baseNav = [
+    { label: "Dashboard", href: "/dashboard", icon: HomeIcon },
+    { label: "Housing", href: "/dashboard/housing", icon: SofaIcon },
+    { label: "Events", href: "/dashboard/events", icon: CalendarIcon },
+    { label: "Messages", href: "/dashboard/messages", icon: MessageCircleIcon, badge: 12 },
+    { label: "Forums", href: "/dashboard/forums", icon: BookmarkIcon },
+    { label: "Recommendations", href: "/dashboard/recommendations", icon: MapPinIcon, badge: "New" },
+    { label: "Hosts", href: "/dashboard/hosts", icon: UsersIcon },
+    { label: "Find People", href: "/dashboard/findpeople", icon: BookUserIcon },
+  ]
+
+  const adminNav = { label: "Admin", href: "/dashboard/admin", icon: ShieldIcon }
+
+  const mainNav = user?.role === 0 ? [...baseNav, adminNav] : baseNav
+
+  const currentNavItem =
+    [...mainNav]
+      .sort((a, b) => b.href.length - a.href.length)
+      .find((item) => pathname.startsWith(item.href)) || { label: "Dashboard", icon: HomeIcon }
+
+  const Icon = currentNavItem.icon
 
   const getRoleBadge = (role: number) => {
     switch (role) {
@@ -62,18 +88,6 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     }
   }
 
-  const mainNav = [
-    { label: "Dashboard", href: "/dashboard", icon: HomeIcon },
-    { label: "Housing", href: "/dashboard/housing", icon: SofaIcon },
-    { label: "Events", href: "/dashboard/events", icon: CalendarIcon },
-    { label: "Messages", href: "/dashboard/messages", icon: MessageCircleIcon, badge: 12 },
-    { label: "Forums", href: "/dashboard/forums", icon: BookmarkIcon },
-    { label: "Recommendations", href: "/dashboard/recommendations", icon: MapPinIcon, badge: "New" },
-    { label: "Hosts", href: "/dashboard/hosts", icon: GlobeIcon },
-    { label: "Profile", href: "/dashboard/profile", icon: UserIcon },
-  ]
-
-  console.log(`${API_BASE_IMAGE_URL}${user?.avatarUrl}`)
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-foreground to-background">
       {/* Sidebar */}
@@ -83,13 +97,14 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           sidebarOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Sidebar title */}
         <div className="absolute top-0 left-0 w-full h-16 flex items-center px-4 border-gray-200 bg-none z-50">
-          <span className="text-4xl font-bold text-primary-dark tracking-wide">Move<span className="text-secondary">Inn</span></span>
+          <span className="text-4xl font-bold text-primary-dark tracking-wide">
+            Move<span className="text-secondary-greenblue dark:text-secondary">Inn</span>
+          </span>
         </div>
         <ScrollArea className="h-full px-3 py-4 pb-24">
           <nav className="space-y-1">
-            {mainNav.map(({ label, href, icon: Icon, badge }) => (
+            {baseNav.map(({ label, href, icon: Icon, badge }) => (
               <SidebarItem
                 key={label}
                 href={href}
@@ -98,6 +113,17 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                 badge={badge}
               />
             ))}
+
+            {user?.role === 0 && (
+              <>
+                <div className="pt-0 mt-2 border-none" />
+                <SidebarItem
+                  href={adminNav.href}
+                  icon={<adminNav.icon className="h-5 w-5" />}
+                  label={adminNav.label}
+                />
+              </>
+            )}
 
             <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
@@ -116,12 +142,12 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           </nav>
         </ScrollArea>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <div className="absolute bottom-20 left-0 w-full px-3 py-2 bg-none">
           <Button
             onClick={() => setShowLogoutModal(true)}
             variant="default"
-            className="w-full bg-foreground justify-start text-red-600 border-red-200 hover:bg-red-200/70"
+            className="w-full bg-foreground justify-start text-red-600 dark:text-red-300 border-red-200 hover:bg-red-200/70 dark:hover:bg-red-500/70"
           >
             <LogOutIcon className="h-4 w-4 mr-2" />
             Logout
@@ -142,21 +168,25 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                 <span className="text-xs text-text-secondary">{getRoleBadge(user?.role)}</span>
               </div>
             </div>
-            
-            <Button variant="ghost" size="icon" className="text-primary-dark hover:bg-accent-light/30">
-              <UserIcon className="h-4 w-4" />
-            </Button>
-          </div>  
+            <Link href="/dashboard/profile">
+              <Button variant="ghost" size="icon" className="text-primary-dark hover:bg-accent-light/30">
+                <UserIcon className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
 
-        {/* MODAL */}
         {showLogoutModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-foreground rounded-lg shadow-lg w-[90%] max-w-sm p-6">
               <h2 className="text-lg font-semibold text-primary-dark mb-2">Confirm Logout</h2>
               <p className="text-sm text-text-secondary mb-4">Are you sure you want to log out?</p>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" className="bg-foreground text-primary-dark hover:bg-gray-400" onClick={() => setShowLogoutModal(false)}>
+                <Button
+                  variant="outline"
+                  className="bg-foreground text-primary-dark hover:bg-gray-400"
+                  onClick={() => setShowLogoutModal(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -173,7 +203,6 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </div>
           </div>
         )}
-
       </aside>
 
       {/* Overlay */}
@@ -187,13 +216,13 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
       {/* Content */}
       <div className="flex-1 flex flex-col lg:ml-64">
         {/* Topbar (mobile only) */}
-        <div className="p-4 bg-white shadow lg:hidden flex items-center justify-between">
+        <div className="p-4 bg-background dark:bg-foreground shadow lg:hidden flex items-center justify-between">
           <Button variant="ghost" onClick={() => setSidebarOpen(true)}>
-            <MenuIcon className="h-6 w-6 text-primary-dark" />
+            <MenuIcon className="h-6 w-6 text-text" />
           </Button>
           <div className="flex items-center gap-2">
-            <HomeIcon className="h-6 w-6 text-primary-dark" />
-            <span className="text-lg font-semibold text-primary-dark">Dashboard</span>
+            <Icon className="h-6 w-6 text-text" />
+            <span className="text-lg font-semibold text-text">{currentNavItem.label}</span>
           </div>
         </div>
 

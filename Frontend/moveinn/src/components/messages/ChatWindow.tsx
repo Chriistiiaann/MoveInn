@@ -5,7 +5,7 @@ import axios from "axios"
 import { useAuth } from "@/context/authcontext"
 import { useWebsocket } from "@/context/WebSocketContext"
 import type { Contact } from "@/components/messages/UseContact"
-import { Check, CheckCheck, Send, Paperclip, Smile } from "lucide-react"
+import { Check, CheckCheck, Send, Paperclip, Smile, MessageCircleDashed } from "lucide-react"
 
 interface ChatMessage {
   id: string
@@ -132,42 +132,51 @@ export function ChatWindow({ contact, onSend }: ChatWindowProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
-        {messages.map((m) => {
-          const dateLabel = formatDateLabel(m.sentAt)
-          const showSeparator = dateLabel !== lastDateLabel
-          lastDateLabel = dateLabel
-          const isMine = m.senderName === null || m.senderId === user!.id
-          const time = new Date(m.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+<div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
+  {messages.length === 0 ? (
+    <div className="text-center text-gray-400 py-20 text-sm flex flex-col items-center">
+      <MessageCircleDashed className="h-12 w-12 text-text mb-2" />
+      There are no messages yet. <span className="text-primary font-semibold text-lg">Start the conversation!</span>
+    </div>
+  ) : (
+    messages.map((m) => {
+      const dateLabel = formatDateLabel(m.sentAt)
+      const showSeparator = dateLabel !== lastDateLabel
+      lastDateLabel = dateLabel
+      const isMine = m.senderName === null || m.senderId === user!.id
+      const time = new Date(m.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 
-          return (
-            <React.Fragment key={m.id}>
-              {showSeparator && (
-                <div className="flex justify-center my-4">
-                  <div className="bg-[#fcf3cc] text-[#ffbf00] px-3 py-1 rounded-full text-sm">{dateLabel}</div>
-                </div>
-              )}
-              {/* Render message bubble without avatar */}
-              <div className={`flex ${isMine ? "justify-end" : ""} mb-4`}>
-                <div className={`flex flex-col max-w-[75%]`}>
-                  <div
-                    className={`${isMine ? "bg-[#5268d6]/30" : "bg-[#b7f8c8]/70"} px-4 py-2 rounded-2xl text-[#121e3e]`}
-                  >
-                    {m.content}
-                  </div>
-                  <div className={`flex items-center mt-1 ${isMine ? "justify-end" : "justify-start"}`}>
-                    <span className="text-xs text-[#4d5562]">{time}</span>
-                    {isMine && m.status === "read" && <CheckCheck className="h-3 w-3 text-blue-500 ml-1" />}
-                    {isMine && m.status === "delivered" && <CheckCheck className="h-3 w-3 text-gray-500 ml-1" />}
-                    {isMine && m.status === "not_received" && <Check className="h-3 w-3 text-gray-500 ml-1" />}
-                  </div>
-                </div>
+      return (
+        <React.Fragment key={m.id}>
+          {showSeparator && (
+            <div className="flex justify-center my-4">
+              <div className="bg-accent-light text-accent-dark px-3 py-1 rounded-full text-sm">{dateLabel}</div>
+            </div>
+          )}
+          <div className={`flex ${isMine ? "justify-end" : ""} mb-4`}>
+            <div className={`flex flex-col max-w-[75%]`}>
+              <div
+                className={`${
+                  isMine ? "bg-primary dark:bg-primary/50 text-white dark:text-text" : "bg-gray-200 dark:bg-gray-600 text-text"
+                } px-4 py-2 rounded-2xl text-[#121e3e]`}
+              >
+                {m.content}
               </div>
-            </React.Fragment>
-          )
-        })}
-        <div ref={bottomRef} />
-      </div>
+              <div className={`flex items-center mt-1 ${isMine ? "justify-end" : "justify-start"}`}>
+                <span className="text-xs text-[#4d5562]">{time}</span>
+                {isMine && m.status === "read" && <CheckCheck className="h-3 w-3 text-blue-500 ml-1" />}
+                {isMine && m.status === "delivered" && <CheckCheck className="h-3 w-3 text-gray-500 ml-1" />}
+                {isMine && m.status === "not_received" && <Check className="h-3 w-3 text-gray-500 ml-1" />}
+              </div>
+            </div>
+          </div>
+        </React.Fragment>
+      )
+    })
+  )}
+  <div ref={bottomRef} />
+</div>
+
 
       {/* Input */}
       <form
@@ -175,20 +184,20 @@ export function ChatWindow({ contact, onSend }: ChatWindowProps) {
           e.preventDefault()
           handleSend()
         }}
-        className="p-4 bg-[#5268d6] rounded-lg my-4 mx-4"
+        className="p-1 dark:bg-primary/50 bg-primary rounded-full my-4 mx-4"
       >
-        <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2">
-          <Smile className="h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+        <div className="flex items-center gap-2 bg-background rounded-full px-4 py-2">
+          <Smile className="h-5 w-5 text-text cursor-pointer hover:text-primary" />
           <input
             type="text"
             placeholder="Escribe un mensaje..."
-            className="flex-1 outline-none text-[#121e3e]"
+            className="flex-1 outline-none text-text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <Paperclip className="h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" />
-          <button type="submit" className="bg-[#b7f8c8] p-2 rounded-full" disabled={!input.trim()}>
-            <Send className="h-5 w-5 text-[#121e3e]" />
+          <Paperclip className="h-5 w-5 text-text cursor-pointer hover:text-primary" />
+          <button type="submit" className="bg-primary p-2 rounded-full hover:bg-primary/80 cursor-pointer" disabled={!input.trim()}>
+            <Send className="h-5 w-5 text-white" />
           </button>
         </div>
       </form>

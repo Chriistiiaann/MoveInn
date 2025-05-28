@@ -17,7 +17,7 @@ export const mockUser = {
       {
         "id": 1,
         "title": "Language Exchange Night",
-        "date": "2025-05-07T19:00:00",
+        "date": "2025-05-09T19:00:00",
         "location": "Café del Mar, Barcelona",
         "address": "Passeig Marítim, 34, 08003 Barcelona",
         "attendees": 18,
@@ -32,7 +32,7 @@ export const mockUser = {
       {
         "id": 2,
         "title": "Weekend Trip to Montserrat",
-        "date": "2025-05-07T09:00:00",
+        "date": "2025-05-09T09:00:00",
         "location": "Meeting at Plaça Catalunya",
         "address": "Plaça Catalunya, Barcelona",
         "attendees": 24,
@@ -47,7 +47,7 @@ export const mockUser = {
       {
         "id": 3,
         "title": "International Food Festival",
-        "date": "2025-11-21T18:30:00",
+        "date": "2025-05-10T18:30:00",
         "location": "University Campus",
         "address": "Universitat de Barcelona",
         "attendees": 42,
@@ -58,47 +58,66 @@ export const mockUser = {
         "organizer": "UB International Students Association",
         "image": "/images/events/food-festival.jpg",
         "tags": ["Food", "Cultural", "Fun"]
-      }
-    ],
-    "groups": [
-      {
-        "name": "Barcelona Central Residence",
-        "members": 42,
-        "type": "Residence",
-        "lastActivity": "10 minutes ago",
-        "unreadMessages": 5
       },
       {
-        "name": "UB Economics Students",
-        "members": 68,
-        "type": "Academic",
-        "lastActivity": "2 hours ago",
-        "unreadMessages": 0
+        "id": 4,
+        "title": "AI in Education: A Debate",
+        "date": "2025-05-11T10:00:00",
+        "location": "UB Tech Auditorium",
+        "address": "Carrer de Balmes, 200, Barcelona",
+        "attendees": 20,
+        "maxAttendees": 50,
+        "category": "Academic",
+        "joined": false,
+        "description": "A discussion on the role of AI in shaping the future of learning.",
+        "organizer": "UB Debate Society",
+        "image": "/images/events/ai-education.jpg",
+        "tags": ["Education", "Debate", "Technology"]
       },
       {
-        "name": "Weekend Travelers",
-        "members": 124,
-        "type": "Interest",
-        "lastActivity": "Yesterday",
-        "unreadMessages": 3
-      }
-    ],
-    "recommendations": [
-      {
-        "name": "La Sagrada Familia",
-        "category": "Sightseeing",
-        "rating": 4.9,
-        "priceRange": "€€",
-        "description": "Gaudí's masterpiece, best seen with an online booking.",
-        "recommendedBy": "Maria (Host)"
+        "id": 5,
+        "title": "Sunset Beach Volleyball",
+        "date": "2025-05-11T18:00:00",
+        "location": "Barceloneta Beach",
+        "address": "Passeig Marítim de la Barceloneta, Barcelona",
+        "attendees": 16,
+        "maxAttendees": 20,
+        "category": "Sports",
+        "joined": true,
+        "description": "Casual beach volleyball games as the sun sets. All skill levels welcome!",
+        "organizer": "Erasmus Sports Club",
+        "image": "/images/events/volleyball.jpg",
+        "tags": ["Sports", "Beach", "Social"]
       },
       {
-        "name": "El Xampanyet",
-        "category": "Restaurant",
-        "rating": 4.7,
-        "priceRange": "€€",
-        "description": "Traditional tapas and local cava near the Picasso Museum.",
-        "recommendedBy": "Thomas (Student)"
+        "id": 6,
+        "title": "Photography Workshop: City at Night",
+        "date": "2025-05-11T20:00:00",
+        "location": "El Raval District",
+        "address": "Rambla del Raval, Barcelona",
+        "attendees": 12,
+        "maxAttendees": 15,
+        "category": "Workshop",
+        "joined": false,
+        "description": "Learn night photography techniques while exploring Barcelona's vibrant streets.",
+        "organizer": "UB Arts Collective",
+        "image": "/images/events/night-photography.jpg",
+        "tags": ["Photography", "Workshop", "Art"]
+      },
+      {
+        "id": 7,
+        "title": "Neon Party at Apolo",
+        "date": "2025-05-11T23:00:00",
+        "location": "Sala Apolo",
+        "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona",
+        "attendees": 70,
+        "maxAttendees": 150,
+        "category": "Party",
+        "joined": false,
+        "description": "Dance the night away at Barcelona's most iconic club – neon dress code encouraged!",
+        "organizer": "International Nights BCN",
+        "image": "/images/events/neon-party.jpg",
+        "tags": ["Party", "Music", "Nightlife"]
       }
     ],
     "notifications": [

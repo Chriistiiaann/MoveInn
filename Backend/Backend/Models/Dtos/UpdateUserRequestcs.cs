@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using Backend.Models.Database.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Models.Dtos
 {
@@ -30,6 +31,5 @@ namespace Backend.Models.Dtos
         public string? Phone { get; set; }
 
         public IFormFile? File { get; set; }
-
     }
 }

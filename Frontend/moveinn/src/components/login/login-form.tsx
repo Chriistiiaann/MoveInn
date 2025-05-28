@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useAuth } from "@/context/authcontext";
+import { Button } from "@/components/ui/button";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,12 +29,17 @@ export default function LoginForm() {
   
   return (
     <div className="w-full max-w-md">
+      <Link href="/" passHref>
+        <Button variant="ghost" className="text-sm hover:bg-primary/10">
+          ← Back to Landing
+        </Button>
+      </Link>
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2 text-text">
           Welcome back to{" "}
           <span>
-            <span className="text-primary">Move</span>
-            <span className="text-secondary">Inn</span>
+            <span className="dark:text-secondary text-primary">Move</span>
+            <span className="text-primary">Inn</span>
           </span>
         </h1>
         <p className="text-text-secondary">Sign in to continue your Erasmus journey</p>
@@ -59,10 +65,7 @@ export default function LoginForm() {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 {/* Icono de correo */}
-                <svg className="h-5 w-5 text-text-secondary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
+                <Mail className="h-5 w-5 text-text-secondary" />
               </div>
               <input
                 id="email"
@@ -80,6 +83,10 @@ export default function LoginForm() {
               Password
             </label>
             <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                {/* Icono de correo */}
+                <LockKeyhole className="h-5 w-5 text-text-secondary" />
+              </div>
               <input
                 id="password"
                 name="password"
@@ -113,7 +120,7 @@ export default function LoginForm() {
               </label>
             </div>
             <div className="text-sm">
-              <Link href="/forgot-password" className="text-primary hover:text-primary-dark transition-colors">
+              <Link href="/forgot-password" className="text-primary hover:text-primary-dark dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -122,7 +129,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-foreground bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:text-gray-900 bg-primary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>
@@ -132,7 +139,7 @@ export default function LoginForm() {
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="text-primary hover:text-primary-dark font-medium inline-flex items-center transition-colors"
+            className="text-primary hover:text-primary-dark dark:text-gray-400 dark:hover:text-gray-200 font-medium inline-flex items-center transition-colors"
           >
             Register Now
             <svg className="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

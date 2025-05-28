@@ -62,10 +62,36 @@ const getCategoryIcon = (categoryId: number) => {
   }
 }
 
+const getCategoryGradient = (category: string) => {
+  switch (category.toLowerCase()) {
+    case "restaurant":
+      return "from-[#B7F8C8]/30 to-foreground"
+    case "cafeteria":
+      return "from-pink-100 dark:from-[#ffbfea]/50 to-foreground"
+    case "museum":
+      return "from-[#4C69DD]/20 to-foreground"
+    case "leisurezone":
+      return "from-amber-200 dark:from-[#723917]/50 to-foreground"
+    case "park":
+      return "from-green-100 dark:from-secondary-greenblue/30 to-foreground"
+    case "historicalsite":
+      return "from-yellow-100 dark:from-yellow-200/50 to-foreground"
+    case "shopping":
+      return "from-purple-100 dark:from-[#ccb1ef]/50 to-foreground"
+    case "bar":
+      return "from-[#0E1E40]/30 dark:from-[#0E1E40]/50 to-foreground"
+    case "other":
+      return "from-gray-200 dark:from-gray-400/20 to-foreground"
+    default:
+      return "from-gray-200 to-foreground"
+  }
+}
+
+
 const getCategoryBadgeColor = (category: string) => {
   switch (category.toLowerCase()) {
     case "restaurant":
-      return "bg-secondary text-primary-dark"
+      return "bg-secondary text-green-900"
     case "cafeteria":
       return "bg-pink-200 text-pink-900"
     case "museum":
@@ -125,7 +151,7 @@ export default function RecommendationDetailPage() {
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <Link href="/dashboard/recommendations">
-            <Button variant="ghost" className="text-[#4C69DD] hover:bg-[#4C69DD]/10">
+            <Button variant="ghost" className="text-primary dark:text-text-secondary hover:bg-primary/10">
               <ChevronLeft className="h-4 w-4 mr-1" />
               Back to Recommendations
             </Button>
@@ -154,14 +180,15 @@ export default function RecommendationDetailPage() {
                 </Badge>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{recommendation.title}</h1>
-              <div className="flex items-center text-white/90">
+              <div className="flex items-center text-white/90 bg-black/50 w-fit px-2 py-1 rounded-full">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span className="text-sm">{recommendation.address}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-between items-center p-4 border-b border-gray-100">
+          <div className={`flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-br ${getCategoryGradient(categoryName)}`}>
+
             <div className="flex items-center">
               <div className="flex items-center bg-amber-100 px-3 py-1 rounded-full">
                 <Star className="h-4 w-4 text-amber-500 fill-amber-500 mr-1" />
@@ -169,7 +196,7 @@ export default function RecommendationDetailPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="text-primary border-gray-200 hover:bg-primary hover:text-white">
+              <Button variant="outline" size="sm" className="text-primary border-gray-200 dark:border-gray-800 hover:bg-primary hover:text-white">
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
               </Button>
@@ -213,14 +240,18 @@ export default function RecommendationDetailPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-background p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-text-secondary mb-3">Contact Info</h3>
+                  <div className="bg-background py-1 px-3 rounded-lg w-fit">
+                    
                     <div className="space-y-3">
                       <div className="flex items-start">
                         <MapPin className="h-4 w-4 text-[#4C69DD] mt-0.5 mr-2" />
                         <div>
-                          <p className="text-sm font-medium text-text-secondary">Address</p>
-                          <p className="text-sm text-text">{recommendation.address}</p>
+                        <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs">
+                          Recomended by{" "}
+                          <span className="font-semibold text-primary dark:text-text-secondary">
+                            {recommendation.userId === "00000000-0000-0000-0000-000000000000" ? "system" : recommendation.userId}
+                          </span>
+                        </p>
                         </div>
                       </div>
                     </div>

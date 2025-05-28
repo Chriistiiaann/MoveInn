@@ -1,6 +1,7 @@
 ﻿using Backend.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Backend.Models.Database;
+using Backend.Models.Database.Entities;
 
 namespace Backend.Services
 {
@@ -71,13 +72,21 @@ namespace Backend.Services
             return EventMapper.ToDto(ev, ev.Participants.Any(u => u.Id == ev.CreatorId));
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteEventAsync(Guid eventId, Guid userId)
         {
-            var ev = await _unitOfWork.EventRepository.GetByIdWithRelationsAsync(id);
-            if (ev == null) return false;
-
-            await _unitOfWork.EventRepository.DeleteAsync(ev);
-            return await _unitOfWork.SaveAsync();
+            try
+            {
+                return await _unitOfWork.EventRepository.DeleteEventAsync(eventId, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    "There was a problem deleting the event", ex);
+            }
         }
 
         public async Task<bool> JoinAsync(Guid eventId, Guid userId)
@@ -132,6 +141,11 @@ namespace Backend.Services
             await file.CopyToAsync(stream);
 
             return $"/events/{name}";
+        }
+
+        public Task<IEnumerable<Event>> GetEventsByUserAsync(Guid userId)
+        {
+            return _unitOfWork.EventRepository.GetByUserAsync(userId);
         }
     }
 }

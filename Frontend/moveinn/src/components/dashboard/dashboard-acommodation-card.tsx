@@ -1,66 +1,96 @@
-import { MapPin, BedIcon, BathIcon } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+"use client"
 
-interface Acommodation {
-  id: number
-  title: string
-  description: string
-  addres: string
-  city: string
-  country: string
-  pricePerMonth: number
-  numberOfRooms: number
-  bathrooms: number
-  squareMeters: number
-  hasWifi: boolean
-  ownetId: string
-  availableFrom: string
-  availableTo: string
-  images: string[]
-  publisher: string
-}
+import Link from "next/link"
+import { MapPin, BedIcon, BathIcon, Ruler, Wifi } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
+import type { AccommodationData } from "@/types/accommodation"
 
 interface DashboardAcommodationCardProps {
-  acommodation: Acommodation
+  acommodation: AccommodationData
 }
 
+function getTypeStyle(type: number) {
+  switch (type) {
+    case 0:
+      return {
+        label: "Room",
+        badgeColor: "bg-pink-200 text-pink-900",
+        bgColor: "from-pink-100 to-foreground dark:from-[#ffbfea]/50",
+      }
+    case 1:
+      return {
+        label: "House",
+        badgeColor: "bg-yellow-200 text-yellow-900",
+        bgColor: "from-yellow-100 to-foreground dark:from-yellow-200/50",
+      }
+    case 2:
+      return {
+        label: "Apartment",
+        badgeColor: "bg-primary text-white",
+        bgColor: "from-[#4C69DD]/20 to-foreground",
+      }
+    case 3:
+      return {
+        label: "Rural",
+        badgeColor: "bg-secondary-greenblue text-green-900",
+        bgColor: "from-green-100 to-foreground dark:from-secondary-greenblue/30",
+      }
+    default:
+      return {
+        label: "Other",
+        badgeColor: "bg-gray-300 text-gray-800",
+        bgColor: "from-gray-200 to-foreground dark:from-gray-400/20",
+      }
+  }
+}
 export function DashboardAcommodationCard({ acommodation }: DashboardAcommodationCardProps) {
+  const { label, badgeColor, bgColor } = getTypeStyle(acommodation.acommodationType)
+
   return (
-    <Card className="bg-gradient-to-br from-white to-[#E7ECF0]/30 border-none shadow-sm hover:shadow-md transition-all rounded-lg overflow-hidden">
-      {/* Imagen */}
-      <div className="relative h-32 overflow-hidden">
-        <img
-          src={acommodation.images?.[0] || "/placeholder.svg"}
-          alt={acommodation.title}
-          className="object-cover w-full h-full"
-        />
-      </div>
-
-      {/* Contenido */}
-      <CardContent className="p-3 flex flex-col space-y-2">
-        <h3 className="font-semibold text-[#0E1E40] text-md truncate">
-          {acommodation.title}
-        </h3>
-
-        <div className="text-gray-600 text-xs flex items-center">
-          <MapPin className="h-3 w-3 text-[#4C69DD] mr-1" />
-          {acommodation.city}, {acommodation.country}
+    <Link href={`/dashboard/housing/${acommodation.id}`} className="block">
+      <Card className={`cursor-pointer flex flex-col gap-2 p-3 rounded-[var(--radius-lg)] shadow-sm bg-gradient-to-br ${bgColor} hover:shadow-md transition-all border-none`}>
+        {/* Title + Type */}
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-semibold text-text line-clamp-1 pr-2">
+            {acommodation.title}
+          </h3>
+          <span className={`ml-2 text-xs font-medium px-2 py-0.5 rounded-md ${badgeColor}`}>
+            {label}
+          </span>
         </div>
 
-        <div className="flex flex-wrap gap-1 text-xs">
-          <Badge variant="outline" className="text-gray-700 border-gray-300">
-            {acommodation.numberOfRooms} <BedIcon className="h-3 w-3 ml-1" />
-          </Badge>
-          <Badge variant="outline" className="text-gray-700 border-gray-300">
-            {acommodation.bathrooms} <BathIcon className="h-3 w-3 ml-1" />
-          </Badge>
+        {/* Address + Price */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center text-xs bg-background/70 dark:bg-background/50 px-2 py-1 rounded-full w-fit max-w-[70%]">
+            <MapPin className="h-3 w-3 mr-1 text-primary" />
+            <span className="truncate text-primary dark:text-text-secondary">{acommodation.address}</span>
+          </div>
+
+          <div className="text-right whitespace-nowrap text-sm font-bold text-primary-dark dark:text-text">
+            €{acommodation.pricePerMonth}
+            <div className="text-[10px] text-gray-500 dark:text-gray-400">/month</div>
+          </div>
         </div>
 
-        <div className="text-primary-dark font-bold text-sm">
-          €{acommodation.pricePerMonth} <span className="text-gray-500 text-xs">/ month</span>
+        {/* Features */}
+        <div className="flex flex-wrap gap-1 mt-1 text-[10px]">
+          <span className="bg-background/50 text-text px-2 py-0.5 rounded-md flex items-center gap-1">
+            {acommodation.numberOfRooms} <BedIcon className="h-3 w-3" />
+          </span>
+          <span className="bg-background/50 text-text px-2 py-0.5 rounded-md flex items-center gap-1">
+            {acommodation.bathrooms} <BathIcon className="h-3 w-3" />
+          </span>
+          <span className="bg-background/50 text-text px-2 py-0.5 rounded-md flex items-center gap-1">
+            {acommodation.squareMeters} m² <Ruler className="h-3 w-3" />
+          </span>
+          {acommodation.hasWifi && (
+            <span className="bg-background/50 text-text px-2 py-0.5 rounded-md flex items-center">
+              <Wifi className="h-3 w-3" />
+            </span>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </Card>
+    </Link>
   )
 }

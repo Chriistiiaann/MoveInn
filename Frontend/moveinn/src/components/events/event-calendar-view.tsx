@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import {
   format,
   startOfMonth,
@@ -13,6 +12,7 @@ import {
   isToday,
   getDay,
 } from "date-fns"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -44,89 +44,63 @@ interface EventCalendarViewProps {
 export function EventCalendarView({ events, selectedDate, setSelectedDate, activeFilters }: EventCalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate))
 
-  // Navigate to previous month
-  const prevMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1))
-  }
+  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
 
-  // Navigate to next month
-  const nextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1))
-  }
-
-  // Get all days in the current month
   const daysInMonth = eachDayOfInterval({
     start: currentMonth,
     end: endOfMonth(currentMonth),
   })
 
-  // Get events for a specific day
-  const getEventsForDay = (day: Date) => {
-    return events.filter(
-      (event) => isSameDay(event.date, day) && (activeFilters.length === 0 || activeFilters.includes(event.category)),
+  const getEventsForDay = (day: Date) =>
+    events.filter(
+      (event) => isSameDay(event.date, day) && (activeFilters.length === 0 || activeFilters.includes(event.category))
     )
-  }
 
-  // Get category color
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
-      case "social":
-        return "bg-[#B7F8C8] border-[#B7F8C8]"
-      case "trip":
-        return "bg-[#4C69DD] border-[#4C69DD]"
-      case "cultural":
-        return "bg-[#62C3BA] border-[#62C3BA]"
-      case "academic":
-        return "bg-[#4C69DD]/80 border-[#4C69DD]/80"
-      case "sports":
-        return "bg-[#B7F8C8] border-[#B7F8C8]"
-      case "workshop":
-        return "bg-[#62C3BA] border-[#62C3BA]"
-      case "party":
-        return "bg-[#0E1E40] border-[#0E1E40]"
-      default:
-        return "bg-gray-200 border-gray-200"
+      case "social": return "bg-pink-200 text-pink-900"
+      case "trip": return "bg-[#4C69DD] text-white"
+      case "cultural": return "bg-[#62C3BA] text-[#0E1E40]"
+      case "academic": return "bg-amber-400 text-amber-900"
+      case "sports": return "bg-purple-200 text-purple-900"
+      case "workshop": return "bg-yellow-200 text-yellow-900"
+      case "party": return "bg-[#0E1E40] text-white"
+      case "other": return "bg-gray-300 text-gray-800"
+      default: return "bg-gray-200 text-gray-700"
     }
   }
 
-  // Get day of week names
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
-  // Calculate empty cells before the first day of the month
   const firstDayOfMonth = getDay(currentMonth)
   const emptyCellsBefore = Array.from({ length: firstDayOfMonth }, (_, i) => i)
 
   return (
-    <Card className="border-gray-200">
+    <Card className="border border-border dark:border-gray-800 bg-foreground shadow-sm rounded-xl">
       <CardContent className="p-4">
-        {/* Calendar Header */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-semibold text-lg text-[#0E1E40]">{format(currentMonth, "MMMM yyyy")}</h3>
+          <h3 className="text-lg font-semibold text-text dark:text-text-secondary">{format(currentMonth, "MMMM yyyy")}</h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={prevMonth}>
-              <ChevronLeft className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 dark:border-gray-700" onClick={prevMonth}>
+              <ChevronLeft className="h-4 w-4 text-text-secondary" />
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={nextMonth}>
-              <ChevronRight className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 dark:border-gray-700" onClick={nextMonth}>
+              <ChevronRight className="h-4 w-4 text-text-secondary" />
             </Button>
           </div>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1">
-          {/* Weekday Headers */}
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1 text-sm">
           {weekdays.map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
-              {day}
-            </div>
+            <div key={day} className="text-center font-medium text-text-secondary py-2">{day}</div>
           ))}
 
-          {/* Empty cells before first day */}
           {emptyCellsBefore.map((i) => (
-            <div key={`empty-before-${i}`} className="h-24 md:h-32 p-1 bg-gray-50/50"></div>
+            <div key={`empty-${i}`} className="h-24 md:h-32 p-1 bg-muted rounded-md" />
           ))}
 
-          {/* Calendar Days */}
           {daysInMonth.map((day) => {
             const dayEvents = getEventsForDay(day)
             const isSelected = isSameDay(day, selectedDate)
@@ -134,72 +108,55 @@ export function EventCalendarView({ events, selectedDate, setSelectedDate, activ
 
             return (
               <div
-                key={day.toString()}
-                className={`h-24 md:h-32 p-1 border border-gray-100 transition-colors ${
-                  isSelected
-                    ? "bg-[#4C69DD]/10 border-[#4C69DD]"
-                    : isTodayDate
-                      ? "bg-[#B7F8C8]/10 border-[#B7F8C8]"
-                      : "hover:bg-gray-50"
-                }`}
+                key={day.toISOString()}
+                className={`h-24 md:h-32 p-1 rounded-md cursor-pointer transition-colors border 
+                  ${isSelected ? "bg-[#4C69DD]/10 border-primary" : isTodayDate ? "bg-accent/10 border-accent" : "bg-background border-border dark:border-gray-700 hover:bg-accent/10"}`}
                 onClick={() => setSelectedDate(day)}
               >
-                <div className="flex justify-between items-start">
-                  <span
-                    className={`text-sm font-medium ${
-                      isTodayDate
-                        ? "bg-[#B7F8C8] text-[#0E1E40] w-6 h-6 rounded-full flex items-center justify-center"
-                        : isSelected
-                          ? "text-[#4C69DD]"
-                          : "text-gray-700"
-                    }`}
-                  >
+                <div className="flex justify-between items-start mb-1">
+                  <span className={`text-sm font-medium ${
+                    isTodayDate
+                      ? "bg-accent text-accent-dark w-6 h-6 rounded-full flex items-center justify-center"
+                      : isSelected
+                        ? "text-[#4C69DD]"
+                        : "text-text"
+                  }`}>
                     {format(day, "d")}
                   </span>
-
                   {dayEvents.length > 0 && (
-                    <Badge className="bg-[#4C69DD] text-white text-xs">{dayEvents.length}</Badge>
+                    <Badge className="bg-[#4C69DD] text-white text-[10px] px-1">{dayEvents.length}</Badge>
                   )}
                 </div>
 
-                {/* Event Indicators */}
-                <div className="mt-1 space-y-1 overflow-hidden">
+                {/* Event preview bullets */}
+                <div className="space-y-1 overflow-hidden text-xs leading-tight">
                   {dayEvents.slice(0, 3).map((event) => (
                     <TooltipProvider key={event.id}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div
-                            className={`text-xs truncate px-1 py-0.5 rounded ${getCategoryColor(event.category)} ${
-                              event.category.toLowerCase() === "trip" ||
-                              event.category.toLowerCase() === "academic" ||
-                              event.category.toLowerCase() === "party"
-                                ? "text-white"
-                                : "text-[#0E1E40]"
-                            } ${event.joined ? "border-l-2 border-white" : ""}`}
+                            className={`truncate px-1 py-[2px] rounded ${getCategoryColor(event.category)} ${
+                              event.joined ? "border-l-2 border-white" : ""
+                            }`}
                           >
                             {format(event.date, "HH:mm")} {event.title}
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="space-y-1">
-                            <p className="font-medium">{event.title}</p>
-                            <p className="text-xs">
-                              {format(event.date, "h:mm a")} • {event.location}
-                            </p>
-                            <p className="text-xs">
-                              {event.attendees}/{event.maxAttendees} attending
-                            </p>
+                        <TooltipContent className="bg-background border border-border shadow-md rounded-md px-3 py-2">
+                          <div className="space-y-1 text-xs text-text">
+                            <p className="font-semibold">{event.title}</p>
+                            <p>{format(event.date, "h:mm a")} • {event.location}</p>
+                            <p>{event.attendees}/{event.maxAttendees} attending</p>
                             {event.joined && (
-                              <Badge className="bg-[#B7F8C8] text-[#0E1E40] text-xs">You're attending</Badge>
+                              <Badge className="bg-[#B7F8C8] text-[#0E1E40] text-[10px]">You're attending</Badge>
                             )}
                           </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ))}
-
                   {dayEvents.length > 3 && (
-                    <div className="text-xs text-[#4C69DD] font-medium px-1">+{dayEvents.length - 3} more</div>
+                    <div className="text-[#4C69DD] font-medium px-1">+{dayEvents.length - 3} more</div>
                   )}
                 </div>
               </div>
@@ -208,30 +165,25 @@ export function EventCalendarView({ events, selectedDate, setSelectedDate, activ
         </div>
 
         {/* Legend */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#B7F8C8] rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">Social</span>
+        <div className="mt-6 flex flex-wrap gap-4 text-xs text-text-secondary">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-pink-200 rounded-sm" /> Social
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#4C69DD] rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">Trip</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#4C69DD] rounded-sm" /> Trip
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#62C3BA] rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">Cultural</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#62C3BA] rounded-sm" /> Cultural
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#4C69DD]/80 rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">Academic</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-amber-400 rounded-sm" /> Academic
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#0E1E40] rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">Party</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-[#0E1E40] rounded-sm" /> Party
           </div>
-          <div className="flex items-center ml-auto">
-            <div className="w-3 h-3 border-l-2 border-white bg-gray-200 rounded-sm mr-1"></div>
-            <span className="text-xs text-gray-600">You're attending</span>
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="w-3 h-3 bg-gray-300 border-l-2 border-white rounded-sm" />
+            You're attending
           </div>
         </div>
       </CardContent>

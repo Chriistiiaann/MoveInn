@@ -53,10 +53,10 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white text-primary-dark">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-background text-text dark:border-gray-800">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#0E1E40]">Create New Event</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl text-primary dark:text-text-secondary">Create New Event</DialogTitle>
+          <DialogDescription className="text-text">
             Fill in the details below to create a new event for the Erasmus community.
           </DialogDescription>
         </DialogHeader>
@@ -64,14 +64,14 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
         <div className="grid gap-4 py-4">
           {/* Event Title */}
           <div className="grid gap-2">
-            <Label htmlFor="title">Event Title</Label>
+            <Label htmlFor="title" className="text-text-secondary">Event Title</Label>
             <Input id="title" placeholder="Give your event a catchy title" />
           </div>
 
           {/* Event Image */}
           <div className="grid gap-2">
-            <Label>Event Image</Label>
-            <div className="border-2 border-dashed rounded-md border-gray-200 p-6 flex flex-col items-center justify-center bg-gray-50">
+            <Label htmlFor="image" className="text-text-secondary">Event Image</Label>
+            <div className="border-2 border-dashed rounded-md border-gray-200 p-6 flex flex-col items-center justify-center bg-foreground">
               <Upload className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-sm text-gray-500 text-center mb-1">Drag and drop an image here, or click to browse</p>
               <p className="text-xs text-gray-400 text-center">Recommended size: 1200 x 600 pixels</p>
@@ -84,7 +84,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label>Date</Label>
+              <Label htmlFor="date" className="text-text-secondary">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -102,7 +102,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
             </div>
 
             <div className="grid gap-2">
-              <Label>Time</Label>
+              <Label htmlFor="time" className="text-text-secondary">Time</Label>
               <div className="flex">
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <Clock className="mr-2 h-4 w-4" />
@@ -114,12 +114,12 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
           {/* Location */}
           <div className="grid gap-2">
-            <Label htmlFor="location">Location Name</Label>
+            <Label htmlFor="location" className="text-text-secondary">Location Name</Label>
             <Input id="location" placeholder="e.g. Café del Mar, University Campus" />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address" className="text-text-secondary">Address</Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input id="address" className="pl-10" placeholder="Full address of the event location" />
@@ -129,12 +129,12 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
           {/* Category and Capacity */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label>Category</Label>
+              <Label htmlFor="category" className="text-text-secondary">Category</Label>
               <Select>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white text-primary-dark">
+                <SelectContent className="bg-white text-text">
                   <SelectItem value="social" className="hover:bg-[#4C69DD]/10">Social</SelectItem>
                   <SelectItem value="trip" className="hover:bg-[#4C69DD]/10">Trip</SelectItem>
                   <SelectItem value="cultural" className="hover:bg-[#4C69DD]/10">Cultural</SelectItem>
@@ -147,7 +147,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="capacity">Maximum Capacity</Label>
+              <Label htmlFor="capacity" className="text-text-secondary">Maximum Capacity</Label>
               <Input id="capacity" type="number" min="1" placeholder="Number of attendees" />
             </div>
           </div>

@@ -11,5 +11,7 @@ public interface IAccommodationRepository
     Task<IEnumerable<string>> GetAllCountriesAsync();
     Task<IEnumerable<string>> GetCitiesByCountryAsync(string country);
     Task UpdateAsync(Accommodation accommodation);
+    Task<bool> DeleteAccommodation(Guid forumId, Guid userId);
+    Task<IEnumerable<Accommodation>> GetAccommodationsByUser(Guid userId);
 
 }

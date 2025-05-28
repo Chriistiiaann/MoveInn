@@ -1,6 +1,7 @@
 ﻿using Backend.Models.Database.Entities;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System.Collections.Generic;
 using System.Net;
 
@@ -22,7 +23,9 @@ public class DataContext : DbContext
     public DbSet<ForumThread> ForumsThread { get; set; }
     public DbSet<ForumMessages> ForumsMessages { get; set; }
     public DbSet<Messages> Messages { get; set; }
-
+    public DbSet<Hosts> Hosts { get; set; }
+    public DbSet<Speciality> Speciality { get; set; }
+    public DbSet<UserLanguage> UserLanguages { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.LogTo(Console.WriteLine);

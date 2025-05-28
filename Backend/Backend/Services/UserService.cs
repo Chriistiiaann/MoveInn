@@ -67,8 +67,6 @@ namespace Backend.Services
             return await InsertAsync(newUser);
         }
 
-        /*<------------->UPDATE<------------->*/
-
         public async Task<User?> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
             User? user = await _unitOfWork.UserRepository.GetByIdAsync(id);
@@ -113,7 +111,7 @@ namespace Backend.Services
             {
                 user.ErasmusCountry = request.ErasmusCountry;
             }
-            if(request.City != null)
+            if (request.City != null)
             {
                 user.City = request.City;
             }
@@ -144,7 +142,6 @@ namespace Backend.Services
             return saved ? user : null;
         }
 
-
         public async Task<UserDto?> UpdateUserSocialMediaAsync(Guid userId, List<SocialMediaLinkDto> linksDto)
         {
             var newLinks = linksDto.Select(dto => new SocialMediaLink
@@ -160,7 +157,21 @@ namespace Backend.Services
             return updated == null ? null : UserMapper.ToDto(updated);
         }
 
-        /*<------------->DELETE<------------->*/
+        public async Task<UserDto?> UpdateUserLanguageAsync(Guid userId, List<UserLanguageDTO> languages)
+        {
+            var newLanguages = languages.Select(dto => new UserLanguage
+            {
+                Language = dto.Language,
+                Level = dto.Level
+            }).ToList();
+
+            await _unitOfWork.UserRepository.ReplaceLanguagesAsync(userId, newLanguages);
+            await _unitOfWork.SaveAsync();
+
+            var updated = await _unitOfWork.UserRepository.GetByIdWithSocialMediasAsync(userId);
+            return updated == null ? null : UserMapper.ToDto(updated);
+        }
+
         public async Task<bool> DeleteAsyncUserById(Guid id)
         {
             User user = await _unitOfWork.UserRepository.GetByIdAsync(id);
@@ -192,6 +203,28 @@ namespace Backend.Services
             }
 
             return Path.Combine("images", fileName).Replace("\\", "/");
+        }
+
+        public async Task<List<UserRelationDto>> GetFollowersAsync(Guid userId)
+        {
+            var users = await _unitOfWork.UserRepository.GetFollowersAsync(userId);
+            return users.Select(u => new UserRelationDto
+            {
+                Id = u.Id,
+                Name = u.Name,
+                AvatarUrl = u.AvatarUrl
+            }).ToList();
+        }
+
+        public async Task<List<UserRelationDto>> GetFollowingsAsync(Guid userId)
+        {
+            var users = await _unitOfWork.UserRepository.GetFollowingsAsync(userId);
+            return users.Select(u => new UserRelationDto
+            {
+                Id = u.Id,
+                Name = u.Name,
+                AvatarUrl = u.AvatarUrl
+            }).ToList();
         }
     }
 }

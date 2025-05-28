@@ -47,7 +47,7 @@ export function HostCard({ name, university, languages, lastActive }: HostCardPr
                 variant="outline"
                 className={`text-xs py-0 px-1.5 ${
                     index === 0
-                    ? "border-[#4C69DD] text-[#4C69DD]"
+                    ? "border-[#4C69DD] text-[#4C69DD] dark:text-text-secondary dark:border-text-secondary"
                     : index === 1
                         ? "border-[#62C3BA] text-[#62C3BA]"
                         : "border-accent text-accent"
@@ -58,7 +58,7 @@ export function HostCard({ name, university, languages, lastActive }: HostCardPr
             ))}
             </div>
 
-            <Button variant="ghost" size="sm" className="h-7 text-[#4C69DD] hover:bg-[#4C69DD]/10 p-1">
+            <Button variant="ghost" size="sm" className="h-7 text-[#4C69DD] hover:bg-[#4C69DD]/10 p-1 dark:text-text-secondary">
             Send message
             </Button>
         </div>

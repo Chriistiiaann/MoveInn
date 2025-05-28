@@ -54,4 +54,30 @@ public class AccommodationRepository : IAccommodationRepository
         _context.Accommodations.Update(accommodation);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> DeleteAccommodation(Guid accommodationId, Guid userId)
+    {
+        var accommodation = await _context.Accommodations
+            .Include(a => a.AccomodationImages)
+            .FirstOrDefaultAsync(a => a.Id == accommodationId);
+
+        if (accommodation == null)
+            throw new KeyNotFoundException("The Accommodation doesn't exists");
+
+        if (accommodation.OwnerId != userId)
+            return false;
+
+        _context.ImageAccommodations.RemoveRange(accommodation.AccomodationImages);
+        _context.Accommodations.Remove(accommodation);
+        var changes = await _context.SaveChangesAsync();
+        return changes > 0;
+    }
+
+
+    public async Task<IEnumerable<Accommodation>> GetAccommodationsByUser(Guid userId)
+    {
+        return await _context.Accommodations
+                             .Where(f => f.OwnerId == userId)
+                             .ToListAsync();
+    }
 }

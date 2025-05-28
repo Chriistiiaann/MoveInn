@@ -30,21 +30,21 @@ export function RecommendationCard({
       case "restaurant":
         return "from-[#B7F8C8]/30 to-foreground"
       case "cafeteria":
-        return "from-pink-100 to-foreground"
+        return "from-pink-100 dark:from-[#ffbfea]/50 to-foreground"
       case "museum":
         return "from-[#4C69DD]/20 to-foreground"
       case "leisurezone":
-        return "from-amber-100 to-foreground"
+        return "from-amber-200 dark:from-[#723917]/50 to-foreground"
       case "park":
-        return "from-green-100 to-foreground"
+        return "from-green-100 dark:from-secondary-greenblue/30 to-foreground"
       case "historicalsite":
-        return "from-yellow-100 to-foreground"
+        return "from-yellow-100 dark:from-yellow-200/50 to-foreground"
       case "shopping":
-        return "from-purple-100 to-foreground"
+        return "from-purple-100 dark:from-[#ccb1ef]/50 to-foreground"
       case "bar":
-        return "from-[#0E1E40]/20 to-foreground"
+        return "from-[#0E1E40]/30 dark:from-[#0E1E40]/50 to-foreground"
       case "other":
-        return "from-gray-200 to-foreground"
+        return "from-gray-200 dark:from-gray-400/20 to-foreground"
       default:
         return "from-gray-200 to-foreground"
     }
@@ -120,9 +120,9 @@ export function RecommendationCard({
         <p className="text-sm text-text mb-3 line-clamp-3">{description}</p>
       </div>
 
-      <div className="flex items-center text-xs bg-foreground px-2 py-1 rounded-full w-fit">
+      <div className="flex items-center text-xs bg-background/70 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
         <MapPinIcon className="h-3 w-3 mr-1 text-primary" />
-        <span className="text-text-secondary">Recommended by {recommenderName}</span>
+        <span className="text-gray-500 dark:text-text-secondary">Recommended by {recommenderName}</span>
       </div>
     </div>
   )

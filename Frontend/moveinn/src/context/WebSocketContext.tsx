@@ -27,9 +27,16 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
 
     ws.onopen = () => console.log('🟢 [WS] connected to', wsUrl);
     ws.onmessage = (event) => {
-      try { setLastMessage(JSON.parse(event.data)); }
-      catch (e) { console.error('⚠️ [WS] invalid JSON', e); }
-    };
+      console.log("📩 WS raw data received:", event.data);
+      try {
+        const parsed = JSON.parse(event.data)
+        console.log("🧩 WS received:", parsed) // <-- pon esto temporalmente
+        setLastMessage(parsed)
+      } catch (e) {
+        console.error("⚠️ [WS] invalid JSON", e)
+      }
+    }
+    
     ws.onerror = (err) => console.error('❌ [WS] error', err);
     ws.onclose = () => console.log('🔴 [WS] disconnected');
 
@@ -63,10 +70,20 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const followUser = (targetUserId: string) => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ action: 'follow', targetUserId }));
+    if (!socketRef.current) {
+      console.warn("❌ No WebSocket instance.")
+      return
     }
-  };
+  
+    if (socketRef.current.readyState !== WebSocket.OPEN) {
+      console.warn("❌ WebSocket not open. Current state:", socketRef.current.readyState)
+      return
+    }
+  
+    const payload = { action: "follow", targetUserId }
+    console.log("📤 Sending follow message:", payload)
+    socketRef.current.send(JSON.stringify(payload))
+  }
 
   const markAsRead = (contactId: string) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {

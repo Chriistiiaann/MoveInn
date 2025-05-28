@@ -2,6 +2,10 @@
 using Backend.Models.Database.Entities;
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
+using Backend.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Backend.Controllers
 {
@@ -67,18 +71,47 @@ namespace Backend.Controllers
             return Ok(reviewsResponse);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> DeleteReview(Guid id)
         {
+            var userIdClaim = User.FindFirstValue("id");
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Forbid();
+
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Forbid();
+
+            bool ok;
+
             try
             {
-                await _reviewService.DeleteReviewAsync(id);
-                return Ok(new { message = "Reseña eliminada exitosamente." });
+                ok = await _reviewService.DeleteReviewAsync(id, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = "Review not found" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = ex.Message });
             }
+
+            if (!ok)
+                return Forbid(new AuthenticationProperties(), "Just the author can eliminate this review");
+
+            return Ok(new { message = "The Review was eliminated correctly" });
+        }
+
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<IEnumerable<Review>>> GetByUser(Guid userId)
+        {
+            var forums = await _reviewService.GetReviewsByUserIdAsync(userId);
+
+            if (!forums.Any())
+                return NotFound(new { message = "You haven’t created any Reviews yet. Why not start one now?" });
+
+            return Ok(forums);
         }
     }
 }

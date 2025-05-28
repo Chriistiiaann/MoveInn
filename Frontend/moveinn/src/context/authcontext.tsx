@@ -12,6 +12,7 @@ import {
 } from "@/utils/endpoints/config"
 import { useRouter } from "next/navigation"
 import type { DecodedToken, User, UserUpdateFormData } from "@/types/user"
+import { setCookie, deleteCookie } from "cookies-next";
 
 
 interface AuthContextType {
@@ -199,6 +200,11 @@ export const AuthProvider = ({
       const { accessToken } = response.data
       if (!accessToken) throw new Error("No se recibió accessToken en la respuesta")
 
+      setCookie("token", accessToken, {
+        maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 2, // 7 días o 2 horas
+        path: "/",
+      });
+
       if (rememberMe) {
         localStorage.setItem("accessToken", accessToken)
       } else {
@@ -254,6 +260,7 @@ export const AuthProvider = ({
   }
 
   const logout = () => {
+    deleteCookie("token")
     localStorage.removeItem("accessToken")
     sessionStorage.removeItem("accessToken")
     setUser(null)

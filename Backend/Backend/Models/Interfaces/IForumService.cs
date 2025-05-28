@@ -12,4 +12,8 @@ public interface IForumService
     Task<IEnumerable<ForumMessageDTO>> GetMessagesByThreadIdAsync(Guid threadId);
     Task<IEnumerable<ForumDTO>> GetAllForumsAsync();
     Task <ForumDTO> GetForumByIdAsync(Guid id);
+    Task<IEnumerable<string>> GetAllCountriesAsync();
+    Task<bool> DeleteForumAsync(Guid forumId, Guid userId);
+    Task<IEnumerable<Forum>> GetForumsByUserAsync(Guid userId);
+
 }

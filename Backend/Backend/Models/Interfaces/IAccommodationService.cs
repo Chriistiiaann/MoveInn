@@ -12,5 +12,6 @@ public interface IAccommodationService
     Task<IEnumerable<string>> GetCitiesByCountryAsync(string country);
     Task<Accommodation> GetByIdAsync(Guid id);
     Task<IEnumerable<DateTime>> GetUnavailableDatesAsync(Guid accommodationId);
-
+    Task<bool> DeleteAccommodationAsync(Guid forumId, Guid userId);
+    Task<IEnumerable<Accommodation>> GetAccommodationsByUser(Guid userId);
 }

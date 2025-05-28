@@ -1,12 +1,13 @@
-﻿using Backend.Models.Dtos;
+﻿using Backend.Models.Database.Entities;
+using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Backend.Controllers
 {
-    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RecommendationController : ControllerBase
@@ -143,13 +144,46 @@ namespace Backend.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteRecommendation(Guid id)
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<IEnumerable<Recommendation>>> GetByUser(Guid userId)
         {
-            bool deleted = await _recommendationService.DeleteRecommendationAsync(id);
-            if (!deleted)
-                return NotFound("Recomendación no encontrada.");
-            return NoContent();
+            var recommendations = await _recommendationService.GetRecommendationsByUserAsync(userId);
+
+            if (!recommendations.Any())
+                return NotFound(new { message = "No recommendations found for this user." });
+
+            return Ok(recommendations);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userIdClaim = User.FindFirstValue("id");
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Forbid();
+
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Forbid();
+
+            bool ok;
+            try
+            {
+                ok = await _recommendationService.DeleteRecommendationAsync(id, userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = "Recommendation not found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+
+            if (!ok)
+                return StatusCode(403, new { message = "Only the author can delete this recommendation." });
+
+            return Ok(new { message = "The recommendation was deleted successfully" });
         }
     }
 }
