@@ -16,9 +16,12 @@ export default async function DashboardLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
+  console.log("🧠 Token from cookies:", token?.value)
+
 
   if (!token?.value) {
     redirect("/login");
+    return null;
   }
 
   return <DashboardLayoutClient>{children}</DashboardLayoutClient>;

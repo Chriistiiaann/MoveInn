@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, GraduationCap, Globe, MessageCircle, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { API_BASE_IMAGE_URL } from "@/utils/endpoints/config";
 
 interface Specialty {
   id?: string;
@@ -37,7 +38,7 @@ export default function HostCard({ host }: HostCardProps) {
         <div className="relative">
           <div className="h-40 bg-gradient-to-br from-accent/50 dark:from-accent/30 to-foreground/10 rounded-t-md flex items-center justify-center border-b-3 border-accent">
             <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-              <AvatarImage src={host.avatarUrl || "/default-avatar.svg"} alt={host.name} />
+              <AvatarImage src={API_BASE_IMAGE_URL + host.avatarUrl || "/default-avatar.svg"} alt={host.name} />
               <AvatarFallback className="bg-[#4C69DD] text-white text-2xl">
                 {host.name?.charAt(0)}
               </AvatarFallback>

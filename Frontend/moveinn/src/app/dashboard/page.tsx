@@ -23,6 +23,7 @@ import {
     CalendarX,
     SearchX,
     UserX,
+    BellIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,10 +35,11 @@ import { DashboardAcommodationCard } from "@/components/dashboard/dashboard-acom
 import { HostCard } from "@/components/dashboard/host-card"
 import axios from "axios"
 import { useAuth } from "@/context/authcontext"
-import { API_SEARCH_RECOMMENDATION, API_SEARCH_ACOMMODATION, API_SEARCH_EVENTS, API_HOST_SEARCH_HOSTS } from "@/utils/endpoints/config"
+import { API_SEARCH_RECOMMENDATION, API_SEARCH_ACOMMODATION, API_SEARCH_EVENTS, API_HOST_SEARCH_HOSTS, API_GET_USER } from "@/utils/endpoints/config"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { getCookie } from "cookies-next"
+import { useWebsocket } from "@/context/WebSocketContext"
 
 interface Recommendation {
     id: string
@@ -139,7 +141,81 @@ export default function DashboardPage() {
     const [acommodations, setAcommodations] = useState<Acommodation[]>([])
     const [isLoadingDashboard, setIsLoadingDashboard] = useState(true)
     const [dashboardHosts, setDashboardHosts] = useState<any[]>([])
+    const [notifications, setNotifications] = useState<
+  { message: string; timestamp: number; type: "message" | "event" | "group" | "recommendation" | "system" }[]
+  >(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("notifications")
+        return saved ? JSON.parse(saved) : []
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
 
+    
+
+    const { lastMessage } = useWebsocket()
+
+    useEffect(() => {
+      try {
+        localStorage.setItem("notifications", JSON.stringify(notifications))
+      } catch (e) {
+        console.error("Error saving notifications to localStorage", e)
+      }
+    }, [notifications]) 
+    
+
+    useEffect(() => {
+      const fetchSenderNameAndNotify = async (senderId: string, content: string) => {
+        try {
+          const token = getCookie("token")
+          const response = await axios.get(API_GET_USER(senderId), {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          const sender = response.data
+          const fullName = `${sender.name}`
+    
+          setNotifications((prev) => [
+            ...prev,
+            {
+              message: `${fullName} te ha enviado un mensaje: "${content}"`,
+              timestamp: Date.now(),
+              type: "message"
+            }
+          ])
+        } catch (err) {
+          console.error("Error fetching sender name:", err)
+          setNotifications((prev) => [
+            ...prev,
+            {
+              message: `Alguien te ha enviado un mensaje: "${content}"`,
+              timestamp: Date.now(),
+              type: "message"
+            }
+          ])
+        }
+      }
+    
+      if (lastMessage?.action === "notification" && lastMessage?.success && lastMessage?.message) {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            message: lastMessage.message,
+            timestamp: Date.now(),
+            type: "system"
+          }
+        ])
+      }
+    
+      if (lastMessage?.action === "new_message" && lastMessage?.content && lastMessage?.senderId) {
+        fetchSenderNameAndNotify(lastMessage.senderId, lastMessage.content)
+      }
+    }, [lastMessage])
+    
+    
 
     interface Event {
       id: string
@@ -211,6 +287,7 @@ export default function DashboardPage() {
             sortOrder: "",
             country: user?.erasmusCountry || "",
             city: user?.city || "",
+            currentUserId: user?.id || ""
           },
           {
             headers: {
@@ -501,42 +578,50 @@ export default function DashboardPage() {
             <div className="space-y-8">
                 {/* Notifications */}
                 <Card className="border-none shadow-sm bg-foreground">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <div>
-                    <CardTitle className="text-xl text-text">Notifications</CardTitle>
-                    <CardDescription className="text-text-secondary">Recent updates and activities</CardDescription>
+                      <CardTitle className="text-xl text-text">Notifications</CardTitle>
+                      <CardDescription className="text-text-secondary">Recent activities</CardDescription>
                     </div>
-                    <Button variant="ghost" size="sm" className="dark:text-text-secondary">
-                    Mark all as read
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="dark:text-text-secondary"
+                      onClick={() => {
+                        setNotifications([])
+                        localStorage.removeItem("notifications")
+                      }}
+                    >
+                      Mark all as read
                     </Button>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                    <NotificationItem
-                        type="message"
-                        content="Carlos sent you a message about the weekend trip"
-                        time="10 minutes ago"
-                        read={false}
-                    />
-                    <NotificationItem
-                        type="event"
-                        content="'Language Exchange Night' starts in 3 hours"
-                        time="1 hour ago"
-                        read={false}
-                    />
-                    <NotificationItem
-                        type="recommendation"
-                        content="Anna recommended 'Parc de la Ciutadella' to you"
-                        time="2 days ago"
-                        read={true}
-                    />
-                    </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                    <Button variant="ghost" className="w-full dark:text-text-secondary">
-                    View all notifications
-                    </Button>
-                </CardFooter>
+
+                  </CardHeader>
+
+                  <CardContent>
+                    {notifications.length > 0 ? (
+                      <div
+                        className={`space-y-4 ${
+                          notifications.length > 4 ? "max-h-80 overflow-y-auto pr-2" : ""
+                        }`}
+                      >
+                        {notifications.map((notification, index) => (
+                          <NotificationItem
+                            key={index}
+                            type={notification.type || "system"}
+                            content={notification.message}
+                            time={new Date(notification.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            read={false}
+                          />
+                        ))}
+
+                      </div>
+                    ) : (
+                      <div className="text-center text-sm text-text py-4">
+                        <BellIcon className="mx-auto h-10 w-10 text-text-secondary mb-4" />
+                        You don’t have any notifications right now.
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
 
                 {/* Your Hosts */}
@@ -554,23 +639,23 @@ export default function DashboardPage() {
                     </Link>
                 </CardHeader>
                 <CardContent>
-  {dashboardHosts.filter((host) => host.id !== user?.id).length > 0 ? (
-    <div className="space-y-4">
-      {dashboardHosts
-        .filter((host) => host.id !== user?.id)
-        .map((host) => (
-          <HostCard key={host.id} host={host} />
-        ))}
-    </div>
-  ) : (
-    <div className="text-center text-md text-text py-4">
-      <UserX className="mx-auto h-20 w-20 text-text-secondary mb-2" />
-      No hosts available in{" "}
-      <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span>{" "}
-      right now. If you're a host, go help someone!
-    </div>
-  )}
-</CardContent>
+                  {dashboardHosts.filter((host) => host.id !== user?.id).length > 0 ? (
+                    <div className="space-y-4">
+                      {dashboardHosts
+                        .filter((host) => host.id !== user?.id)
+                        .map((host) => (
+                          <HostCard key={host.id} host={host} />
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-sm text-text py-4">
+                      <UserX className="mx-auto h-10 w-10 text-text-secondary mb-4" />
+                      No hosts available in{" "}
+                      <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span>{" "}
+                      right now. If you're a host, go help someone!
+                    </div>
+                  )}
+                </CardContent>
 
                 </Card>
             </div>

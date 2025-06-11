@@ -11,8 +11,13 @@ import {
   API_ACCOMMODATIONS_USER,
   API_EVENTS_USER,
   API_FORUMS_USER,
+  API_DELETE_REVIEW,
+  API_FORUM_DELETE,
+  API_DELETE_ACCOMMODATION,
+  API_DELETE_RECOMMENDATION,
+  API_DELETE_EVENT,
 } from "@/utils/endpoints/config"
-import { CalendarOff, MapPinOff, Bookmark, Sofa, MessageCircleOff, NotebookPen } from "lucide-react"
+import { CalendarOff, MapPinOff, Bookmark, Sofa, MessageCircleOff, NotebookPen, Trash2 } from "lucide-react"
 import { useAuth } from "@/context/authcontext"
 import { format } from "date-fns"
 import ForumCard from "@/components/forums/forum-card"
@@ -22,6 +27,9 @@ import { DetailedRecommendationCard } from "@/components/recommendations/detaile
 import { getCategoryIcon } from "@/app/dashboard/recommendations/page"
 import { ReservationCard } from "@/components/reservations/reservation-card"
 import { ReviewCard } from "@/components/reviews/review-card"
+import { getCookie } from "cookies-next"
+import { Button } from "@/components/ui/button"
+
 
 
 export function UserContentOverview() {
@@ -34,6 +42,9 @@ export function UserContentOverview() {
     events: [],
     forums: [],
   })
+
+  const [itemToDelete, setItemToDelete] = useState<{ id: string, type: string } | null>(null)
+
 
   const fetchReviews = async () => {
     try {
@@ -207,7 +218,17 @@ export function UserContentOverview() {
             <div className="grid gap-4 md:grid-cols-2">
                 {data.reviews.length > 0 ? (
                 data.reviews.map((rev: any) => (
-                    <ReviewCard key={rev.id} review={rev} />
+                  <div key={rev.id} className="relative">
+                    <button
+                      onClick={() => setItemToDelete({ id: rev.id, type: "reviews" })}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
+                      title="Delete review"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    <ReviewCard review={rev} />
+                  </div>
                 ))
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
@@ -222,7 +243,9 @@ export function UserContentOverview() {
             <div className="grid gap-4 md:grid-cols-2">
                 {data.reservations.length > 0 ? (
                 data.reservations.map((res: any) => (
-                    <ReservationCard key={res.id} reservation={res} />
+                  <div key={res.id}>
+                    <ReservationCard reservation={res} />
+                  </div>
                 ))
                 ) : (
                     <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
@@ -237,11 +260,20 @@ export function UserContentOverview() {
             <div className="grid gap-4 md:grid-cols-2">
                 {data.recommendations.length > 0 ? (
                 data.recommendations.map((rec: any) => (
+                  <div key={rec.id} className="relative">
+                    <button
+                      onClick={() => setItemToDelete({ id: rec.id, type: "recommendations" })}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
+                      title="Delete recommendation"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                
                     <DetailedRecommendationCard
-                    key={rec.id}
-                    recommendation={rec}
-                    categoryIcon={getCategoryIcon(rec.category)}
+                      recommendation={rec}
+                      categoryIcon={getCategoryIcon(rec.category)}
                     />
+                  </div>
                 ))
                 ) : (
                     <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
@@ -256,7 +288,17 @@ export function UserContentOverview() {
             <div className="grid gap-4 md:grid-cols-2">
                 {data.accommodations.length > 0 ? (
                 data.accommodations.map((accom: any) => (
-                    <AcommodationCard key={accom.id} acommodation={accom} />
+                  <div key={accom.id} className="relative">
+                    <button
+                      onClick={() => setItemToDelete({ id: accom.id, type: "accommodations" })}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
+                      title="Delete accommodation"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                
+                    <AcommodationCard acommodation={accom} />
+                  </div>
                 ))
                 ) : (
                     <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
@@ -271,8 +313,19 @@ export function UserContentOverview() {
             <div className="grid gap-4">
                 {data.events.length > 0 ? (
                 data.events.map((event: any) => (
-                    <EventCardWrapper key={event.id} event={event} />
+                  <div key={event.id} className="relative">
+                    <button
+                      onClick={() => setItemToDelete({ id: event.id, type: "events" })}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
+                      title="Delete event"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                
+                    <EventCardWrapper event={event} />
+                  </div>
                 ))
+                
                 ) : (
                     <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
                         <CalendarOff className="h-12 w-12 text-primary" />
@@ -285,7 +338,19 @@ export function UserContentOverview() {
         <TabsContent value="forums">
           <div className="grid gap-4 md:grid-cols-2">
             {data.forums.length > 0 ? (
-              data.forums.map((forum: any) => <ForumCard key={forum.id} forum={forum} />)
+              data.forums.map((forum: any) => (
+                <div key={forum.id} className="relative">
+                  <button
+                    onClick={() => setItemToDelete({ id: forum.id, type: "forums" })}
+                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
+                    title="Delete forum"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+
+                  <ForumCard forum={forum} />
+                </div>
+              ))
             ) : (
                 <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
                     <Bookmark className="h-12 w-12 text-primary" />
@@ -295,6 +360,57 @@ export function UserContentOverview() {
           </div>
         </TabsContent>
       </Tabs>
+      {itemToDelete && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white dark:bg-foreground p-6 rounded-lg shadow-md max-w-md w-full">
+      <h2 className="text-lg font-semibold text-text mb-2">Confirm Deletion</h2>
+      <p className="text-sm text-text-secondary mb-4">
+        Are you sure you want to delete this {itemToDelete.type.slice(0, -1)}? This action cannot be undone.
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <Button variant="default" className="bg-gray-600 hover:bg-gray-700 text-white" onClick={() => setItemToDelete(null)}>
+          Cancel
+        </Button>
+        <Button
+          variant="default"
+          className="bg-red-600 hover:bg-red-700 text-white"
+          onClick={async () => {
+            const token = getCookie("token")
+            const { id, type } = itemToDelete
+
+            const endpointMap: Record<string, (id: string) => string> = {
+              reviews: API_DELETE_REVIEW,
+              forums: API_FORUM_DELETE,
+              accommodations: API_DELETE_ACCOMMODATION,
+              recommendations: API_DELETE_RECOMMENDATION,
+              events: API_DELETE_EVENT,
+            }
+
+            try {
+              await axios.delete(endpointMap[type](id), {
+                headers: { Authorization: `Bearer ${token}` },
+              })
+
+              setData(prev => ({
+                ...prev,
+                [type]: (prev as any)[type].filter((el: any) => el.id !== id),
+              }))
+            } catch (err) {
+              console.error("Error deleting", type, err)
+            } finally {
+              setItemToDelete(null)
+            }
+          }}
+        >
+          Delete
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </section>
   )
 }

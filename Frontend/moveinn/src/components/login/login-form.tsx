@@ -32,7 +32,7 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <Link href="/" passHref>
-        <Button variant="ghost" className="text-sm hover:bg-primary/10 dark:text-text-secondary">
+        <Button variant="ghost" className="text-sm text-primary hover:bg-primary/10 dark:text-text-secondary">
           ← Back to Landing
         </Button>
       </Link>
@@ -101,6 +101,7 @@ export default function LoginForm() {
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text"
+                aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>

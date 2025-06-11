@@ -28,11 +28,14 @@ interface Event {
   category: string
   joined: boolean
   description: string
-  organizer: string
   imageUrl: string
   tags: string[]
   city: string
   country: string
+  creatorId: string
+  creatorName: string
+  creatorLastName: string
+  creatorAvatarUrl: string
 }
 
 interface DetailedEventCardProps {
@@ -48,9 +51,6 @@ export function DetailedEventCard({ event, categoryIcon }: DetailedEventCardProp
   const [attendeesCount, setAttendeesCount] = useState(event.attendeesCount)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
-
-  console.log("event", event)
-
 
   const confirmLeaveEvent = async () => {
     if (!user?.id) return
@@ -145,7 +145,7 @@ export function DetailedEventCard({ event, categoryIcon }: DetailedEventCardProp
   const isToday = new Date().toDateString() === event.date.toDateString()
 
   return (
-    <Card className={`overflow-hidden shadow-md hover:shadow-lg border-none transition-all duration-300 bg-foreground py-0 ${showFullDescription ? "min-h-[auto]" : "min-h-[370px]"}`}>
+    <Card className={`overflow-hidden shadow-md hover:shadow-lg border-none transition-all duration-300 bg-foreground py-0 ${showFullDescription ? "min-h-[auto]" : "min-h-[270px]"}`}>
       <div className="flex flex-col md:flex-row h-full">
         <div className="relative h-48 md:h-auto md:w-1/3">
           <Image
@@ -239,7 +239,7 @@ export function DetailedEventCard({ event, categoryIcon }: DetailedEventCardProp
                   {event.description.length > 160 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="mt-1 text-sm text-primary flex items-center hover:underline focus:outline-none"
+                      className="mt-1 text-sm text-primary dark:text-text-secondary flex items-center hover:underline focus:outline-none"
                     >
                       {showFullDescription ? (
                         <>
@@ -269,7 +269,28 @@ export function DetailedEventCard({ event, categoryIcon }: DetailedEventCardProp
 
                 <div className="text-xs text-text bg-background/70 dark:bg-foreground px-2 py-1 rounded-full">
                   Organized by{" "}
-                  <span className="font-medium text-primary dark:text-text-secondary">{event.organizer}</span>
+                  <span className="font-medium text-primary dark:text-text-secondary">
+                    {event.creatorName} {event.creatorLastName}
+                  </span>
+                  {event.creatorAvatarUrl && !event.creatorAvatarUrl.includes("default-avatar-url") ? (
+                    <Image
+                      src={API_BASE_IMAGE_URL + event.creatorAvatarUrl}
+                      alt={`${event.creatorName} ${event.creatorLastName}`}
+                      width={24}
+                      height={24}
+                      className="inline-block rounded-full ml-2 object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div
+                      className="inline-flex items-center justify-center w-6 h-6 rounded-full ml-2 bg-primary text-white text-[10px] font-semibold leading-none"
+                      title={`${event.creatorName} ${event.creatorLastName}`}
+                    >
+                      {event.creatorName?.charAt(0).toUpperCase() ?? "?"}
+                    </div>
+
+                  )}
+
                 </div>
               </div>
 

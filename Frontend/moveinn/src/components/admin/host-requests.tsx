@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import {
+  API_BASE_IMAGE_URL,
   API_GET_HOSTS,
   API_HOST_GET_REQUESTS,
   API_HOST_REQUEST_ACCEPT,
@@ -109,11 +110,19 @@ export function HostRequests({ setHosts }: HostRequestProps) {
           className="min-h-[180px] p-4 flex flex-col justify-between gap-2 text-text bg-background border border-gray-200 dark:border-gray-800 shadow-sm"
         >
           <div className="flex items-center gap-4">
-            <img
-              src={req.avatarUrl}
-              alt={req.userName}
-              className="w-12 h-12 rounded-full object-cover"
-            />
+          {req.avatarUrl && req.avatarUrl !== "default-avatar-url" ? (
+          <img
+            src={API_BASE_IMAGE_URL + req.avatarUrl}
+            alt={req.userName}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm uppercase">
+              {req.userName.charAt(0)}
+            </div>
+          )}
+
+
             <div>
               <p className="font-semibold">{req.userName}</p>
               <p className="text-xs text-text-secondary">

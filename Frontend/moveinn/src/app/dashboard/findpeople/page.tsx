@@ -98,7 +98,7 @@ export default function UsersExplorePage() {
           },
           { headers: { Authorization: `Bearer ${token}` } }
         )
-
+        console.log("data", res.data)
         const data = res.data
         setUsers(data.items.filter((u: any) => u.id !== user?.id))
         setTotalPages(data.totalPages)
@@ -118,7 +118,7 @@ export default function UsersExplorePage() {
 
         {/* Buscador */}
         <section className="mb-8">
-          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] rounded-xl p-6 text-white">
+          <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] dark:to-foreground rounded-xl p-6 text-white">
             <h1 className="text-3xl font-bold mb-2">Find Erasmus Friends</h1>
             <p className="text-white/80">Search and connect with other Erasmus students</p>
             <div className="relative mt-4">

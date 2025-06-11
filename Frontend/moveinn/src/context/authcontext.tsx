@@ -27,6 +27,7 @@ interface AuthContextType {
   updateUserProfile: (userData: UserUpdateFormData) => Promise<User>
   updateSocialMedia: (socialMedias: Array<{ id: number; socialMedia: number; url: string }>) => Promise<void>
   setUser: React.Dispatch<React.SetStateAction<User | null>>
+  isLoggingOut: boolean
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -41,6 +42,8 @@ export const AuthProvider = ({
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
 
   const extractUserId = (accessToken: string): string | null => {
     try {
@@ -175,7 +178,13 @@ export const AuthProvider = ({
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
+        const cookieToken = document.cookie
+          .split("; ")
+          .find(row => row.startsWith("token="))
+          ?.split("=")[1]
+
+        const storedToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || cookieToken
+
 
         console.log("Token almacenado encontrado:", !!storedToken)
 
@@ -215,6 +224,7 @@ export const AuthProvider = ({
       setCookie("token", accessToken, {
         maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 2,
         path: "/",
+        sameSite: "lax",
       });
 
       if (rememberMe) {
@@ -224,7 +234,6 @@ export const AuthProvider = ({
       }
       setToken(accessToken)
       await updateUserFromToken(accessToken)
-      router.push("/dashboard")
     } catch (error: any) {
       console.error("Error en login:", error)
       setError(error.response?.data?.message || error.message || "Error de inicio de sesión.")
@@ -266,12 +275,15 @@ export const AuthProvider = ({
   
 
   const logout = () => {
+    setIsLoggingOut(true)
     deleteCookie("token")
     localStorage.removeItem("accessToken")
     sessionStorage.removeItem("accessToken")
     setUser(null)
     setToken(null)
-    router.push("/login")
+    setTimeout(() => {
+      router.push("/login")
+    }, 50)
   }
 
   return (
@@ -288,6 +300,7 @@ export const AuthProvider = ({
         updateUserProfile,
         updateSocialMedia,
         setUser,
+        isLoggingOut,
       }}
     >
       {children}

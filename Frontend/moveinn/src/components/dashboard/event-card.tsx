@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useAuth } from "@/context/authcontext"
-import { API_JOIN_EVENT, API_LEAVE_EVENT, API_GET_USER_EVENTS } from "@/utils/endpoints/config"
+import { API_JOIN_EVENT, API_LEAVE_EVENT } from "@/utils/endpoints/config"
 import { format, parseISO } from "date-fns"
 
 interface EventCardProps {
@@ -18,13 +18,25 @@ interface EventCardProps {
   onStatusChange?: (joined: boolean) => void
 }
 
-
-export function EventCard({ eventId, title, date, location, attendeesCount, category, joined, onStatusChange }: EventCardProps) {
-  
+export function EventCard({
+  eventId,
+  title,
+  date,
+  location,
+  attendeesCount,
+  category,
+  joined,
+  onStatusChange
+}: EventCardProps) {
   const { user } = useAuth()
   const [isJoining, setIsJoining] = useState(false)
-  const [isJoined, setIsJoined] = useState(false)
+  const [isJoined, setIsJoined] = useState(joined)
   const [currentAttendees, setCurrentAttendees] = useState(attendeesCount)
+
+  useEffect(() => {
+    setIsJoined(joined)
+    setCurrentAttendees(attendeesCount)
+  }, [joined, attendeesCount])
 
   const handleJoinLeave = async () => {
     if (!user?.id) return
@@ -49,70 +61,33 @@ export function EventCard({ eventId, title, date, location, attendeesCount, cate
     }
   }
 
-  useEffect(() => {
-    const checkIfUserJoined = async () => {
-      if (!user?.id) return
-      try {
-        const { data } = await axios.get(API_GET_USER_EVENTS(user.id))
-        const joinedEventIds = data.map((event: { id: string }) => event.id)
-        setIsJoined(joinedEventIds.includes(eventId))
-      } catch (error) {
-        console.error("Failed to fetch user's joined events:", error)
-      }
-    }
-  
-    checkIfUserJoined()
-  }, [eventId, user])
-  
-
-  
   const getCategoryColor = () => {
     switch (category.toLowerCase()) {
-      case "social":
-        return "from-pink-100 to-foreground dark:from-[#ffbfea]/50"
-      case "trip":
-        return "from-[#4C69DD]/20 to-foreground"
-      case "cultural":
-        return "from-[#62C3BA]/30 to-foreground"
-      case "academic":
-        return "from-amber-200 to-foreground dark:from-[#723917]/50"
-      case "sports":
-        return "from-purple-100 to-foreground dark:from-[#ccb1ef]/50"
-      case "workshop":
-        return "from-yellow-100 to-foreground dark:from-yellow-200/50"
-      case "party":
-        return "from-[#0E1E40]/30 to-foreground dark:from-[#0E1E40]/50"
-      case "food":
-        return "from-green-100 to-foreground dark:from-green-200/50"
-      case "other":
-        return "from-gray-200 to-foreground dark:from-gray-400/20"
-      default:
-        return "from-gray-100 to-foreground"
+      case "social": return "from-pink-100 to-foreground dark:from-[#ffbfea]/50"
+      case "trip": return "from-[#4C69DD]/20 to-foreground"
+      case "cultural": return "from-[#62C3BA]/30 to-foreground"
+      case "academic": return "from-amber-200 to-foreground dark:from-[#723917]/50"
+      case "sports": return "from-purple-100 to-foreground dark:from-[#ccb1ef]/50"
+      case "workshop": return "from-yellow-100 to-foreground dark:from-yellow-200/50"
+      case "party": return "from-[#0E1E40]/30 to-foreground dark:from-[#0E1E40]/50"
+      case "food": return "from-green-100 to-foreground dark:from-green-200/50"
+      case "other": return "from-gray-200 to-foreground dark:from-gray-400/20"
+      default: return "from-gray-100 to-foreground"
     }
   }
 
   const getBadgeColor = () => {
     switch (category.toLowerCase()) {
-      case "social":
-        return "bg-pink-200 text-pink-900"
-      case "trip":
-        return "bg-primary text-white"
-      case "cultural":
-        return "bg-secondary-greenblue text-green-900"
-      case "academic":
-        return "bg-amber-400 text-amber-900"
-      case "sports":
-        return "bg-purple-200 text-purple-900"
-      case "workshop":
-        return "bg-yellow-200 text-yellow-900"
-      case "party":
-        return "bg-[#0E1E40] text-white"
-      case "food":
-        return "bg-green-200 text-green-900"
-      case "other":
-        return "bg-gray-300 text-gray-800"
-      default:
-        return "bg-gray-200 text-gray-700"
+      case "social": return "bg-pink-200 text-pink-900"
+      case "trip": return "bg-primary text-white"
+      case "cultural": return "bg-secondary-greenblue text-green-900"
+      case "academic": return "bg-amber-400 text-amber-900"
+      case "sports": return "bg-purple-200 text-purple-900"
+      case "workshop": return "bg-yellow-200 text-yellow-900"
+      case "party": return "bg-[#0E1E40] text-white"
+      case "food": return "bg-green-200 text-green-900"
+      case "other": return "bg-gray-300 text-gray-800"
+      default: return "bg-gray-200 text-gray-700"
     }
   }
 
@@ -146,8 +121,8 @@ export function EventCard({ eventId, title, date, location, attendeesCount, cate
       <div className="flex-1 min-w-0">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
           <h3 className="font-medium text-text truncate max-w-[200px]">{title}</h3>
-          <Badge className={joined ? "bg-secondary text-[#0E1E40]" : getBadgeColor()}>
-            {joined ? "Joined" : category}
+          <Badge className={isJoined ? "bg-secondary text-[#0E1E40]" : getBadgeColor()}>
+            {isJoined ? "Joined" : category}
           </Badge>
         </div>
 
@@ -180,7 +155,6 @@ export function EventCard({ eventId, title, date, location, attendeesCount, cate
       >
         {isJoining ? "Loading..." : isJoined ? "Leave Event" : "Join Event"}
       </Button>
-
     </div>
   )
 }

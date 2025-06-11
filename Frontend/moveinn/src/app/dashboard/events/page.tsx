@@ -157,61 +157,53 @@ export default function EventsPage() {
     fetchCountries()
   }, [])
   
-
-  useEffect(() => {
-    const fetchFilteredEvents = async () => {
-      try {
-        setIsLoadingEvents(true)
-        const token = getCookie("token")
+  const fetchFilteredEvents = async () => {
+    try {
+      setIsLoadingEvents(true)
+      const token = getCookie("token")
   
-        const payload: any = {
-          page,
-          limit,
-          query: query || "",
-          location: locationFilter || "",
-          category: categoryFilter || "",
-          tags: tagFilter.length ? tagFilter : [],
-          sortField: sortField || "",
-          sortOrder: sortOrder || "",
-        }
-        
-        // Solo incluir ciudad/país si están seleccionados
-        if (selectedCity.trim()) payload.city = selectedCity
-        if (selectedCountry.trim()) payload.country = selectedCountry
-        
-        
-        console.log("payload events", payload)
-        const res = await axios.post(API_SEARCH_EVENTS, payload, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-
-        console.log("res events", res.data)
-  
-        const joinedRes = await axios.get(API_GET_USER_EVENTS(user?.id))
-        const joinedIds = new Set(joinedRes.data.map((e: any) => e.id))
-  
-        const formattedEvents = res.data.items.map((event: any) => ({
-          ...event,
-          date: new Date(event.date),
-          joined: joinedIds.has(event.id)
-        }))
-  
-        setEvents(formattedEvents)
-        setTotalPages(res.data.totalPages)
-      } catch (error) {
-        console.error("Error loading events:", error)
-      } finally {
-        setIsLoadingEvents(false)
+      const payload: any = {
+        page,
+        limit,
+        query: query || "",
+        location: locationFilter || "",
+        city: selectedCity || "",
+        country: selectedCountry || "",
+        category: categoryFilter || "",
+        tags: tagFilter,
+        sortField: sortField || "",
+        sortOrder: sortOrder || "",
+        currentUserId: user?.id || ""
       }
-    }
   
+      const res = await axios.post(API_SEARCH_EVENTS, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+  
+      const formattedEvents = res.data.items.map((event: any) => ({
+        ...event,
+        date: new Date(event.date)
+      }))
+  
+      setEvents(formattedEvents)
+      setTotalPages(res.data.totalPages)
+    } catch (error) {
+      console.error("Error loading events:", error)
+    } finally {
+      setIsLoadingEvents(false)
+    }
+  }
+  
+
+  useEffect(() => {  
     if (user?.id) {
       fetchFilteredEvents()
     }
   }, [query, locationFilter, categoryFilter, tagFilter, sortField, sortOrder, page, limit, selectedCountry, selectedCity, user?.id])
-
+  
+  
   const filteredEvents = events.filter(event => {
     const matchDate = userClickedDate ? isSameDay(event.date, selectedDate) : true;
     const matchCategory = activeFilters.length === 0 || activeFilters.includes(event.category);
@@ -258,6 +250,29 @@ export default function EventsPage() {
       return
     }
   
+    const requiredFields = {
+      title,
+      description,
+      date,
+      time,
+      location,
+      address,
+      country,
+      city,
+      category,
+      capacity,
+      imageFile,
+    }
+  
+    const missing = Object.entries(requiredFields)
+      .filter(([_, value]) => !value || (typeof value === "string" && value.trim() === ""))
+      .map(([key]) => key)
+  
+    if (missing.length > 0) {
+      toast.error("Please fill in all required fields and upload an image.")
+      return
+    }
+  
     try {
       const datetime = new Date(`${date}T${time}`)
   
@@ -286,13 +301,10 @@ export default function EventsPage() {
       const newEvent = {
         ...response.data,
         date: new Date(response.data.date),
-        joined: true,
       }
   
-      // 1. Añadir el nuevo evento al principio
       setEvents((prev) => [newEvent, ...prev])
   
-      // 2. Resetear el formulario
       setTitle("")
       setDescription("")
       setDate("")
@@ -306,16 +318,16 @@ export default function EventsPage() {
       setTags([])
       setTagInput("")
   
-      // 3. Cerrar el desplegable
       setShowCreateEvent(false)
   
-      // 4. Toast de éxito
       toast.success("Event created successfully!")
+      await fetchFilteredEvents()
+
     } catch (error: any) {
       console.error("Error creating event:", error)
       toast.error("Failed to create event.")
     }
-  }
+  }  
   
   
   return (
@@ -325,7 +337,7 @@ export default function EventsPage() {
         {/* Header */}
         <section className="mb-8">
           <div className="relative bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] dark:to-foreground rounded-xl p-6 md:p-8 text-white overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#B7F8C8]/20 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" />
+            {/* <div className="absolute top-0 right-0 w-64 h-64 bg-[#B7F8C8]/20 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" /> */}
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#62C3BA]/20 rounded-full -translate-x-1/2 translate-y-1/2 blur-3xl" />
             <div className="relative z-10 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
               <div className="mb-4 md:mb-0">
@@ -554,35 +566,48 @@ export default function EventsPage() {
         <div className="mb-4">
           <label className="text-sm font-medium text-text-secondary block mb-1">Tags (max 3)</label>
           <div className="flex gap-2">
-            <Input
-              placeholder="Add a tag and press Enter"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault()
-                  const trimmed = tagInput.trim()
-                  if (trimmed && !tags.includes(trimmed) && tags.length < 3) {
-                    setTags([...tags, trimmed])
-                    setTagInput("")
-                  }
+          <Input
+            placeholder="Add a tag and press Enter"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                const trimmed = tagInput.trim()
+                if (trimmed && !tags.includes(trimmed) && tags.length < 3) {
+                  setTags([...tags, trimmed])
+                  setTagInput("")
                 }
-              }}
-              className="text-primary-dark text-sm border border-primary dark:border-text-secondary focus:ring-2 focus:ring-primary focus:outline-none"
-            />
+              }
+            }}
+            disabled={tags.length >= 3}
+            className={`text-primary-dark text-sm border ${
+              tags.length >= 3 ? "opacity-50 cursor-not-allowed" : "border-primary dark:border-text-secondary"
+            } focus:ring-2 focus:ring-primary focus:outline-none`}
+          />
+
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map((tag) => (
               <Badge
-                key={tag}
-                variant="outline"
-                className="text-xs py-1 px-2 flex items-center gap-1 bg-muted text-muted-foreground"
+              key={tag}
+              variant="outline"
+              className="text-xs py-1 px-2 flex items-center gap-1 bg-muted text-muted-foreground"
+            >
+              {tag}
+              <button
+                type="button"
+                onClick={() => setTags(tags.filter((t) => t !== tag))}
+                className="ml-1 text-muted-foreground hover:text-red-500 focus:outline-none"
               >
-                {tag}
-                <X className="h-3 w-3 cursor-pointer" onClick={() => setTags(tags.filter((t) => t !== tag))} />
-              </Badge>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
             ))}
           </div>
+          {tags.length >= 3 && (
+            <p className="text-xs text-red-500 mt-1">You can only add up to 3 tags.</p>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
@@ -688,7 +713,7 @@ export default function EventsPage() {
       variant="outline"
       onClick={() => {
         setUserClickedDate(false)
-        setSelectedDate(new Date(0)) // una fecha "neutral" que nunca estará en next7Days
+        setSelectedDate(new Date(0))
         setPage(1)
       }}
       className="text-sm bg-background border border-primary text-primary hover:bg-primary hover:text-white transition"
@@ -726,18 +751,20 @@ export default function EventsPage() {
 
         {/* Lista o calendario */}
         {viewMode === "list" ? (
-  <div className="space-y-6">
+  <div className="grid gap-4">
     {isLoadingEvents ? (
-      <div className="flex justify-center items-center min-h-[200px]">
+      <div className="flex justify-center items-center min-h-[200px] col-span-full">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
       </div>
     ) : filteredEvents.length > 0 ? (
-      filteredEvents.map(event => (
-        <DetailedEventCard key={event.id} event={event} categoryIcon={getCategoryIcon(event.category)} />
+      filteredEvents.map((event: any) => (
+        <div key={event.id} className="relative">
+          <DetailedEventCard event={event} categoryIcon={getCategoryIcon(event.category)} />
+        </div>
       ))
     ) : (
-      <div className="text-center py-12 bg-foreground rounded-lg">
-        <CalendarOff className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
+      <div className="flex flex-col items-center justify-center w-full min-h-[300px] text-center gap-2 col-span-full">
+        <CalendarOff className="h-12 w-12 text-primary" />
         <h3 className="text-xl font-medium text-text-secondary mb-2">No events found</h3>
         <p className="text-text max-w-md mx-auto mb-6">Try changing your filters or date.</p>
         <Button onClick={clearFilters} className="text-white">Clear filters</Button>
@@ -746,35 +773,33 @@ export default function EventsPage() {
   </div>
 ) : (
   <EventCalendarView
-  events={events}
-  selectedDate={selectedDate}
-  setSelectedDate={(date) => {
-    setSelectedDate(date)
-    setUserClickedDate(true)
-    setPage(1)
-    setViewMode("list")
-  }}
-  activeFilters={activeFilters}
-/>
-
-        )}
-      </main>
-      {!userClickedDate && totalPages > 1 && (
-  <div className="mt-6 flex justify-center gap-2 flex-wrap">
-    {Array.from({ length: totalPages }, (_, i) => (
-      <Button
-        key={i}
-        onClick={() => setPage(i + 1)}
-        variant={i + 1 === page ? "default" : "outline"}
-        className={`border-primary dark:border-text-secondary text-primary dark:text-text min-w-[36px] h-9 px-3 py-1 text-sm ${i + 1 === page ? "bg-primary text-white" : ""}`}
-      >
-        {i + 1}
-      </Button>
-    ))}
-  </div>
+    events={events}
+    selectedDate={selectedDate}
+    setSelectedDate={(date) => {
+      setSelectedDate(date)
+      setUserClickedDate(true)
+      setPage(1)
+      setViewMode("list")
+    }}
+    activeFilters={activeFilters}
+  />
 )}
 
-
+            </main>
+            {!userClickedDate && totalPages > 1 && (
+        <div className="mt-6 flex justify-center gap-2 flex-wrap">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <Button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              variant={i + 1 === page ? "default" : "outline"}
+              className={`border-primary dark:border-text-secondary text-primary dark:text-text min-w-[36px] h-9 px-3 py-1 text-sm ${i + 1 === page ? "bg-primary text-white" : ""}`}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

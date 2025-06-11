@@ -44,7 +44,7 @@ export const API_GET_RESERVATION = (id) => `${API_RESERVATION}/${id}`;
 export const API_GET_RESERVATIONS_BY_USER = (userId) => `${API_RESERVATION}/user/${userId}`;
 export const API_CREATE_RESERVATION = `${API_RESERVATION}/CreateReservation`;
 export const API_UPDATE_RESERVATION = (id) => `${API_RESERVATION}/Update/${id}`;
-export const API_DELETE_RESERVATION = (id) => `${API_RESERVATION}/Delete/${id}`;
+export const API_DELETE_RESERVATION = (id) => `${API_RESERVATION}/${id}`;
 
 
 const API_ACCOMMODATION = `${API_BASE_URL}/Accommodations`;
@@ -52,7 +52,7 @@ export const API_ALL_ACCOMMODATION = `${API_ACCOMMODATION}/AllAccommodations`;
 export const API_GET_ACCOMMODATION = (id) => `${API_ACCOMMODATION}/${id}`;
 export const API_CREATE_ACCOMMODATION = `${API_ACCOMMODATION}/CreateAccommodation`;
 export const API_UPDATE_ACCOMMODATION = (id) => `${API_ACCOMMODATION}/Update/${id}`;
-export const API_DELETE_ACCOMMODATION = (id) => `${API_ACCOMMODATION}/Delete/${id}`;
+export const API_DELETE_ACCOMMODATION = (id) => `${API_ACCOMMODATION}/${id}`;
 export const API_GET_UNAVAILABLEDATESBYACCOMMODATION = (id) => `${API_ACCOMMODATION}/UnavailableDates/${id}`;
 const API_ACOMMODATION = `${API_BASE_URL}/Accommodations`;
 export const API_SEARCH_ACOMMODATION = `${API_ACOMMODATION}/SearchAccommodation`;
@@ -65,6 +65,7 @@ const API_REVIEWS = `${API_BASE_URL}/Reviews`;
 export const API_GET_ALL_REVIEWS = `${API_REVIEWS}`;
 export const API_GET_REVIEWS = (id) => `${API_REVIEWS}/accommodation/${id}`;
 export const API_CREATE_REVIEW = `${API_REVIEWS}`;
+export const API_DELETE_REVIEW = (id) => `${API_REVIEWS}/${id}`;
 
 const API_PAYMENT = `${API_BASE_URL}/Payment`;
 export const API_CREATE_PAYMENT = `${API_PAYMENT}/CreatePaymentIntent`;
@@ -79,7 +80,8 @@ export const API_FORUM_POST_FORUM = `${API_FORUMS}/forum`;
 export const API_FORUM_POST_THREAD = `${API_FORUMS}/thread`;
 export const API_FORUM_POST_RESPONSE_TO_THREAD = `${API_FORUMS}/createMessageInThread`;
 export const API_FORUM_SEARCH_FORUMS = `${API_FORUMS}/SearchForums`;
-export const API_FORUM_COUNTRIES = `${API_FORUMS}/countries` 
+export const API_FORUM_COUNTRIES = `${API_FORUMS}/countries`;
+export const API_FORUM_DELETE = (id) => `${API_FORUMS}/${id}`;
 
 
 const API_LOCATION = `${API_BASE_URL}/Location`;
@@ -115,3 +117,6 @@ export const API_FORUMS_USER = (id) => `${API_FORUMS}/user/${id}`;
 
 export const API_USER_FOLLOWERS = (id) => `${API_USER}/${id}/followers`;
 export const API_USER_FOLLOWING = (id) => `${API_USER}/${id}/followings`;
+
+export const API_CHAT_GET_CONTACTS = (id) => `${API_BASE_URL}/Chat/${id}`;
+

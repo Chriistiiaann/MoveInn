@@ -109,6 +109,9 @@ export default function RecommendationsPage() {
   const [countrySearch, setCountrySearch] = useState("")
   const [availableCities, setAvailableCities] = useState<string[]>([])
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState("")
+
 
   const { user } = useAuth()
 
@@ -127,16 +130,21 @@ export default function RecommendationsPage() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true)
-  
-      // Validación básica
+
       if (
         !formData.title.trim() ||
+        !formData.description.trim() ||
+        !formData.address.trim() ||
+        !formData.country.trim() ||
+        !formData.city.trim() ||
         !formData.category ||
+        tags.length === 0 ||
+        formData.files.length === 0 ||
         !user?.id ||
         formData.rating < 1 ||
         formData.rating > 5
       ) {
-        toast.error("Please complete all required fields: title, category, rating, and user.")
+        toast.error("Please fill in all required fields and add at least one tag.")
         setIsSubmitting(false)
         return
       }
@@ -148,11 +156,8 @@ export default function RecommendationsPage() {
       multipart.append("Description", formData.description)
       multipart.append("Category", String(formData.category))
   
-      formData.tags
-        .split(",")
-        .map(tag => tag.trim())
-        .filter(Boolean)
-        .forEach(tag => multipart.append("Tags", tag))
+      tags.forEach(tag => multipart.append("Tags", tag))
+
   
       multipart.append("Address", formData.address)
       multipart.append("City", formData.city)
@@ -365,7 +370,6 @@ export default function RecommendationsPage() {
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           {[
             { label: "Title", name: "title", placeholder: "e.g. Chill place with good food" },
-            { label: "Tags (comma separated)", name: "tags", placeholder: "e.g. cozy,cheap,vegan" },
             { label: "Address", name: "address", placeholder: "e.g. Calle de la Paz 14" },
           ].map(({ label, name, placeholder }) => (
             <div key={name}>
@@ -381,6 +385,54 @@ export default function RecommendationsPage() {
           ))}
 
 <div>
+  <label className="block text-sm font-medium text-text-secondary mb-1">Tags (up to 3)</label>
+  <Input
+    placeholder="Add a tag and press Enter"
+    value={tagInput}
+    onChange={(e) => setTagInput(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        e.preventDefault()
+        const trimmed = tagInput.trim()
+        if (trimmed && !tags.includes(trimmed) && tags.length < 3) {
+          setTags([...tags, trimmed])
+          setTagInput("")
+        }
+      }
+    }}
+    disabled={tags.length >= 3}
+    className={`text-primary-dark text-sm border ${
+      tags.length >= 3 ? "opacity-50 cursor-not-allowed" : "border-[#4C69DD]"
+    } focus:ring-2 focus:ring-[#4C69DD] focus:outline-none`}
+  />
+
+  {/* Lista de tags */}
+  <div className="flex flex-wrap gap-2 mt-2">
+    {tags.map((tag) => (
+      <Badge
+        key={tag}
+        variant="outline"
+        className="text-xs py-1 px-2 flex items-center gap-1 bg-muted text-text"
+      >
+        {tag}
+        <button
+          type="button"
+          onClick={() => setTags(tags.filter((t) => t !== tag))}
+          className="ml-1 hover:text-red-500"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      </Badge>
+    ))}
+  </div>
+
+  {tags.length >= 3 && (
+    <p className="text-xs text-red-500 mt-1">You can only add up to 3 tags.</p>
+  )}
+</div>
+
+
+          <div>
             <label className="block text-sm font-medium text-text-secondary mb-1">Rating (1–5)</label>
             <Input
               name="rating"

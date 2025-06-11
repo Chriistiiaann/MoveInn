@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, GraduationCap, Globe } from "lucide-react"
+import { API_BASE_IMAGE_URL } from "@/utils/endpoints/config"
 
 type Props = {
   user: any
@@ -17,7 +18,7 @@ export default function UserCard({ user, onClick }: Props) {
         <div className="relative">
           <div className="h-40 bg-gradient-to-br from-[#4C69DD]/20 to-[#62C3BA]/20 rounded-t-md flex items-center justify-center border-b-3 border-primary">
             <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-              <AvatarImage src={user.avatarUrl || "/default-avatar.svg"} alt={user.name} />
+              <AvatarImage src={API_BASE_IMAGE_URL + user.avatarUrl || "/default-avatar.svg"} alt={user.name} />
               <AvatarFallback className="bg-[#4C69DD] text-white text-2xl">
                 {user.name?.charAt(0)}
               </AvatarFallback>

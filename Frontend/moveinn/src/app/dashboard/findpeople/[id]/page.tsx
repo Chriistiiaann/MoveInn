@@ -251,32 +251,53 @@ export default function UserDetailPage() {
         <p className="text-gray-500">No users to display.</p>
       ) : (
         <ul className="space-y-2">
-          {list.map((u: any, i: number) => (
-            <li key={u.id} className="flex items-center gap-3">
-                              {u.avatarUrl === "default-avatar-url" ? (
-                                <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-sm">
-                                  {u.name?.charAt(0).toUpperCase()}
-                                </div>
-                              ) : (
-                                <Image
-                                  src={API_BASE_IMAGE_URL + u.avatarUrl}
-                                  alt={u.name}
-                                  width={36}
-                                  height={36}
-                                  className="rounded-full"
-                                  unoptimized
-                                />
-                              )}
-                              <div>
-                                <p className="text-text font-medium">{u.name}</p>
-                                <p className="text-sm text-gray-600 dark:text-text-secondary">{u.city} · {u.erasmusCountry}</p>
-                              </div>
-                            </li>
-          ))}
+          {list.map((u: any, i: number) => {
+            const isCurrentUser = authUser?.id === u.id
+            return (
+              <li
+                key={u.id}
+                className={`flex items-center gap-3 ${isCurrentUser ? 'cursor-default opacity-80' : 'cursor-pointer hover:bg-muted/30 p-2 rounded-md'}`}
+                onClick={() => {
+                  if (!isCurrentUser) {
+                    window.location.href = `/dashboard/findpeople/${u.id}`
+                  }
+                }}
+              >
+                {u.avatarUrl === "default-avatar-url" ? (
+                  <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-sm">
+                    {u.name?.charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <Image
+                    src={API_BASE_IMAGE_URL + u.avatarUrl}
+                    alt={u.name}
+                    width={36}
+                    height={36}
+                    className="rounded-full"
+                    unoptimized
+                  />
+                )}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <p className="text-text font-medium">{u.name}</p>
+                    {isCurrentUser && (
+                      <span className="text-xs px-2 py-0.5 bg-primary text-white rounded-full">
+                        You
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-text-secondary">
+                    {u.city} · {u.erasmusCountry}
+                  </p>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
   )
+  
 
   return (
     <div className="min-h-screen container mx-auto px-4 py-10 space-y-10">
@@ -452,26 +473,26 @@ export default function UserDetailPage() {
   {/* Info Tab */}
   <TabsContent value="info" className="mt-6">
     <Card className="border-none shadow-sm bg-foreground">
-      <CardHeader className="border-b border-gray-200">
+      <CardHeader className="border-b border-gray-200 dark:border-gray-700">
         <CardTitle className="text-text">User Information</CardTitle>
-        <CardDescription className="text-gray-500">Details and profile data</CardDescription>
+        <CardDescription className="text-gray-500 dark:text-gray-400">Details and profile data</CardDescription>
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary border-b pb-2">Contact</h3>
+            <h3 className="text-lg font-semibold text-text-secondary dark:border-gray-700 border-b pb-2">Contact</h3>
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                 <p className="text-text">{user.mail}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                 <p className="text-text">{user.phone || "Not specified"}</p>
               </div>
             </div>
@@ -479,18 +500,18 @@ export default function UserDetailPage() {
 
           {/* Academic Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary border-b pb-2">Academic</h3>
+            <h3 className="text-lg font-semibold text-text-secondary dark:border-gray-700 border-b pb-2">Academic</h3>
             <div className="flex items-center gap-3">
               <School className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">University</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">University</p>
                 <p className="text-text">{user.school || "Not specified"}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Briefcase className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Degree</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Degree</p>
                 <p className="text-text">{user.degree || "Not specified"}</p>
               </div>
             </div>
@@ -500,11 +521,11 @@ export default function UserDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Personal Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary border-b pb-2">Personal</h3>
+            <h3 className="text-lg font-semibold text-text-secondary dark:border-gray-700 border-b pb-2">Personal</h3>
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Nationality</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Nationality</p>
                 <p className="text-text">{user.nationality || "Not specified"}</p>
               </div>
             </div>
@@ -512,11 +533,11 @@ export default function UserDetailPage() {
 
           {/* Erasmus Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary border-b pb-2">Erasmus</h3>
+            <h3 className="text-lg font-semibold text-text-secondary dark:border-gray-700 border-b pb-2">Erasmus</h3>
             <div className="flex items-center gap-3">
               <Calendar className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Erasmus Duration</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Erasmus Duration</p>
                 <p className="text-text">
                   {user.erasmusDate ? `${user.erasmusDate} days` : "Not specified"}
                 </p>
@@ -525,14 +546,14 @@ export default function UserDetailPage() {
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Erasmus Country</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Erasmus Country</p>
                 <p className="text-text">{user.erasmusCountry || "Not specified"}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-gray-500">Erasmus City</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Erasmus City</p>
                 <p className="text-text">{user.city || "Not specified"}</p>
               </div>
             </div>

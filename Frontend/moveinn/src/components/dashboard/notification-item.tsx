@@ -34,11 +34,19 @@ export function NotificationItem({ type, content, time, read }: NotificationItem
             bgColor: "bg-[#62C3BA]",
             gradientFrom: read ? "from-[#62C3BA]/5" : "from-[#62C3BA]/20",
             }
-        case "system":
-            return {
-            icon: <BellIcon className="h-5 w-5 text-white" />,
-            bgColor: "bg-gray-500",
-            gradientFrom: read ? "from-gray-100" : "from-gray-200",
+            case "system": {
+                const isUnfollow = content.toLowerCase().includes("ha dejado de seguirte")
+                return {
+                  icon: <BellIcon className={`h-5 w-5 ${isUnfollow ? "text-red-500" : "text-green-500"}`} />,
+                  bgColor: isUnfollow ? "bg-red-100" : "bg-green-100",
+                  gradientFrom: read
+                    ? isUnfollow
+                      ? "from-red-300"
+                      : "from-green-50"
+                    : isUnfollow
+                      ? "from-red-300/50"
+                      : "from-green-300/50",
+                }
             }
         }
     }
@@ -48,10 +56,17 @@ export function NotificationItem({ type, content, time, read }: NotificationItem
     return (
         <div className={`flex items-start gap-3 p-2 rounded-[var(--radius-lg)] bg-gradient-to-r ${gradientFrom} to-foreground`}>
             <div className={`w-8 h-8 rounded-full ${bgColor} flex items-center justify-center flex-shrink-0`}>{icon}</div>
-                <div className="flex-1">
-                    <p className={`text-sm ${read ? "text-text" : "text-text font-medium"}`}>{content}</p>
-                    <p className="text-xs text-gray-400 mt-1">{time}</p>
-                </div>
+            <div className="flex-1 overflow-hidden">
+                <p
+                className={`text-sm ${read ? "text-text" : "text-text font-medium"} truncate`}
+                title={content}
+                >
+                    {content.length > 80 ? content.slice(0, 77) + "..." : content}
+                </p>
+
+                <p className="text-xs text-gray-700 dark:text-gray-200 mt-1">{time}</p>
+            </div>
+
             {!read && <div className="w-2 h-2 rounded-full bg-[#4C69DD] mt-2"></div>}
         </div>
     )

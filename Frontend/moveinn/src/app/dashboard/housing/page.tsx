@@ -183,6 +183,30 @@ const filteredCountries = availableCountries
   }, [])
 
   const handleCreate = async () => {
+    const requiredFields = [
+      "title",
+      "description",
+      "address",
+      "city",
+      "country",
+      "pricePerMonth",
+      "numberOfRooms",
+      "bathrooms",
+      "squareMeters",
+      "availableFrom",
+      "availableTo",
+      "acommodationType"
+    ]
+  
+    const missingFields = requiredFields.filter(
+      (field) => !newAcommodation[field as keyof typeof newAcommodation]
+    )
+  
+    if (missingFields.length > 0 || imageFiles.length === 0) {
+      toast.error("Please fill in all required fields and upload at least one image.")
+      return
+    }
+  
     try {
       const token = localStorage.getItem("token")
       const ownerId = user?.id
@@ -194,26 +218,18 @@ const filteredCountries = availableCountries
       formData.append("Address", newAcommodation.address)
       formData.append("City", newAcommodation.city)
       formData.append("Country", newAcommodation.country)
-      formData.append("PricePerMonth", String(Number(newAcommodation.pricePerMonth)))
-      formData.append("NumberOfRooms", String(parseInt(newAcommodation.numberOfRooms.toString())))
-      formData.append("Bathrooms", String(parseInt(newAcommodation.bathrooms.toString())))
-      formData.append("SquareMeters", String(parseInt(newAcommodation.squareMeters.toString())))
-      formData.append("AcommodationType", String(parseInt(newAcommodation.acommodationType.toString())))
-
+      formData.append("PricePerMonth", String(newAcommodation.pricePerMonth))
+      formData.append("NumberOfRooms", String(newAcommodation.numberOfRooms))
+      formData.append("Bathrooms", String(newAcommodation.bathrooms))
+      formData.append("SquareMeters", String(newAcommodation.squareMeters))
+      formData.append("AcommodationType", String(newAcommodation.acommodationType))
       formData.append("AvailableFrom", new Date(newAcommodation.availableFrom).toISOString())
       formData.append("AvailableTo", new Date(newAcommodation.availableTo).toISOString())
-
       formData.append("OwnerId", ownerId)
-      formData.append("AcommodationType", newAcommodation.acommodationType.toString())
   
       imageFiles.forEach((file) => {
         formData.append("AccomodationImages", file)
       })
-
-      // Debug log
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value)
-    }
   
       setIsPosting(true)
       await axios.post(API_CREATE_ACCOMMODATION, formData, {
@@ -227,11 +243,10 @@ const filteredCountries = availableCountries
       setShowCreateForm(false)
       setImageFiles([])
       if (!availableCountries.includes(newAcommodation.country)) {
-        setAvailableCountries(prev => [...prev, newAcommodation.country])
+        setAvailableCountries((prev) => [...prev, newAcommodation.country])
       }
-      
+  
       await fetchAcommodations()
-      
     } catch (err) {
       console.error("Error creating accommodation:", err)
       toast.error("Error creating accommodation")
@@ -239,6 +254,7 @@ const filteredCountries = availableCountries
       setIsPosting(false)
     }
   }
+  
   
   
 

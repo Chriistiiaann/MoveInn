@@ -6,15 +6,38 @@ import { useWebsocket } from '@/context/WebSocketContext'
 import { ContactsList } from '@/components/messages/ContactList'
 import { ChatWindow } from '@/components/messages/ChatWindow'
 import { User, Search, Menu, X } from 'lucide-react'
+import { API_USER_FOLLOWERS } from "@/utils/endpoints/config"
+import { toast } from "sonner"
+import axios from "axios"
+import { useAuth } from "@/context/authcontext"
+
 
 export default function MessagesPage() {
   const { contacts: initialContacts, loading: contactsLoading, error: contactsError } = useContacts()
   const { lastMessage, sendMessage } = useWebsocket()
-
+  const { user } = useAuth()
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selected, setSelected] = useState<Contact | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [showMobileContacts, setShowMobileContacts] = useState(false)
+  const [followersIds, setFollowersIds] = useState<string[]>([])
+
+  useEffect(() => {
+    const fetchFollowers = async () => {
+      if (!user?.id) return
+  
+      try {
+        const response = await axios.get(API_USER_FOLLOWERS(user.id))
+        const followerIds = response.data.map((f: any) => f.id) // ajusta si el ID viene como userId u otro campo
+        setFollowersIds(followerIds)
+      } catch (error) {
+        console.error("Error loading followers:", error)
+      }
+    }
+  
+    fetchFollowers()
+  }, [user?.id])
+  
 
   useEffect(() => {
     setContacts(initialContacts)
@@ -109,10 +132,18 @@ export default function MessagesPage() {
           {/* Contact list */}
           {filteredContacts.length > 0 ? (
             <ContactsList
-              contacts={filteredContacts}
-              selectedContactId={selected?.otherUserId || null}
-              onSelect={(c) => setSelected(c)}
-            />
+            contacts={filteredContacts}
+            selectedContactId={selected?.otherUserId || null}
+            followersIds={followersIds}
+            onSelect={(c) => {
+              if (followersIds.includes(c.otherUserId)) {
+                setSelected(c)
+              } else {
+                toast.warning(`Wait until ${c.otherUserName} follows you to start a conversation`)
+              }
+            }}
+          />
+          
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-sm text-text text-center px-4">
               <p className="mb-2">You don’t have any contacts yet.</p>
@@ -158,9 +189,14 @@ export default function MessagesPage() {
       <ContactsList
         contacts={filteredContacts}
         selectedContactId={selected?.otherUserId || null}
+        followersIds={followersIds}
         onSelect={(c) => {
-          setSelected(c)
-          setShowMobileContacts(false)
+          if (followersIds.includes(c.otherUserId)) {
+            setSelected(c)
+            setShowMobileContacts(false)
+          } else {
+            toast.warning(`Wait until ${c.otherUserName} follows you to start a conversation`)
+          }
         }}
       />
     </div>

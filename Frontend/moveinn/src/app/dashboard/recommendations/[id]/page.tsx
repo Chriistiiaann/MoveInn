@@ -261,15 +261,19 @@ export default function RecommendationDetailPage() {
           </div>
 
           <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-            <div className="px-4">
+            <div className="flex justify-center md:justify-start px-4">
               <TabsList className="grid grid-cols-2 w-full max-w-md bg-background h-fit rounded-lg m-4">
-              <TabsTrigger value="overview" className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text">
-                Overview
-              </TabsTrigger>
                 <TabsTrigger
-                value="photos"
-                className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text">
-                Photos
+                  value="overview"
+                  className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="photos"
+                  className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text"
+                >
+                  Photos
                 </TabsTrigger>
               </TabsList>
             </div>
