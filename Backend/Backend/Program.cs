@@ -34,8 +34,7 @@ public class Program
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
         builder.Services.AddScoped<PaymentService>();
 
-        // Repositorios y servicios de BD
-        builder.Services.AddScoped<DataContext>();
+        builder.Services.AddDbContext<DataContext>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<RecommendationRepository>();
         builder.Services.AddScoped<UnitOfWork>();
@@ -48,7 +47,6 @@ public class Program
         builder.Services.AddScoped<IHostRepository, HostRepository>();
         builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
-        // Servicios de aplicación
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<IAccommodationService, AccommodationService>();
@@ -68,7 +66,6 @@ public class Program
         builder.Services.AddScoped<IHostService, HostService>();
         builder.Services.AddScoped<IAdminService, AdminService>();
 
-        // WebSocket handler y dependencias
         builder.Services.AddSingleton<WebsocketHandler>();
         builder.Services.AddSingleton<IFollowRepository, FollowRepository>();
         builder.Services.AddSingleton<IFollowService, FollowService>();
@@ -92,7 +89,6 @@ public class Program
             options.OperationFilter<SecurityRequirementsOperationFilter>(true, JwtBearerDefaults.AuthenticationScheme);
         });
 
-        // Autenticación JWT
         builder.Services.AddAuthentication()
             .AddJwtBearer(options =>
             {
@@ -109,7 +105,6 @@ public class Program
                 {
                     OnMessageReceived = ctx =>
                     {
-                        // Extraer token JWT de la query string ?token=...
                         var token = ctx.Request.Query["token"];
                         if (!string.IsNullOrEmpty(token))
                         {
@@ -120,12 +115,12 @@ public class Program
                 };
             });
 
-        // CORS (solo origen http://localhost:3000 y permitir credentials)
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
                 policy.WithOrigins("http://localhost:3000")
+                      .AllowAnyOrigin()
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -141,7 +136,6 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
         app.UseCors();
 
         app.UseAuthentication();
@@ -149,7 +143,6 @@ public class Program
 
         app.UseWebSockets();
 
-        // Mapear ruta WebSocket antes de MapControllers
         app.Map("/api/WebSocket/ws", subApp =>
         {
             subApp.Use(async (ctx, next) =>
