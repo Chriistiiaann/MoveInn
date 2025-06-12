@@ -1,24 +1,25 @@
 **MoveInn**
 ============
-
-## 📖 Descripción
+<a id="descripcion"></a>
+## 📖 Descripcion
 
 **MoveInn** es una red social diseñada para estudiantes Erasmus, donde podrán conectarse, compartir experiencias y facilitar la integración de nuevos participantes en sus respectivos destinos. La plataforma ofrece funcionalidades enfocadas en la convivencia, el apoyo y la socialización.
 
 ## 📑 Contenido
 
-1. [📖 Descripción](#descripci%C3%B3n)  
-2. [🚀 Características Principales](#caracter%C3%ADsticas-principales)  
-3. [🔧 Instalación](#instalaci%C3%B3n)  
+1. [📖 Descripción](#descripcion)  
+2. [🚀 Características Principales](#caracteristicasPrincipales)  
+3. [🔧 Instalación](#instalacion)  
 4. [⚙️ Uso](#uso)  
-5. [📚 Referencias y Documentación Frontend](#referencias-y-documentaci%C3%B3n-frontend)  
-6. [🏗️ Arquitectura del Sistema](#arquitectura-del-sistema)  
-7. [🔐 Flujo de Autenticación](#flujo-de-autenticaci%C3%B3n)  
-8. [🗃️ Modelos de Datos y Relaciones](#modelos-de-datos-y-relaciones)  
-9. [☁️ Despliegue en AWS](#despliegue-en-aws)  
+5. [📚 Referencias y Documentación Frontend](#ReferenciasYDocumentacionFrontend)  
+6. [🏗️ Arquitectura del Sistema](#arquitecturaDelSistema)  
+7. [🔐 Flujo de Autenticación](#flujoDeAutenticacion)  
+8. [🗃️ Modelos de Datos y Relaciones](#modeloDeDatosYRelaciones)  
+9. [☁️ Despliegue en AWS](#despliegueEnAws)  
 10. [📌 Autores](#autores)  
 11. [📄 Licencia](#licencia) 
 
+<a id="caracteristicasPrincipales"></a>
 ## 🚀 Características Principales
 
 - Perfil de arrendadores y publicación de habitaciones en alquiler.  
@@ -31,6 +32,7 @@
 
 _La arquitectura se basa en un cliente Next.js que consume una API RESTful desarrollada en ASP.NET, con persistencia en SQLite y despliegue continuo en AWS._
 
+<a id="instalacion"></a>
 ## 🔧 Instalación
 
 
@@ -66,7 +68,7 @@ cd frontend
 npm install
 npm run dev
 ```
-
+<a id="uso"></a>
 ## ⚙️ Uso
 
 Para familiarizarte rápidamente con **MoveInn**, puedes comenzar viendo nuestro vídeo de presentación justo aquí:
@@ -96,7 +98,8 @@ A continuación, sigue estos pasos para empezar a disfrutar de la plataforma:
 
 4. **¡A disfrutar de MoveInn!**  
    Conecta con la comunidad Erasmus, comparte tus vivencias y haz que tu estancia sea inolvidable.  
- 
+
+<a id="ReferenciasYDocumentacionFrontend"></a>
 ## 📚 Referencias y Documentación Frontend
 
 ### 📘 Bibliografía
@@ -111,7 +114,7 @@ A continuación, sigue estos pasos para empezar a disfrutar de la plataforma:
 - [Prototipos en Figma](https://www.figma.com/design/Fk9dHAUrLTsE9YpQ6nX2WV/MoveInn?node-id=0-1&t=hEjniRgTCOvDUPk0-1)  
 - [Documentación Frontend](https://docs.google.com/document/d/1sNPZV_LL11qH76SVsSsHjmcT2MHdQJ64DWNDYb_xRQQ/edit?usp=sharing)  
 
- 
+<a id="arquitecturaDelSistema"></a>
 ## 🏗️ Arquitectura del Sistema
 
 ![Arquitectura del Sistema](images/ArquitecturaDelSistema.png)
@@ -140,6 +143,7 @@ La aplicación sigue una arquitectura **cliente-servidor** con separación de re
 
 ---
 
+<a id="flujoDeAutenticacion"></a>
 ## 🔐 Flujo de Autenticación
 
 ![Flujo de Autenticación](images/FlujoAutenticacion.png)
@@ -153,6 +157,7 @@ La aplicación sigue una arquitectura **cliente-servidor** con separación de re
 
 ---
 
+<a id="modeloDeDatosYRelaciones"></a>
 ## 🗃️ Modelos de Datos y Relaciones
 
 ![Modelos de Datos y Relaciones](images/ModeloER.png)
@@ -182,6 +187,7 @@ La aplicación sigue una arquitectura **cliente-servidor** con separación de re
 - **Reservation**  
   - Relación N–M entre **User** y **Accommodation**.
 
+<a id="despliegueEnAws"></a>
 ## ☁️ Despliegue en AWS
 
 En esta sección se detalla cómo se despliega **MoveInn** desde GitHub hasta las instancias EC2 en AWS, usando GitHub Actions y AWS CodeDeploy.
@@ -237,13 +243,17 @@ El pipeline sigue este flujo:
 3. **AWS CodeDeploy**: appspec.yml gestiona la fase de despliegue.  
 4. **Infrastructure**: dos instancias EC2 (backend y frontend) detrás de Apache.
 
-
+<a id="autores"></a>
 ## 📌 Autores
 
 - [Christian Rodríguez Lara](https://github.com/Chriistiiaann)  
 - [Kilian Méndez Ávila](https://github.com/kilianmendez)  
-- [Yasir Bel Maalem](https://github.com/yasirrdev)  
+- [Yasir Bel Maalem](https://github.com/yasirrdev) 
 
+<a id="licencia"></a>
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.  
+Este proyecto está protegido por derechos de autor. No se permite su uso, copia, modificación, distribución ni creación de obras derivadas sin autorización expresa de los autores.
+
+© 2025 [Christian Rodríguez Lara](https://github.com/Chriistiiaann), [Kilian Méndez Ávila](https://github.com/kilianmendez), [Yasir Bel Maalem](https://github.com/yasirrdev). Todos los derechos reservados.
+
