@@ -24,11 +24,10 @@ public class Program
 
         builder.Services.Configure<Settings>(builder.Configuration.GetSection(Settings.SECTION_NAME));
 
-        builder.Services.AddControllers();
-        builder.Services.AddControllers().AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        });
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+            );
 
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
@@ -74,7 +73,6 @@ public class Program
         builder.Services.AddSingleton<middleware>();
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         builder.Services.AddSwaggerGen(options =>
         {
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -89,12 +87,11 @@ public class Program
             options.OperationFilter<SecurityRequirementsOperationFilter>(true, JwtBearerDefaults.AuthenticationScheme);
         });
 
-        builder.Services.AddAuthentication()
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                Settings settings = builder.Configuration.GetSection(Settings.SECTION_NAME).Get<Settings>()!;
                 string key = Environment.GetEnvironmentVariable("JWT_KEY")!;
-
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
@@ -111,6 +108,12 @@ public class Program
                             ctx.Token = token;
                         }
                         return Task.CompletedTask;
+                    },
+                    OnTokenValidated = ctx =>
+                    {
+                         Console.WriteLine("✓ JWT válido para userId=" +
+                             ctx.Principal.FindFirst("id")?.Value);
+                         return Task.CompletedTask;
                     }
                 };
             });
@@ -119,11 +122,11 @@ public class Program
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:3000")
-                      .AllowAnyOrigin()
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
+                policy
+                  .WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
             });
         });
 
@@ -172,7 +175,6 @@ public class Program
         app.MapControllers();
 
         await SeedDatabase(app.Services);
-
         app.Run();
     }
 
@@ -180,7 +182,6 @@ public class Program
     {
         using var scope = serviceProvider.CreateScope();
         using var dbContext = scope.ServiceProvider.GetService<DataContext>()!;
-
         if (dbContext.Database.EnsureCreated())
         {
             var seeder = new Seeder(dbContext);
