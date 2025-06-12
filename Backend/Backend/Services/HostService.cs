@@ -118,5 +118,15 @@ namespace Backend.Services
                 })
                 .ToList();
         }
+
+        public async Task<IEnumerable<string>> GetAllCountriesAsync()
+        {
+            return await _unitOfWork.HostRepository.GetAllCountriesAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
+        {
+            return await _unitOfWork.HostRepository.GetCitiesByCountryAsync(country);
+        }
     }
 }

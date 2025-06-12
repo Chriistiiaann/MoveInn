@@ -1,6 +1,7 @@
 ﻿using Backend.Models.Database.Entities;
 using Backend.Models.Dtos;
 using Backend.Models.Interfaces;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers;
 
@@ -9,10 +10,12 @@ namespace Backend.Controllers;
 public class HostsController : ControllerBase
 {
     private readonly IHostService _hostService;
+    private readonly SmartSearchService _smartSearchService;
 
-    public HostsController(IHostService hostService)
+    public HostsController(IHostService hostService, SmartSearchService smartSearchService)
     {
         _hostService = hostService;
+        _smartSearchService = smartSearchService;
     }
 
 
@@ -93,6 +96,77 @@ public class HostsController : ControllerBase
         {
             return NotFound(new { message = "Host request not found." });
         }
+    }
+
+    [HttpPost("SearchHosts")]
+    public async Task<IActionResult> SearchHosts([FromBody] SearchUserDTO request)
+    {
+        if (request.Page < 1 || request.Limit < 1)
+            return BadRequest("La página y el límite deben ser mayores que 0.");
+
+        try
+        {
+            var allResults = (await _smartSearchService.SearchHostsAsync(request.Query ?? string.Empty))
+                             .ToList();
+
+            if (!allResults.Any())
+                return NotFound("No se han encontrado hosts.");
+
+            if (!string.IsNullOrWhiteSpace(request.Country))
+            {
+                allResults = allResults
+                    .Where(h =>
+                        h.ErasmusCountry != null &&
+                        h.ErasmusCountry.Equals(request.Country, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.City))
+            {
+                allResults = allResults
+                    .Where(h =>
+                        h.City != null &&
+                        h.City.Equals(request.City, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            if (!allResults.Any())
+                return NotFound("No se han encontrado hosts con esos filtros.");
+
+            var totalItems = allResults.Count;
+            var totalPages = (int)Math.Ceiling(totalItems / (double)request.Limit);
+
+            var paged = allResults
+                .Skip((request.Page - 1) * request.Limit)
+                .Take(request.Limit)
+                .ToList();
+
+            return Ok(new
+            {
+                currentPage = request.Page,
+                totalPages,
+                totalItems,
+                items = paged
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Error interno del servidor: " + ex.Message);
+        }
+    }
+
+    [HttpGet("countries")]
+    public async Task<IActionResult> GetCountries()
+    {
+        var countries = await _hostService.GetAllCountriesAsync();
+        return Ok(countries);
+    }
+
+    [HttpGet("cities/{country}")]
+    public async Task<IActionResult> GetCitiesByCountry(string country)
+    {
+        var cities = await _hostService.GetCitiesByCountryAsync(country);
+        return Ok(cities);
     }
 
 }

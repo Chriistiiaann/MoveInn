@@ -29,6 +29,7 @@ export interface UserUpdateFormData {
   socialMedias: SocialMedia[]
   countryFlag?: string
   erasmusCountryFlag?: string
+  languages?: Array<{ language: string; level: number }>
 }
 
 

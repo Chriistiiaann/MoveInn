@@ -18,7 +18,7 @@ public class AccommodationCreateDTO
     public Guid OwnerId { get; set; }
     public DateTime AvailableFrom { get; set; }
     public DateTime AvailableTo { get; set; }
-    public ICollection<ImageAccommodation> AccomodationImages { get; set; }
+    public ICollection<IFormFile> AccomodationImages { get; set; }
     public AcommodationType AcommodationType { get; set; }
 
 }

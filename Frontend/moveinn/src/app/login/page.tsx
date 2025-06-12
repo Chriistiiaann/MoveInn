@@ -1,7 +1,24 @@
+"use client"
+
+import { useAuth } from "@/context/authcontext"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import LoginForm from "@/components/login/login-form"
 import { ThemeToggle } from "@/components/landing/theme-toggle-btn"
+import { Users, Globe, MapPin, GraduationCap } from "lucide-react"
 
-export default function Home() {
+export default function LoginPage() {
+
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      window.location.href = "/dashboard"
+    }
+  }, [isLoading, isAuthenticated])
+
+
   return (
     <main className="min-h-screen relative">
       {/* Botón de cambio de tema en la esquina superior derecha */}
@@ -35,31 +52,7 @@ export default function Home() {
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
                     {/* Icono Community */}
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <path
-                        d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="9"
-                        cy="7"
-                        r="4"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <Users />
                   </div>
                   <h3 className="font-semibold">Community</h3>
                 </div>
@@ -70,24 +63,7 @@ export default function Home() {
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
                     {/* Icono Locations */}
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <path
-                        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="12"
-                        cy="10"
-                        r="3"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <MapPin />
                   </div>
                   <h3 className="font-semibold">Locations</h3>
                 </div>
@@ -98,31 +74,7 @@ export default function Home() {
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
                     {/* Icono Global */}
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M2 12h20"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <Globe />
                   </div>
                   <h3 className="font-semibold">Global</h3>
                 </div>
@@ -133,31 +85,7 @@ export default function Home() {
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center mb-2">
                   <div className="w-6 h-6 mr-2 text-white">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M2 12h20"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <GraduationCap />
                   </div>
                   <h3 className="font-semibold">Global</h3>
                 </div>

@@ -12,4 +12,6 @@ public interface IHostService
     Task ApproveRequestAsync(Guid id);
     Task RejectRequestAsync(Guid id);
     Task<List<HostSummaryDTO>> GetApprovedHostsAsync();
+    Task<IEnumerable<string>> GetAllCountriesAsync();
+    Task<IEnumerable<string>> GetCitiesByCountryAsync(string country);
 }

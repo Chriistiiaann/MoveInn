@@ -44,12 +44,20 @@ function getTypeStyle(type: number) {
       }
   }
 }
+
+const typeMapBorder: Record<number, { label: string; borderColor: string;}> = {
+  0: { label: "Room", borderColor: "border-pink-500" },
+  1: { label: "House", borderColor: "border-yellow-500" },
+  2: { label: "Apartment", borderColor: "border-primary" },
+  3: { label: "Rural", borderColor: "border-secondary-greenblue" },
+  4: { label: "Other", borderColor: "border-gray-500" },
+}
 export function DashboardAcommodationCard({ acommodation }: DashboardAcommodationCardProps) {
   const { label, badgeColor, bgColor } = getTypeStyle(acommodation.acommodationType)
 
   return (
     <Link href={`/dashboard/housing/${acommodation.id}`} className="block">
-      <Card className={`cursor-pointer flex flex-col gap-2 p-3 rounded-[var(--radius-lg)] shadow-sm bg-gradient-to-br ${bgColor} hover:shadow-md transition-all border-none`}>
+      <Card className={`cursor-pointer flex flex-col gap-2 p-3 rounded-[var(--radius-lg)] shadow-sm bg-gradient-to-br ${bgColor} hover:shadow-md transition-all border-0 border-l-3 ${typeMapBorder[acommodation.acommodationType].borderColor} hover:border-background/50`}>
         {/* Title + Type */}
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-text line-clamp-1 pr-2">
@@ -62,9 +70,9 @@ export function DashboardAcommodationCard({ acommodation }: DashboardAcommodatio
 
         {/* Address + Price */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center text-xs bg-background/70 dark:bg-background/50 px-2 py-1 rounded-full w-fit max-w-[70%]">
+          <div className="flex items-center text-xs bg-background/50 dark:bg-background/50 px-2 py-1 rounded-full w-fit max-w-[70%]">
             <MapPin className="h-3 w-3 mr-1 text-primary" />
-            <span className="truncate text-primary dark:text-text-secondary">{acommodation.address}</span>
+            <span className="truncate text-gray-600 dark:text-gray-300">{acommodation.address}</span>
           </div>
 
           <div className="text-right whitespace-nowrap text-sm font-bold text-primary-dark dark:text-text">

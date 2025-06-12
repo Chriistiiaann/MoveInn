@@ -10,6 +10,7 @@ public class AccommodationDTO
     public string Address { get; set; }
     public string City { get; set; }
     public string Country { get; set; }
+    public AcommodationType Category { get; set; }
     public decimal PricePerMonth { get; set; }
     public int NumberOfRooms { get; set; }
     public int Bathrooms { get; set; }

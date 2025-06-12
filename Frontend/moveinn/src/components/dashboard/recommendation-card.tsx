@@ -3,6 +3,9 @@ import { MapPinIcon, StarIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import axios from "axios"
 import { API_BASE_URL } from "@/utils/endpoints/config"
+import { id } from "date-fns/locale"
+import Link from "next/link"
+import { getCookie } from "cookies-next"
 
 interface RecommendationCardProps {
   name: string
@@ -10,6 +13,7 @@ interface RecommendationCardProps {
   rating: number
   description: string
   recommendedBy: string
+  id: string
 }
 
 const API_GET_USER = (id: string) => `${API_BASE_URL}/User/${id}`
@@ -20,6 +24,7 @@ export function RecommendationCard({
   rating,
   description,
   recommendedBy,
+  id,
 }: RecommendationCardProps) {
   const [recommenderName, setRecommenderName] = useState<string>("")
 
@@ -75,11 +80,26 @@ export function RecommendationCard({
     }
   }
 
+  const getCategoryColorBorder = () => {
+    switch (categorySlug) {
+      case "restaurant": return "border-secondary"
+      case "cafeteria": return "border-pink-200"
+      case "museum": return "border-primary"
+      case "leisurezone": return "border-amber-400"
+      case "park": return "border-secondary-greenblue"
+      case "historicalsite": return "border-yellow-200"
+      case "shopping": return "border-purple-200"
+      case "bar": return "border-[#0E1E40]"
+      case "other": return "border-gray-200"
+      default: return "border-gray-200"
+    }
+  }
+
   useEffect(() => {
     const fetchUserName = async () => {
       if (recommendedBy && recommendedBy !== "00000000-0000-0000-0000-000000000000") {
         try {
-          const token = localStorage.getItem("token")
+          const token = getCookie("token")
           const response = await axios.get(API_GET_USER(recommendedBy), {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -100,8 +120,9 @@ export function RecommendationCard({
   }, [recommendedBy])
 
   return (
+    <Link href={`/dashboard/recommendations/${id}`}>
     <div
-      className={`p-4 rounded-[var(--radius-lg)] hover:border-gray-200 bg-gradient-to-br ${getCategoryColor()} transition-all hover:shadow-md 
+      className={`p-4 rounded-[var(--radius-lg)] hover:border-background/50 bg-gradient-to-br ${getCategoryColor()} border-l-3 ${getCategoryColorBorder()} transition-all hover:shadow-md 
       flex flex-col min-h-[200px]`} // Quité justify-between
     >
       <div className="flex-grow"> {/* Este div ocupa el espacio disponible */}
@@ -120,10 +141,11 @@ export function RecommendationCard({
         <p className="text-sm text-text mb-3 line-clamp-3">{description}</p>
       </div>
 
-      <div className="flex items-center text-xs bg-background/70 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
+      <div className="flex items-center text-xs bg-background/50 dark:bg-background/50 px-2 py-1 rounded-full w-fit">
         <MapPinIcon className="h-3 w-3 mr-1 text-primary" />
-        <span className="text-gray-500 dark:text-text-secondary">Recommended by {recommenderName}</span>
+        <p className="text-gray-600 dark:text-gray-300">Recommended by <span className="font-semibold text-primary dark:text-text-secondary">{recommenderName}</span></p>
       </div>
     </div>
+    </Link>
   )
 }

@@ -13,7 +13,6 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using Swashbuckle.AspNetCore.Filters;
 
-
 namespace Backend;
 public class Program
 {
@@ -25,18 +24,16 @@ public class Program
 
         builder.Services.Configure<Settings>(builder.Configuration.GetSection(Settings.SECTION_NAME));
 
-        builder.Services.AddControllers();
-        builder.Services.AddControllers().AddJsonOptions(options => {
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        });
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+            );
 
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
         builder.Services.AddScoped<PaymentService>();
 
-
-        //Contextos
-        builder.Services.AddScoped<DataContext>();
+        builder.Services.AddDbContext<DataContext>();
         builder.Services.AddScoped<UserRepository>();
         builder.Services.AddScoped<RecommendationRepository>();
         builder.Services.AddScoped<UnitOfWork>();
@@ -49,7 +46,6 @@ public class Program
         builder.Services.AddScoped<IHostRepository, HostRepository>();
         builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
-        // Servicios
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<IAccommodationService, AccommodationService>();
@@ -69,7 +65,6 @@ public class Program
         builder.Services.AddScoped<IHostService, HostService>();
         builder.Services.AddScoped<IAdminService, AdminService>();
 
-        // WebSocket
         builder.Services.AddSingleton<WebsocketHandler>();
         builder.Services.AddSingleton<IFollowRepository, FollowRepository>();
         builder.Services.AddSingleton<IFollowService, FollowService>();
@@ -77,9 +72,7 @@ public class Program
         builder.Services.AddSingleton<IMessagesService, MessagesService>();
         builder.Services.AddSingleton<middleware>();
 
-        //Swagger
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         builder.Services.AddSwaggerGen(options =>
         {
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -94,27 +87,46 @@ public class Program
             options.OperationFilter<SecurityRequirementsOperationFilter>(true, JwtBearerDefaults.AuthenticationScheme);
         });
 
-        builder.Services.AddAuthentication()
-        .AddJwtBearer(options =>
-        {
-            Settings settings = builder.Configuration.GetSection(Settings.SECTION_NAME).Get<Settings>()!;
-            string key = Environment.GetEnvironmentVariable("JWT_KEY");
-
-            options.TokenValidationParameters = new TokenValidationParameters
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
-            };
-        });
+                string key = Environment.GetEnvironmentVariable("JWT_KEY")!;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
+                    {
+                        var token = ctx.Request.Query["token"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            ctx.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = ctx =>
+                    {
+                         Console.WriteLine("✓ JWT válido para userId=" +
+                             ctx.Principal.FindFirst("id")?.Value);
+                         return Task.CompletedTask;
+                    }
+                };
+            });
 
         builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(builder =>
+            options.AddDefaultPolicy(policy =>
             {
-                builder.AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+                policy
+                  .WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
             });
         });
 
@@ -125,34 +137,55 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        app.UseAuthentication();
-        app.UseWebSockets();
 
         app.UseHttpsRedirection();
+        app.UseCors();
+
+        app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseWebSockets();
+
+        app.Map("/api/WebSocket/ws", subApp =>
+        {
+            subApp.Use(async (ctx, next) =>
+            {
+                if (ctx.WebSockets.IsWebSocketRequest)
+                {
+                    var tokenRecibido = ctx.Request.Query["token"].ToString();
+                    Console.WriteLine($"[WS-Middleware] WSRequest a {ctx.Request.Path} con token={tokenRecibido}");
+                    var socket = await ctx.WebSockets.AcceptWebSocketAsync();
+                    Console.WriteLine("[WS-Handler] WebSocket aceptado");
+                    var handler = ctx.RequestServices.GetRequiredService<WebsocketHandler>();
+                    await handler.HandleAsync(ctx, socket);
+                }
+                else
+                {
+                    await next();
+                }
+            });
+        });
+
         app.UseMiddleware<middleware>();
-        app.UseCors();
 
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
         });
         app.MapControllers();
-        await SeedDatabase(app.Services);
 
+        await SeedDatabase(app.Services);
         app.Run();
     }
+
     static async Task SeedDatabase(IServiceProvider serviceProvider)
     {
-        using IServiceScope scope = serviceProvider.CreateScope();
-        using DataContext dbContext = scope.ServiceProvider.GetService<DataContext>()!;
-
+        using var scope = serviceProvider.CreateScope();
+        using var dbContext = scope.ServiceProvider.GetService<DataContext>()!;
         if (dbContext.Database.EnsureCreated())
         {
-            Seeder seeder = new Seeder(dbContext);
+            var seeder = new Seeder(dbContext);
             await seeder.SeedAsync();
         }
-
     }
 }

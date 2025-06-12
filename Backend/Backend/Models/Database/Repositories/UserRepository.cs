@@ -111,5 +111,30 @@ namespace Backend.Models.Database.Repositories
                 .Select(f => f.Following)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users
+                         .Include(u => u.Accommodations)
+                         .Include(u => u.SocialMedias)
+                         .Include(u => u.Languages)
+                         .ToArrayAsync();
+        }
+        public async Task<IEnumerable<string>> GetAllCountriesAsync()
+        {
+            return await _context.Users
+                .Where(u => !string.IsNullOrEmpty(u.ErasmusCountry))
+                .Select(u => u.ErasmusCountry)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
+        {
+            return await _context.Users
+                .Where(u => u.ErasmusCountry == country && !string.IsNullOrEmpty(u.City))
+                .Select(u => u.City)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

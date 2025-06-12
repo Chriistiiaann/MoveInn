@@ -26,6 +26,8 @@ interface AuthContextType {
   isLoading: boolean
   updateUserProfile: (userData: UserUpdateFormData) => Promise<User>
   updateSocialMedia: (socialMedias: Array<{ id: number; socialMedia: number; url: string }>) => Promise<void>
+  setUser: React.Dispatch<React.SetStateAction<User | null>>
+  isLoggingOut: boolean
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -40,6 +42,8 @@ export const AuthProvider = ({
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
 
   const extractUserId = (accessToken: string): string | null => {
     try {
@@ -106,7 +110,10 @@ export const AuthProvider = ({
     if (userData.countryFlag) formData.append("countryFlag", userData.countryFlag);
     if (userData.erasmusCountryFlag) formData.append("erasmusCountryFlag", userData.erasmusCountryFlag);
     if (userData.avatarFile) formData.append("file", userData.avatarFile);
-  
+    if (userData.languages && Array.isArray(userData.languages)) {
+      formData.append("languages", JSON.stringify({ userLanguages: userData.languages }));
+    }    
+    
     try {
       const response = await axios.put(API_UPDATE_USER(user.id), formData, {
         headers: {
@@ -114,8 +121,14 @@ export const AuthProvider = ({
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
+      console.log("FormData enviado:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
       if (response.status === 200 && response.data) {
+        console.log("✅ Usuario actualizado, datos recibidos despues del update:", response.data); //
         setUser(response.data);
       }
   
@@ -165,7 +178,13 @@ export const AuthProvider = ({
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
+        const cookieToken = document.cookie
+          .split("; ")
+          .find(row => row.startsWith("token="))
+          ?.split("=")[1]
+
+        const storedToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || cookieToken
+
 
         console.log("Token almacenado encontrado:", !!storedToken)
 
@@ -197,12 +216,15 @@ export const AuthProvider = ({
           headers: { "Content-Type": "application/json" },
         },
       )
+
       const { accessToken } = response.data
+      console.log("accessToken", accessToken)
       if (!accessToken) throw new Error("No se recibió accessToken en la respuesta")
 
       setCookie("token", accessToken, {
-        maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 2, // 7 días o 2 horas
+        maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 2,
         path: "/",
+        sameSite: "lax",
       });
 
       if (rememberMe) {
@@ -212,7 +234,6 @@ export const AuthProvider = ({
       }
       setToken(accessToken)
       await updateUserFromToken(accessToken)
-      router.push("/dashboard")
     } catch (error: any) {
       console.error("Error en login:", error)
       setError(error.response?.data?.message || error.message || "Error de inicio de sesión.")
@@ -225,31 +246,24 @@ export const AuthProvider = ({
   const register = async (name: string, mail: string, password: string, phone: string) => {
     setIsLoading(true)
     setError(null)
-
+  
     try {
-      const payload = {
-        mail,
-        password,
-        name,
-        phone: phone,
-      }
-
+      const payload = { mail, password, name, phone }
+  
       const response = await axios.post(API_AUTH_REGISTER, payload, {
         headers: { "Content-Type": "application/json" },
       })
-
+  
       const { accessToken } = response.data
+      if (!accessToken) throw new Error("No se recibió accessToken")
+  
       localStorage.setItem("accessToken", accessToken)
       setToken(accessToken)
-
-      const decoded: DecodedToken = jwtDecode(accessToken)
-      setUser({
-        id: decoded.id,
-        mail: decoded.email,
-        name: decoded.name,
-        phone: phone.toString(),
-      })
-
+  
+      // Importante: actualiza usuario completo
+      await updateUserFromToken(accessToken)
+  
+      // Redirige después de que esté todo cargado
       router.push("/dashboard")
     } catch (err: any) {
       setError(err.response?.data || "Error en el registro")
@@ -258,14 +272,18 @@ export const AuthProvider = ({
       setIsLoading(false)
     }
   }
+  
 
   const logout = () => {
+    setIsLoggingOut(true)
     deleteCookie("token")
     localStorage.removeItem("accessToken")
     sessionStorage.removeItem("accessToken")
     setUser(null)
     setToken(null)
-    router.push("/login")
+    setTimeout(() => {
+      router.push("/login")
+    }, 50)
   }
 
   return (
@@ -281,6 +299,8 @@ export const AuthProvider = ({
         isLoading,
         updateUserProfile,
         updateSocialMedia,
+        setUser,
+        isLoggingOut,
       }}
     >
       {children}

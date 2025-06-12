@@ -5,7 +5,7 @@ import axios from "axios"
 import { format } from "date-fns"
 import { Pencil } from "lucide-react"
 
-import { API_EVENTS, API_DELETE_EVENT } from "@/utils/endpoints/config"
+import { API_EVENTS, API_DELETE_EVENT, API_ADMIN_DELETE_EVENT } from "@/utils/endpoints/config"
 import {
   Table,
   TableBody,
@@ -26,6 +26,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
+import { getCookie } from "cookies-next"
+import { toast } from "sonner"
 
 interface Event {
   id: string
@@ -73,7 +75,11 @@ export function EventsTable() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const token = getCookie("token")
+        if (!token) {
+          console.error("No token found")
+          return
+        }
         const res = await axios.get<Event[]>(API_EVENTS, {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -99,14 +105,20 @@ export function EventsTable() {
   const handleDelete = async () => {
     if (!selectedEvent) return
     try {
-      const token = localStorage.getItem("token")
-      await axios.delete(API_DELETE_EVENT(selectedEvent.id), {
+      const token = getCookie("token")
+      if (!token) {
+        console.error("No token found")
+        return
+      }
+      await axios.delete(API_ADMIN_DELETE_EVENT(selectedEvent.id), {
         headers: { Authorization: `Bearer ${token}` },
       })
       setEvents((prev) => prev.filter((e) => e.id !== selectedEvent.id))
       handleClose()
+      toast.success(`Event "${selectedEvent.title}" deleted successfully`)
     } catch (err) {
       console.error("Error deleting event", err)
+      toast.error("Failed to delete event. Please try again.")
     }
   }
 
@@ -120,7 +132,7 @@ export function EventsTable() {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="border-b border-gray-200 dark:border-gray-800">
                 <TableHead className="text-text font-semibold">Title</TableHead>
@@ -137,7 +149,9 @@ export function EventsTable() {
                   key={ev.id}
                   className="border-b border-gray-200 dark:border-gray-800 hover:bg-accent/10"
                 >
-                  <TableCell className="font-medium text-text">{ev.title}</TableCell>
+                  <TableCell className="font-medium text-text max-w-[250px] truncate whitespace-nowrap overflow-hidden">
+                    {ev.title}
+                  </TableCell>  
                   <TableCell className="text-text">{format(new Date(ev.date), "PPp")}</TableCell>
                   <TableCell>
                     <Badge className={getCategoryBadgeColor(ev.category)}>{ev.category}</Badge>
@@ -178,20 +192,29 @@ export function EventsTable() {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md z-50 border border-gray-200 dark:border-gray-800">
                           <DialogHeader>
-                            <DialogTitle>Delete Event</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="text-primary dark:text-text-secondary">Delete Event</DialogTitle>
+                            <DialogDescription className="text-text mb-2">
                               Are you sure you want to delete{" "}
-                              <span className="font-semibold text-destructive">
-                                {selectedEvent?.title}
-                              </span>
-                              ?
+                              <span className="font-semibold text-destructive">{selectedEvent?.title}</span>?
                             </DialogDescription>
                           </DialogHeader>
+
+                          <div className="text-text text-sm mb-4">
+                            <p className="font-semibold mb-1">Description:</p>
+                            <div className="border rounded p-3 max-h-40 overflow-y-auto bg-muted whitespace-pre-line">
+                              {selectedEvent?.description || "No description"}
+                            </div>
+                          </div>
+
                           <DialogFooter>
-                            <Button variant="ghost" onClick={handleClose}>
+                            <Button variant="ghost" className="dark:text-text-secondary" onClick={handleClose}>
                               Cancel
                             </Button>
-                            <Button variant="destructive" onClick={handleDelete}>
+                            <Button
+                              variant="default"
+                              className="bg-red-500 hover:bg-red-600 text-white"
+                              onClick={handleDelete}
+                            >
                               Confirm Delete
                             </Button>
                           </DialogFooter>

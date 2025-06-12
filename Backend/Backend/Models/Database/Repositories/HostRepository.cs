@@ -65,4 +65,26 @@ public class HostRepository : IHostRepository
             .Select(h => h.User)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<string>> GetAllCountriesAsync()
+    {
+        return await _context.Hosts
+            .Include(h => h.User)
+            .Where(h => !string.IsNullOrEmpty(h.User.ErasmusCountry))
+            .Select(h => h.User.ErasmusCountry!)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
+    {
+        return await _context.Hosts
+            .Include(h => h.User)
+            .Where(h =>
+                h.User.ErasmusCountry == country &&
+                !string.IsNullOrEmpty(h.User.City))
+            .Select(h => h.User.City!)
+            .Distinct()
+            .ToListAsync();
+    }
 }

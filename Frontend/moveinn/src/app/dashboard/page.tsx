@@ -20,6 +20,10 @@ import {
     Plus,
     X,
     Map,
+    CalendarX,
+    SearchX,
+    UserX,
+    BellIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,9 +35,11 @@ import { DashboardAcommodationCard } from "@/components/dashboard/dashboard-acom
 import { HostCard } from "@/components/dashboard/host-card"
 import axios from "axios"
 import { useAuth } from "@/context/authcontext"
-import { API_SEARCH_RECOMMENDATION, API_SEARCH_ACOMMODATION, API_ALL_ACOMMODATIONS } from "@/utils/endpoints/config"
+import { API_SEARCH_RECOMMENDATION, API_SEARCH_ACOMMODATION, API_SEARCH_EVENTS, API_HOST_SEARCH_HOSTS, API_GET_USER } from "@/utils/endpoints/config"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { getCookie } from "cookies-next"
+import { useWebsocket } from "@/context/WebSocketContext"
 
 interface Recommendation {
     id: string
@@ -133,24 +139,197 @@ export default function DashboardPage() {
     const [recommendations, setRecommendations] = useState<Recommendation[]>([])
     // const [acomodations, setAcomodations] = useState<Acommodation[]>([])
     const [acommodations, setAcommodations] = useState<Acommodation[]>([])
+    const [isLoadingDashboard, setIsLoadingDashboard] = useState(true)
+    const [dashboardHosts, setDashboardHosts] = useState<any[]>([])
+    const [notifications, setNotifications] = useState<
+  { message: string; timestamp: number; type: "message" | "event" | "group" | "recommendation" | "system" }[]
+  >(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("notifications")
+        return saved ? JSON.parse(saved) : []
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
+
+    
+
+    const { lastMessage } = useWebsocket()
+
+    useEffect(() => {
+      try {
+        localStorage.setItem("notifications", JSON.stringify(notifications))
+      } catch (e) {
+        console.error("Error saving notifications to localStorage", e)
+      }
+    }, [notifications]) 
+    
+
+    useEffect(() => {
+      const fetchSenderNameAndNotify = async (senderId: string, content: string) => {
+        try {
+          const token = getCookie("token")
+          const response = await axios.get(API_GET_USER(senderId), {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          const sender = response.data
+          const fullName = `${sender.name}`
+    
+          setNotifications((prev) => [
+            ...prev,
+            {
+              message: `${fullName} te ha enviado un mensaje: "${content}"`,
+              timestamp: Date.now(),
+              type: "message"
+            }
+          ])
+        } catch (err) {
+          console.error("Error fetching sender name:", err)
+          setNotifications((prev) => [
+            ...prev,
+            {
+              message: `Alguien te ha enviado un mensaje: "${content}"`,
+              timestamp: Date.now(),
+              type: "message"
+            }
+          ])
+        }
+      }
+    
+      if (lastMessage?.action === "notification" && lastMessage?.success && lastMessage?.message) {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            message: lastMessage.message,
+            timestamp: Date.now(),
+            type: "system"
+          }
+        ])
+      }
+    
+      if (lastMessage?.action === "new_message" && lastMessage?.content && lastMessage?.senderId) {
+        fetchSenderNameAndNotify(lastMessage.senderId, lastMessage.content)
+      }
+    }, [lastMessage])
+    
+    
+
+    interface Event {
+      id: string
+      title: string
+      description: string
+      location: string
+      date: string
+      category: string
+      tags: string[]
+      attendeesCount: number
+      joined: boolean
+    }
+    
+    const [events, setEvents] = useState<Event[]>([])
+
+    useEffect(() => {
+      const loadDashboardData = async () => {
+        setIsLoadingDashboard(true)
+        await Promise.all([getRecommendations(), fetchEvents(), searchAcommodations(), fetchDashboardHosts()])
+        setIsLoadingDashboard(false)
+      }
+    
+      if (user?.city && user?.erasmusCountry) {
+        loadDashboardData()
+      }
+    }, [user])
+    
+    const fetchDashboardHosts = async () => {
+      try {
+        const token = getCookie("token")
+        const response = await axios.post(
+          API_HOST_SEARCH_HOSTS,
+          {
+            query: "",
+            country: user?.erasmusCountry || "",
+            city: user?.city || "",
+            page: 1,
+            limit: 4,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        const data = response.data.items
+        console.log("Hosts encontrados:", data)
+        setDashboardHosts(data || [])
+      } catch (error) {
+        console.error("Error fetching dashboard hosts:", error)
+        setDashboardHosts([])
+      }
+    }
+    
+
+    const fetchEvents = async () => {
+      try {
+        const token = getCookie("token")
+        const response = await axios.post(
+          API_SEARCH_EVENTS,
+          {
+            page: 1,
+            limit: 4,
+            query: "",
+            location: "",
+            category: "",
+            tags: [],
+            sortField: "",
+            sortOrder: "",
+            country: user?.erasmusCountry || "",
+            city: user?.city || "",
+            currentUserId: user?.id || ""
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        console.log("Eventos encontrados:", response.data.items)
+        setEvents(response.data.items || [])
+      } catch (error) {
+        console.error("Error fetching events:", error)
+        setEvents([])
+      }
+    }
+    
+    useEffect(() => {
+      if (user?.city) {
+        fetchEvents()
+        fetchDashboardHosts()
+      }
+    }, [user])
+    
 
     const getRecommendations = async () => {
         try {
-          const token = localStorage.getItem("token") // 👈 get token from storage
+          const token = getCookie("token")
 
           const body = {
             query: "",
             sortField: "",
             sortOrder: "",
-            country: "Spain",
-            city: "",
+            country: user?.erasmusCountry,
+            city: user?.city,
             page: 1,
             limit: 4,
           }
+
+          console.log("Body de la busqueda:", body)
   
           const response = await axios.post(API_SEARCH_RECOMMENDATION, body, {
             headers: {
-              Authorization: `Bearer ${token}`, // 👈 add Authorization header
+              Authorization: `Bearer ${token}`,
             },
           })
       
@@ -170,22 +349,54 @@ export default function DashboardPage() {
         }
     }
 
-    const fetchAcommodations = async () => {
-        try {
-          const token = localStorage.getItem("token")
-          const response = await axios.get(API_ALL_ACOMMODATIONS, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          setAcommodations(Array.isArray(response.data) ? response.data : [])
-        } catch (err) {
-          console.error("Error fetching accommodations:", err)
+    const searchAcommodations = async () => {
+      console.log("Buscando acomodaciones para:", user?.city, user?.erasmusCountry)
+      try {
+        const token = getCookie("token")
+    
+        const body = {
+          query: "",
+          sortField: "",
+          sortOrder: "",
+          accommodationType: null,
+          availableFrom: null,
+          availableTo: null,
+          country: user?.erasmusCountry,
+          city: user?.city,
+          page: 1,
+          limit: 4,
+        }
+
+        console.log("Body de la busqueda:", body)
+    
+        const response = await axios.post(API_SEARCH_ACOMMODATION, body, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = response.data.items
+        console.log("Acomodaciones encontradas:", data)
+    
+        if (Array.isArray(data)) {
+          setAcommodations(data)
+        } else if (Array.isArray(data.accommodations)) {
+          setAcommodations(data.accommodations)
+        } else {
           setAcommodations([])
         }
+      } catch (error) {
+        console.error("Error fetching accommodations:", error)
+        setAcommodations([])
+      }
     }
+    
 
     useEffect(() => {
-        fetchAcommodations()
-    }, [])
+      if (user?.city && user?.erasmusCountry) {
+        searchAcommodations()
+      }
+    }, [user])
+    
 
     useEffect(() => {
         getRecommendations()
@@ -220,81 +431,28 @@ export default function DashboardPage() {
                 </div>
                 
                 <div className="mt-6 md:mt-0 flex flex-col items-start gap-2 space-y-3 md:space-y-0 md:space-x-3">
+                    <Link href="/dashboard/events">
                     <Button className="bg-[#B7F8C8] text-[#0E1E40] hover:bg-[#B7F8C8]/90 font-semibold">
                         <PlusCircleIcon className="mr-2 h-4 w-4" />
                         Create Event
                     </Button>
+                    </Link>
+                    <Link href="/dashboard/recommendations">
                     <Button variant="outline" className="bg-white/10 border-none text-white hover:bg-white/10">
                         <MapPinIcon className="mr-2 h-4 w-4" />
                         Explore The City
                     </Button>
+                    </Link>
+                    <Link href="/dashboard/findpeople">
                     <Button variant="outline" className="bg-white/10 border-none text-white hover:bg-white/10">
                         <UsersIcon className="mr-2 h-4 w-4" />
                         Make New Friends
                     </Button>
+                    </Link>
                 </div>
                 </div>
             </div>
             </section>
-
-            {/* Quick Stats */}
-            {/* <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card className="border-none shadow-sm bg-gradient-to-br from-foreground to-[#B7F8C8]/10">
-                <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                    <p className="text-sm text-text-secondary">Upcoming Events</p>
-                    <p className="text-2xl font-bold text-text">5</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-[#B7F8C8]/50 flex items-center justify-center">
-                    <CalendarIcon className="h-5 w-5 text-[#0E1E40]" />
-                    </div>
-                </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-sm bg-gradient-to-br from-foreground to-[#4C69DD]/10">
-                <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                    <p className="text-sm text-text-secondary">New Messages</p>
-                    <p className="text-2xl font-bold text-text">12</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-[#4C69DD]/30 flex items-center justify-center">
-                    <MessageCircleIcon className="h-5 w-5 text-white" />
-                    </div>
-                </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-sm bg-gradient-to-br from-foreground to-[#62C3BA]/10">
-                <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                    <p className="text-sm text-text-secondary">Group Invites</p>
-                    <p className="text-2xl font-bold text-text">3</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-[#62C3BA]/40 flex items-center justify-center">
-                    <Users2Icon className="h-5 w-5 text-[#0E1E40]" />
-                    </div>
-                </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-sm bg-gradient-to-br from-foreground to-[#0E1E40]/10">
-                <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                    <p className="text-sm text-text-secondary">New Recommendations</p>
-                    <p className="text-2xl font-bold text-text">8</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-[#0E1E40]/70 flex items-center justify-center">
-                    <MapPinIcon className="h-5 w-5 text-white" />
-                    </div>
-                </div>
-                </CardContent>
-            </Card>
-            </section> */}
 
             {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -307,81 +465,43 @@ export default function DashboardPage() {
                     <CardTitle className="text-xl text-text">Upcoming Events</CardTitle>
                     <CardDescription className="text-text-secondary">Events you&apos;ve joined or might be interested in</CardDescription>
                     </div>
+                    <Link href="dashboard/events">
                     <Button variant="ghost" className="dark:text-text-secondary">
                     View all <ChevronRightIcon className="ml-1 h-4 w-4"/>
                     </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
                     <CardContent>
-  <div className="space-y-4">
-    <EventCard
-      title="Language Exchange Night"
-      date="Today, 7:00 PM"
-      location="Café del Mar, Barcelona"
-      attendees={18}
-      category="Social"
-      joined={true}
-    />
-    <EventCard
-      title="Weekend Trip to Montserrat"
-      date="Today, 9:00 AM"
-      location="Plaça Catalunya"
-      attendees={24}
-      category="Trip"
-      joined={true}
-    />
-    <EventCard
-      title="International Food Festival"
-      date="Tomorrow, 6:30 PM"
-      location="University Campus"
-      attendees={42}
-      category="Cultural"
-      joined={false}
-    />
-    <EventCard
-      title="AI in Education: A Debate"
-      date="Sunday, 10:00 AM"
-      location="Tech Hub, Barcelona"
-      attendees={16}
-      category="Academic"
-      joined={true}
-    />
-    <EventCard
-      title="Sunset Beach Volleyball"
-      date="Sunday, 6:00 PM"
-      location="Barceloneta Beach"
-      attendees={20}
-      category="Sports"
-      joined={true}
-    />
-    <EventCard
-      title="Photography Workshop: City at Night"
-      date="Sunday, 8:00 PM"
-      location="Plaza Real"
-      attendees={12}
-      category="Workshop"
-      joined={false}
-    />
-    <EventCard
-      title="Neon Party at Apolo"
-      date="Sunday, 11:00 PM"
-      location="Sala Apolo, Barcelona"
-      attendees={80}
-      category="Party"
-      joined={false}
-    />
-  </div>
-</CardContent>
+                      <div className="space-y-4">
+                        {events.length > 0 ? (
+                          events.map((event) => (
+                            <EventCard
+                              key={event.id}
+                              eventId={event.id}
+                              title={event.title}
+                              date={event.date}
+                              location={event.location}
+                              attendeesCount={event.attendeesCount}
+                              category={event.category}
+                              joined={event.joined}
+                            />
+                          ))
+                        ) : (
+                          <div className="text-center text-md text-text py-4">
+                            <CalendarX className="mx-auto h-20 w-20 text-text-secondary mb-2" />
+                            No events found in{" "}
+                            <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span>.
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+
 
                     </div>
                 </CardContent>
-                <CardFooter className="border-t pt-4">
-                    <Button variant="outline" className="w-full bg-foreground border-primary-dark text-primary-dark hover:bg-primary hover:text-white">
-                    <PlusCircleIcon className="mr-2 h-4 w-4" />
-                    Create New Event
-                    </Button>
-                </CardFooter>
+                
                 </Card>
 
                 {/* Housing */}
@@ -398,12 +518,21 @@ export default function DashboardPage() {
                     </Link>
                 </CardHeader>
                 <CardContent>
+                  {acommodations.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {acommodations.map((acommodation) => (
+                      {acommodations.map((acommodation) => (
                         <DashboardAcommodationCard key={acommodation.id} acommodation={acommodation} />
-                    ))}
+                      ))}
                     </div>
+                  ) : (
+                    <div className="text-center text-md text-text py-4">
+                      <SearchX className="mx-auto h-20 w-20 text-text-secondary mb-2" />
+                      No housing options available in{" "}
+                      <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span> at the moment.
+                    </div>
+                  )}
                 </CardContent>
+
                 </Card>
 
                 {/* Local Recommendations */}
@@ -420,12 +549,28 @@ export default function DashboardPage() {
                     </Link>
                 </CardHeader>
                 <CardContent>
+                  {recommendations.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recommendations.map((recommendation) => (
-                        <RecommendationCard key={recommendation.id} name={recommendation.title} category={getCategoryName(recommendation.category)} rating={recommendation.rating} description={recommendation.description} recommendedBy={recommendation.userId} />
-                    ))}
+                      {recommendations.map((recommendation) => (
+                        <RecommendationCard
+                          key={recommendation.id}
+                          name={recommendation.title}
+                          category={getCategoryName(recommendation.category)}
+                          rating={recommendation.rating}
+                          description={recommendation.description}
+                          recommendedBy={recommendation.userId}
+                          id={recommendation.id}
+                        />
+                      ))}
                     </div>
+                  ) : (
+                    <div className="text-center text-md text-text py-4">
+                      <CalendarX className="mx-auto h-20 w-20 text-text-secondary mb-2" />
+                      No recommendations found in <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span> yet. Be the first to recommend something!
+                    </div>
+                  )}
                 </CardContent>
+
                 </Card>
             </div>
 
@@ -433,42 +578,50 @@ export default function DashboardPage() {
             <div className="space-y-8">
                 {/* Notifications */}
                 <Card className="border-none shadow-sm bg-foreground">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <div>
-                    <CardTitle className="text-xl text-text">Notifications</CardTitle>
-                    <CardDescription className="text-text-secondary">Recent updates and activities</CardDescription>
+                      <CardTitle className="text-xl text-text">Notifications</CardTitle>
+                      <CardDescription className="text-text-secondary">Recent activities</CardDescription>
                     </div>
-                    <Button variant="ghost" size="sm" className="dark:text-text-secondary">
-                    Mark all as read
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="dark:text-text-secondary"
+                      onClick={() => {
+                        setNotifications([])
+                        localStorage.removeItem("notifications")
+                      }}
+                    >
+                      Mark all as read
                     </Button>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                    <NotificationItem
-                        type="message"
-                        content="Carlos sent you a message about the weekend trip"
-                        time="10 minutes ago"
-                        read={false}
-                    />
-                    <NotificationItem
-                        type="event"
-                        content="'Language Exchange Night' starts in 3 hours"
-                        time="1 hour ago"
-                        read={false}
-                    />
-                    <NotificationItem
-                        type="recommendation"
-                        content="Anna recommended 'Parc de la Ciutadella' to you"
-                        time="2 days ago"
-                        read={true}
-                    />
-                    </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                    <Button variant="ghost" className="w-full dark:text-text-secondary">
-                    View all notifications
-                    </Button>
-                </CardFooter>
+
+                  </CardHeader>
+
+                  <CardContent>
+                    {notifications.length > 0 ? (
+                      <div
+                        className={`space-y-4 ${
+                          notifications.length > 4 ? "max-h-80 overflow-y-auto pr-2" : ""
+                        }`}
+                      >
+                        {notifications.map((notification, index) => (
+                          <NotificationItem
+                            key={index}
+                            type={notification.type || "system"}
+                            content={notification.message}
+                            time={new Date(notification.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            read={false}
+                          />
+                        ))}
+
+                      </div>
+                    ) : (
+                      <div className="text-center text-sm text-text py-4">
+                        <BellIcon className="mx-auto h-10 w-10 text-text-secondary mb-4" />
+                        You don’t have any notifications right now.
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
 
                 {/* Your Hosts */}
@@ -476,34 +629,34 @@ export default function DashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <div>
                     <CardTitle className="text-xl text-text">Your Hosts</CardTitle>
-                    <CardDescription className="text-text-secondary">Local students helping you navigate Barcelona</CardDescription>
+                    <CardDescription className="text-text-secondary">Local students helping you navigate your city</CardDescription>
                     </div>
-                    <Button variant="ghost" size="sm" className="dark:text-text-secondary">
-                    Find more
-                    </Button>
+                    <Link href="/dashboard/hosts">
+                      <Button variant="ghost" size="sm" className="dark:text-text-secondary">
+                        Find more
+                        <ChevronRightIcon className="ml-1 h-4 w-4" />
+                      </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent>
+                  {dashboardHosts.filter((host) => host.id !== user?.id).length > 0 ? (
                     <div className="space-y-4">
-                    <HostCard
-                        name="Maria Rodriguez"
-                        university="Universitat de Barcelona"
-                        languages={["Spanish", "English", "Catalan"]}
-                        lastActive="Online"
-                    />
-                    <HostCard
-                        name="Jordi Puig"
-                        university="Universitat Pompeu Fabra"
-                        languages={["Spanish", "English", "French"]}
-                        lastActive="2 hours ago"
-                    />
-                    <HostCard
-                        name="Anna Costa"
-                        university="Universitat Autònoma de Barcelona"
-                        languages={["Spanish", "English", "Italian"]}
-                        lastActive="Yesterday"
-                    />
+                      {dashboardHosts
+                        .filter((host) => host.id !== user?.id)
+                        .map((host) => (
+                          <HostCard key={host.id} host={host} />
+                        ))}
                     </div>
+                  ) : (
+                    <div className="text-center text-sm text-text py-4">
+                      <UserX className="mx-auto h-10 w-10 text-text-secondary mb-4" />
+                      No hosts available in{" "}
+                      <span className="font-semibold text-primary dark:text-text-secondary">{user?.city}</span>{" "}
+                      right now. If you're a host, go help someone!
+                    </div>
+                  )}
                 </CardContent>
+
                 </Card>
             </div>
             </div>

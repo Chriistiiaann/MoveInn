@@ -10,7 +10,7 @@ public class ImageAccommodation
     public required string Url { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    //[ForeignKey(nameof(Accommodation))]
-    //public Guid AccommodationId { get; set; }
-    //public Accommodation Accommodation { get; set; }
+    [ForeignKey(nameof(Accommodation))]
+    public Guid AccommodationId { get; set; }
+    public Accommodation Accommodation { get; set; }
 }

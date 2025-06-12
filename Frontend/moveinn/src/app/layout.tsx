@@ -9,6 +9,9 @@ import { ThemeProvider } from "next-themes"
 export const metadata: Metadata = {
   title: "MoveInn",
   description: "Connect with Erasmus students worldwide",
+  icons: {
+    icon: "/travel-bag-svgrepo-com.svg",
+  },
 }
 
 export default function RootLayout({
@@ -17,9 +20,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <html lang="en" className={inter.className}>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <Providers>{children}</Providers>
         </ThemeProvider>
       </body>

@@ -117,36 +117,32 @@ public class ForumController : ControllerBase
                 : (await _smartSearchService.SearchForumsAsync(request.Query!)).ToList();
 
             if (forums == null || !forums.Any())
-            {
                 return NotFound(new { message = "No se han encontrado foros." });
 
-            }
-
             if (!string.IsNullOrWhiteSpace(request.Country))
-            {
                 forums = forums
                     .Where(f => !string.IsNullOrWhiteSpace(f.Country)
                                 && f.Country.Equals(request.Country, StringComparison.OrdinalIgnoreCase))
                     .ToList();
-            }
+
+            if (request.Category.HasValue)
+                forums = forums
+                    .Where(f => f.Category == request.Category.Value)
+                    .ToList();
 
             if (!string.IsNullOrWhiteSpace(request.SortField))
             {
-                var field = request.SortField!.Trim().ToLower();
+                var field = request.SortField.Trim().ToLower();
                 var asc = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase);
 
                 if (field == "title" || field == "titulo")
-                {
                     forums = asc
                         ? forums.OrderBy(f => f.Title).ToList()
                         : forums.OrderByDescending(f => f.Title).ToList();
-                }
                 else if (field == "date" || field == "createdat" || field == "fecha")
-                {
                     forums = asc
                         ? forums.OrderBy(f => f.CreatedAt).ToList()
                         : forums.OrderByDescending(f => f.CreatedAt).ToList();
-                }
             }
 
             int totalItems = forums.Count;
@@ -156,21 +152,20 @@ public class ForumController : ControllerBase
                 .Take(request.Limit)
                 .ToList();
 
-            var result = new
+            return Ok(new
             {
                 currentPage = request.Page,
                 totalPages,
                 totalItems,
                 items = paged
-            };
-
-            return Ok(result);
+            });
         }
         catch (Exception ex)
         {
             return StatusCode(500, "Error interno del servidor: " + ex.Message);
         }
     }
+
 
     [HttpGet("countries")]
     public async Task<IActionResult> GetCountries()

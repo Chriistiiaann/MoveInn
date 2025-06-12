@@ -15,6 +15,8 @@ namespace Backend.Models.Database.Entities
         public DateTime Date { get; set; }
         public string Location { get; set; }
         public string Address { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
 
         public int AttendeesCount { get; set; } = 0;
         public int? MaxAttendees { get; set; }

@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation"
 import { useAuth } from "@/context/authcontext"
 import { Calendar, MapPin, Users, Home, Wifi, Square, CheckCircle, Clock, User, Mail, Key, PhoneCall } from "lucide-react"
 import Image from "next/image"
-import { API_GET_ACCOMMODATION, API_GET_RESERVATION } from "@/utils/endpoints/config"
+import { API_BASE_IMAGE_URL, API_GET_ACCOMMODATION, API_GET_RESERVATION } from "@/utils/endpoints/config"
+import { getCookie } from "cookies-next"
 
 interface AccommodationData {
   id: string
@@ -22,7 +23,7 @@ interface AccommodationData {
   availableFrom: string
   availableTo: string
   ownerId: string
-  accommodationImages: {
+  accomodationImages: {
     id: string
     url: string
     createdAt: string
@@ -80,7 +81,7 @@ export function Reservation() {
   const fetchReservationAndAccommodation = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      const token = getCookie("token");
       if (!token) {
         throw new Error("No authentication token found");
       }
@@ -123,6 +124,8 @@ export function Reservation() {
       }
 
       const accommodationData = await resAccommodation.json();
+      console.log(accommodationData)
+      console.log(`${API_BASE_IMAGE_URL}${accommodationData.accomodationImages[0].url}`)
       setAccommodation(accommodationData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -205,7 +208,20 @@ export function Reservation() {
 
       <div className="bg-white rounded-b-xl shadow-xl overflow-hidden">
         <div className="relative h-64 w-full">
-          <Image src="/placeholder.svg?height=400&width=800" alt={accommodation.title} fill className="object-cover" />
+        {accommodation.accomodationImages.length > 0 ? (
+  <Image
+    src={`${API_BASE_IMAGE_URL}${accommodation.accomodationImages[0].url}`}
+    alt={accommodation.title}
+    fill
+    className="object-cover"
+    unoptimized
+  />
+) : (
+  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+    No image available
+  </div>
+)}
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
             <div className="p-6 text-white">
               <h2 className="text-2xl font-bold mb-1">{accommodation.title}</h2>

@@ -12,8 +12,6 @@ import { API_BASE_URL, API_CREATE_RESERVATION } from "@/utils/endpoints/config"
 import axios from "axios"
 import { BookingModalProps } from "@/types/accommodation"
 
-
-
 export function BookingModal({ isOpen, onClose, accommodation }: BookingModalProps) {
   const router = useRouter()
   const { user } = useAuth()
@@ -30,10 +28,8 @@ export function BookingModal({ isOpen, onClose, accommodation }: BookingModalPro
     const fetchUnavailableDates = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/Accommodations/UnavailableDates/${accommodation.id}`)
-        if (!res.ok) throw new Error("No se pudieron cargar las fechas no disponibles")
         const data = await res.json()
-        const parsed = data.map((dateStr: string) => new Date(dateStr))
-        setUnavailableDates(parsed)
+        setUnavailableDates(data.map((d: string) => new Date(d)))
       } catch (err) {
         console.error("Error fetching unavailable dates:", err)
       }
@@ -43,10 +39,7 @@ export function BookingModal({ isOpen, onClose, accommodation }: BookingModalPro
 
   const calculateTotal = () => {
     if (!startDate || !endDate) return 0
-    const months = Math.max(
-      1,
-      endDate.getMonth() - startDate.getMonth() + 12 * (endDate.getFullYear() - startDate.getFullYear()),
-    )
+    const months = Math.max(1, endDate.getMonth() - startDate.getMonth() + 12 * (endDate.getFullYear() - startDate.getFullYear()))
     return accommodation.pricePerMonth * months + accommodation.pricePerMonth
   }
 
@@ -54,7 +47,7 @@ export function BookingModal({ isOpen, onClose, accommodation }: BookingModalPro
 
   const handleCreateReservation = async () => {
     if (!user || !startDate || !endDate) {
-      setError("Por favor, inicia sesión y selecciona las fechas de entrada y salida")
+      setError("Please log in and select the dates")
       return
     }
 
@@ -62,33 +55,24 @@ export function BookingModal({ isOpen, onClose, accommodation }: BookingModalPro
     setError(null)
 
     try {
-      const response = await axios.post(
-        API_CREATE_RESERVATION,
-        {
-          userId: user.id,
-          accommodationId: accommodation.id,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-          status: "Pending",
-          totalPrice: totalDue,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      )
+      const response = await axios.post(API_CREATE_RESERVATION, {
+        userId: user.id,
+        accommodationId: accommodation.id,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        status: "Pending",
+        totalPrice: totalDue,
+      }, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        }
+      })
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error("Error al crear la reserva")
-      }
-
-      const data = response.data
-      router.push(`/reservations/${data.id}`)
+      router.push(`/reservations/${response.data.id}`)
     } catch (error) {
       console.error("Error creating reservation:", error)
-      setError("No se pudo crear la reserva. Por favor, inténtalo de nuevo.")
+      setError("Failed to create reservation. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -96,124 +80,101 @@ export function BookingModal({ isOpen, onClose, accommodation }: BookingModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
-        <div className="bg-gradient-to-r from-primary to-primary-dark p-6 text-foreground">
-          <DialogTitle className="text-xl text-white font-bold text-center">Reservar Alojamiento</DialogTitle>
-          <p className="text-center text-sm mt-1 text-foreground/80">Selecciona las fechas para tu estancia</p>
+      <DialogContent
+        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 rounded-xl shadow-md border-none"
+      >
+        <div className="bg-gradient-to-r from-[#0E1E40] via-[#4C69DD] to-[#62C3BA] p-6 text-white">
+          <DialogTitle className="text-xl font-bold text-center text-white">Book Accommodation</DialogTitle>
+          <p className="text-center text-sm mt-1 text-white/80">Select your check-in and check-out dates</p>
         </div>
 
-        <div className="p-6">
-          <div className="flex items-center mb-6">
-            <Home className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-            <h3 className="font-medium text-text">{accommodation.title}</h3>
+        <div className="p-6 bg-foreground">
+          <div className="flex items-center mb-5">
+            <Home className="h-5 w-5 text-primary mr-2" />
+            <h3 className="font-semibold text-text">{accommodation.title}</h3>
           </div>
 
           <div className="space-y-5 mb-6">
-            {/* Fecha de entrada con mejor estilo */}
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-1 text-primary" />
-                Fecha de entrada
-              </label>
-              <div className="relative">
+            {[{ label: "Check-in date", value: startDate, setValue: setStartDate, min: minDate },
+              { label: "Check-out date", value: endDate, setValue: setEndDate, min: startDate || minDate }]
+              .map(({ label, value, setValue, min }, i) => (
+              <div key={i}>
+                <label className="block text-sm font-medium text-text-secondary mb-2 flex items-center">
+                  <Calendar className="h-4 w-4 mr-1 text-primary" /> {label}
+                </label>
                 <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  minDate={minDate}
+                  selected={value}
+                  onChange={(date) => setValue(date)}
+                  minDate={min}
                   maxDate={maxDate}
                   excludeDates={unavailableDates}
-                  placeholderText="Selecciona fecha de entrada"
+                  placeholderText={`Select ${label.toLowerCase()}`}
                   dateFormat="dd/MM/yyyy"
-                  className="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text"
+                  className="w-full border border-primary/30 px-4 py-2.5 rounded-md bg-background text-text focus:ring-2 focus:ring-primary focus:outline-none"
                 />
               </div>
-            </div>
-
-            {/* Fecha de salida con mejor estilo */}
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-1 text-primary" />
-                Fecha de salida
-              </label>
-              <div className="relative">
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  minDate={startDate || minDate}
-                  maxDate={maxDate}
-                  excludeDates={unavailableDates}
-                  placeholderText="Selecciona fecha de salida"
-                  dateFormat="dd/MM/yyyy"
-                  className="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text"
-                />
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Resumen de precios mejorado */}
-          <div className="bg-background rounded-xl p-5 mb-5 border border-background shadow-sm">
-            <h4 className="font-medium mb-4 text-text flex items-center">
-              <CreditCard className="h-4 w-4 mr-2 text-primary" />
-              Resumen de precios
+          <div className="bg-background p-5 rounded-lg border border-border mb-5">
+            <h4 className="font-medium text-text mb-4 flex items-center">
+              <CreditCard className="h-4 w-4 mr-2 text-primary" /> Price Summary
             </h4>
-
             {startDate && endDate ? (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Alquiler</span>
-                  <span className="font-medium text-text">€{accommodation.pricePerMonth}</span>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Rent</span>
+                  <span className="text-text font-medium">€{accommodation.pricePerMonth}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Depósito de seguridad</span>
-                  <span className="font-medium text-text">€{accommodation.pricePerMonth}</span>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Security Deposit</span>
+                  <span className="text-text font-medium">€{accommodation.pricePerMonth}</span>
                 </div>
-                <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
-                  <span className="font-semibold text-text">Total a pagar</span>
-                  <span className="font-bold text-xl text-primary-dark">€{totalDue}</span>
+                <div className="border-t pt-3 flex justify-between">
+                  <span className="font-semibold text-text">Total</span>
+                  <span className="font-bold text-lg text-primary-dark">€{totalDue}</span>
                 </div>
               </div>
             ) : (
-              <p className="text-text-secondary text-sm italic">Selecciona las fechas para ver el precio total</p>
+              <p className="text-text-secondary text-sm italic">Select dates to calculate total</p>
             )}
           </div>
 
-          {/* Mensaje de error mejorado */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-negative-red p-4 rounded-lg mb-5 flex items-start">
-              <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-md mb-4 flex items-start">
+              <AlertCircle className="h-5 w-5 mr-2 mt-0.5" />
               <div>
-                <p className="font-medium">No se pudo completar la reserva</p>
+                <p className="font-semibold">Error</p>
                 <p className="text-sm">{error}</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Footer con botones mejorados */}
-        <DialogFooter className="bg-gray-50 p-4 border-t border-gray-100">
+        <DialogFooter className="bg-gray-50 p-4 border-t border-border">
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
-              className="border-gray-300 text-text-secondary hover:bg-gray-100 hover:text-text sm:flex-1"
+              className="sm:flex-1 border-primary text-text hover:bg-primary/10"
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               onClick={handleCreateReservation}
               disabled={isSubmitting || !startDate || !endDate}
-              className="bg-accent hover:bg-accent-dark text-foreground sm:flex-1"
+              className="sm:flex-1 bg-[#4C69DD] hover:bg-[#3b5ccd] text-white"
             >
               {isSubmitting ? (
                 <>
-                  <span className="animate-spin h-4 w-4 mr-2 border-2 border-foreground border-t-transparent rounded-full"></span>
-                  Procesando...
+                  <span className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></span>
+                  Processing...
                 </>
               ) : (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Confirmar Reserva
+                  Confirm Booking
                 </>
               )}
             </Button>

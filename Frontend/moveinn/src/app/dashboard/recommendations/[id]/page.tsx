@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useParams } from "next/navigation"
-import { API_GET_RECOMMENDATION } from "@/utils/endpoints/config"
+import { API_GET_RECOMMENDATION, API_GET_USER } from "@/utils/endpoints/config"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Recommendation, categories } from "@/types/recommendation"
+import { getCookie } from "cookies-next"
 
 type CategoryName = keyof typeof categories
 const categoryByNumber: Record<number, CategoryName> = Object.entries(categories).reduce(
@@ -113,12 +114,38 @@ const getCategoryBadgeColor = (category: string) => {
   }
 }
 
+const getCategoryColorBorder = (category: string) => {
+  switch (category.toLowerCase()) {
+    case "restaurant":
+      return "border-secondary"
+    case "cafeteria":
+      return "border-pink-200"
+    case "museum":
+      return "border-primary"
+    case "leisurezone":
+      return "border-amber-400"
+    case "park":
+      return "border-secondary-greenblue"
+    case "historicalsite":
+      return "border-yellow-200"
+    case "shopping":
+      return "border-purple-200"
+    case "bar":
+      return "border-[#0E1E40]"
+    case "other":
+      return "border-gray-200"
+    default:
+      return "border-gray-200"
+  }
+}
+
 
 export default function RecommendationDetailPage() {
   const { id } = useParams()
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
+  const [recommenderName, setRecommenderName] = useState<string>("")
 
   useEffect(() => {
     const fetchRecommendation = async () => {
@@ -129,6 +156,7 @@ export default function RecommendationDetailPage() {
             Authorization: `Bearer ${token}`,
           },
         })
+        console.log(response.data)
         setRecommendation(response.data)
       } catch (error) {
         console.error("Error fetching recommendation:", error)
@@ -140,8 +168,40 @@ export default function RecommendationDetailPage() {
     fetchRecommendation()
   }, [id])
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>
-  if (!recommendation) return <div className="p-8 text-center">Recommendation not found</div>
+  useEffect(() => {
+      const fetchUserName = async () => {
+        if (recommendation?.userId && recommendation.userId !== "00000000-0000-0000-0000-000000000000") {
+          try {
+            const token = getCookie("token")
+            const response = await axios.get(API_GET_USER(recommendation.userId), {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            const userData = response.data
+            setRecommenderName(userData.name)
+          } catch (error) {
+            console.error("Error fetching user name:", error)
+            setRecommenderName("Unknown User")
+          }
+        } else {
+          setRecommenderName("System")
+        }
+      }
+  
+      fetchUserName()
+    }, [recommendation?.userId])
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+    </div>
+  )
+  if (!recommendation) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <p className="text-gray-500">Recommendation not found</p>
+    </div>
+  )
 
   const categoryName = categoryByNumber[recommendation.category]
   const categoryIcon = getCategoryIcon(recommendation.category)
@@ -187,7 +247,7 @@ export default function RecommendationDetailPage() {
             </div>
           </div>
 
-          <div className={`flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-br ${getCategoryGradient(categoryName)}`}>
+          <div className={`flex justify-between items-center p-4 border-b-3 ${getCategoryColorBorder(categoryName)} bg-gradient-to-br ${getCategoryGradient(categoryName)}`}>
 
             <div className="flex items-center">
               <div className="flex items-center bg-amber-100 px-3 py-1 rounded-full">
@@ -196,23 +256,24 @@ export default function RecommendationDetailPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="text-primary border-gray-200 dark:border-gray-800 hover:bg-primary hover:text-white">
-                <Share2 className="h-4 w-4 mr-1" />
-                Share
-              </Button>
+              
             </div>
           </div>
 
           <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-            <div className="px-4">
-              <TabsList className="grid grid-cols-2 w-full max-w-md bg-background h-fit rounded-[5px] m-4">
-              <TabsTrigger value="overview" className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text">
-                Overview
-              </TabsTrigger>
+            <div className="flex justify-center md:justify-start px-4">
+              <TabsList className="grid grid-cols-2 w-full max-w-md bg-background h-fit rounded-lg m-4">
                 <TabsTrigger
-                value="photos"
-                className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text">
-                Photos
+                  value="overview"
+                  className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="photos"
+                  className="bg-background p-2 rounded-var(--radius-sm) text-text data-[state=active]:bg-foreground data-[state=active]:text-text"
+                >
+                  Photos
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -225,13 +286,13 @@ export default function RecommendationDetailPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Tags</h3>
+                  <h3 className="text-sm font-medium text-text-secondary mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {recommendation.tags.map((tag) => (
                       <Badge
                         key={tag}
                         variant="outline"
-                        className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                        className="bg-secondary-greenblue border-none text-green-900 cursor-default"
                       >
                         {tag}
                       </Badge>
@@ -240,16 +301,16 @@ export default function RecommendationDetailPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-background py-1 px-3 rounded-lg w-fit">
+                  <div className="bg-background/50 py-1 px-3 rounded-lg w-fit">
                     
                     <div className="space-y-3">
                       <div className="flex items-start">
                         <MapPin className="h-4 w-4 text-[#4C69DD] mt-0.5 mr-2" />
                         <div>
-                        <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs">
+                        <p className="text-gray-600 dark:text-gray-300 mb-1 text-xs">
                           Recomended by{" "}
                           <span className="font-semibold text-primary dark:text-text-secondary">
-                            {recommendation.userId === "00000000-0000-0000-0000-000000000000" ? "system" : recommendation.userId}
+                            {recommendation.userId === "00000000-0000-0000-0000-000000000000" ? "system" : recommenderName}
                           </span>
                         </p>
                         </div>

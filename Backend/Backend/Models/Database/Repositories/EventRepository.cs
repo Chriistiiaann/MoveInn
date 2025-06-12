@@ -54,5 +54,30 @@ namespace Backend.Models.Database.Repositories
                 )
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<string>> GetAllCountriesAsync()
+        {
+            return await _context.Events
+                .Where(a => !string.IsNullOrEmpty(a.Country))
+                .Select(a => a.Country)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
+        {
+            return await _context.Events
+                .Where(a => a.Country == country && !string.IsNullOrEmpty(a.City))
+                .Select(a => a.City)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Event>> GetEventsWhereUserIsParticipatingAsync(Guid userId)
+        {
+            return await _context.Events
+                .Where(e => e.Participants.Any(p => p.Id == userId))
+                .ToListAsync();
+        }
     }
 }

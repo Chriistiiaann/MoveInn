@@ -87,8 +87,6 @@ public class AccommodationsController : ControllerBase
 
                 accommodations = accommodations
                     .Where(a =>
-                        a.AvailableFrom != default(DateTime) &&
-                        a.AvailableTo != default(DateTime) &&
                         a.AvailableFrom.Date <= to &&
                         a.AvailableTo.Date >= from
                     )
@@ -99,9 +97,26 @@ public class AccommodationsController : ControllerBase
             {
                 accommodations = accommodations
                     .Where(a =>
-                        !string.IsNullOrWhiteSpace(a.Country) &&
+                        a.Country != null &&
                         a.Country.Equals(request.Country, StringComparison.OrdinalIgnoreCase)
                     )
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.City))
+            {
+                accommodations = accommodations
+                    .Where(a =>
+                        a.City != null &&
+                        a.City.Equals(request.City, StringComparison.OrdinalIgnoreCase)
+                    )
+                    .ToList();
+            }
+
+            if (request.AccommodationType.HasValue)
+            {
+                accommodations = accommodations
+                    .Where(a => a.AcommodationType == request.AccommodationType.Value)
                     .ToList();
             }
 
@@ -120,29 +135,28 @@ public class AccommodationsController : ControllerBase
                         : accommodations.OrderByDescending(a => a.Title).ToList();
             }
 
-            int totalItems = accommodations.Count;
-            int totalPages = (int)Math.Ceiling(totalItems / (double)request.Limit);
+            var totalItems = accommodations.Count;
+            var totalPages = (int)Math.Ceiling(totalItems / (double)request.Limit);
 
             var paginatedItems = accommodations
                 .Skip((request.Page - 1) * request.Limit)
                 .Take(request.Limit)
                 .ToList();
 
-            var result = new
+            return Ok(new
             {
                 currentPage = request.Page,
                 totalPages,
                 totalItems,
                 items = paginatedItems
-            };
-
-            return Ok(result);
+            });
         }
         catch (Exception ex)
         {
             return StatusCode(500, "Error interno del servidor: " + ex.Message);
         }
     }
+
 
 
     [HttpPut("{id}/{ownerId}")]

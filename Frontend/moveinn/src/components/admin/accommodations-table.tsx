@@ -5,7 +5,7 @@ import axios from "axios"
 import { format } from "date-fns"
 import { Pencil } from "lucide-react"
 
-import { API_ALL_ACCOMMODATION } from "@/utils/endpoints/config"
+import { API_ADMIN_DELETE_ACCOMMODATION, API_ALL_ACCOMMODATION } from "@/utils/endpoints/config"
 import {
   Table,
   TableBody,
@@ -26,6 +26,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
+import { getCookie } from "cookies-next"
+import { toast } from "sonner"
 
 interface Accommodation {
   id: string
@@ -54,7 +56,11 @@ export function AccommodationsTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const token = getCookie("token")
+        if (!token) {
+          console.error("No token found")
+          return
+        }
         const res = await axios.get<Accommodation[]>(API_ALL_ACCOMMODATION, {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -77,6 +83,26 @@ export function AccommodationsTable() {
     setOpen(false)
   }
 
+  const handleDelete = async () => {
+    if (!selected) return
+    try {
+      const token = getCookie("token")
+      if (!token) {
+        console.error("No token found")
+        return
+      }
+      await axios.delete(API_ADMIN_DELETE_ACCOMMODATION(selected.id), {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setAccommodations((prev) => prev.filter((a) => a.id !== selected.id))
+      handleClose()
+      toast.success(`Accommodation "${selected.title}" deleted successfully`)
+    } catch (err) {
+      console.error("Error deleting accommodation", err)
+      toast.error("Failed to delete accommodation. Please try again.")
+    }
+  }
+
   return (
     <Card className="bg-foreground border-none shadow-md">
       <CardHeader>
@@ -91,6 +117,7 @@ export function AccommodationsTable() {
             <TableHeader>
               <TableRow className="border-b border-gray-200 dark:border-gray-800">
                 <TableHead className="text-text font-semibold">Title</TableHead>
+                <TableHead className="text-text font-semibold">Description</TableHead>
                 <TableHead className="text-text font-semibold">City</TableHead>
                 <TableHead className="text-text font-semibold">Price</TableHead>
                 <TableHead className="text-text font-semibold">Rooms</TableHead>
@@ -105,6 +132,9 @@ export function AccommodationsTable() {
                   className="border-b border-gray-200 dark:border-gray-800 hover:bg-accent/10"
                 >
                   <TableCell className="font-medium text-text">{acc.title}</TableCell>
+                  <TableCell className="text-text max-w-[300px] truncate whitespace-nowrap overflow-hidden">
+                    {acc.description}
+                  </TableCell>
                   <TableCell className="text-text">{acc.city}</TableCell>
                   <TableCell className="text-text">€{acc.pricePerMonth}</TableCell>
                   <TableCell className="text-text">{acc.numberOfRooms}</TableCell>
@@ -127,32 +157,37 @@ export function AccommodationsTable() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md z-50 border border-gray-200 dark:border-gray-800">
-                          <DialogHeader>
-                            <DialogTitle>Delete Accommodation</DialogTitle>
-                            <DialogDescription>
-                              Are you sure you want to delete{" "}
-                              <span className="font-semibold text-destructive">
-                                {selected?.title}
-                              </span>
-                              ?
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                            <Button variant="ghost" className="text-text" onClick={handleClose}>
-                              Cancel
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              className="text-white bg-red-500 hover:bg-red-600"
-                              onClick={() => {
-                                console.log("🗑 DELETE ACCOMMODATION:", selected?.id)
-                                handleClose()
-                              }}
-                            >
-                              Confirm Delete
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
+  <DialogHeader>
+    <DialogTitle className="text-primary dark:text-text-secondary">Delete Accommodation</DialogTitle>
+    <DialogDescription className="text-text mb-2">
+      Are you sure you want to delete{" "}
+      <span className="font-semibold text-destructive">{selected?.title}</span>?
+    </DialogDescription>
+  </DialogHeader>
+
+  {selected?.description && (
+    <div className="text-text text-sm mb-4">
+      <p className="font-semibold mb-1">Description:</p>
+      <div className="border rounded p-3 max-h-40 overflow-y-auto bg-muted whitespace-pre-line">
+        {selected.description}
+      </div>
+    </div>
+  )}
+
+  <DialogFooter>
+    <Button variant="ghost" className="dark:text-text-secondary" onClick={handleClose}>
+      Cancel
+    </Button>
+    <Button
+      variant="default"
+      className="bg-red-500 hover:bg-red-600 text-white"
+      onClick={handleDelete}
+    >
+      Confirm Delete
+    </Button>
+  </DialogFooter>
+</DialogContent>
+
                       </Dialog>
                     </div>
                   </TableCell>

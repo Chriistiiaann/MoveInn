@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import {
+  API_BASE_IMAGE_URL,
+  API_GET_HOSTS,
   API_HOST_GET_REQUESTS,
   API_HOST_REQUEST_ACCEPT,
   API_HOST_REQUEST_REJECT
@@ -22,7 +24,12 @@ interface HostRequest {
   specialties: string[]
 }
 
-export function HostRequests() {
+interface HostRequestProps {
+  setHosts: React.Dispatch<React.SetStateAction<any[]>>;
+}
+
+export function HostRequests({ setHosts }: HostRequestProps) {
+
   const [requests, setRequests] = useState<HostRequest[]>([])
   const [selected, setSelected] = useState<HostRequest | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -50,22 +57,31 @@ export function HostRequests() {
         ? API_HOST_REQUEST_ACCEPT(id)
         : API_HOST_REQUEST_REJECT(id)
 
-    try {
-      await axios.post(url, {}, { headers: { Authorization: `Bearer ${token}` } })
-      setFeedback(
-        action === "accept"
-          ? "Request accepted successfully"
-          : "Request rejected successfully"
-      )
-      setSelected(null)
-      fetchRequests()
-
-      setTimeout(() => setFeedback(null), 3000)
-    } catch (err) {
-      console.error("Error performing action:", err)
-      setFeedback("Something went wrong. Try again.")
-      setTimeout(() => setFeedback(null), 3000)
-    }
+        try {
+          await axios.post(url, {}, { headers: { Authorization: `Bearer ${token}` } });
+        
+          // 🆕 Si fue aceptado, refrescamos la lista de hosts
+          if (action === "accept") {
+            const hostsRes = await axios.get(API_GET_HOSTS, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setHosts(hostsRes.data);
+          }
+        
+          setFeedback(
+            action === "accept"
+              ? "Request accepted successfully"
+              : "Request rejected successfully"
+          );
+          setSelected(null);
+          fetchRequests();
+        
+          setTimeout(() => setFeedback(null), 3000);
+        } catch (err) {
+          console.error("Error performing action:", err);
+          setFeedback("Something went wrong. Try again.");
+          setTimeout(() => setFeedback(null), 3000);
+        }
   }
 
   return (
@@ -94,11 +110,19 @@ export function HostRequests() {
           className="min-h-[180px] p-4 flex flex-col justify-between gap-2 text-text bg-background border border-gray-200 dark:border-gray-800 shadow-sm"
         >
           <div className="flex items-center gap-4">
-            <img
-              src={req.avatarUrl}
-              alt={req.userName}
-              className="w-12 h-12 rounded-full object-cover"
-            />
+          {req.avatarUrl && req.avatarUrl !== "default-avatar-url" ? (
+          <img
+            src={API_BASE_IMAGE_URL + req.avatarUrl}
+            alt={req.userName}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm uppercase">
+              {req.userName.charAt(0)}
+            </div>
+          )}
+
+
             <div>
               <p className="font-semibold">{req.userName}</p>
               <p className="text-xs text-text-secondary">

@@ -29,73 +29,295 @@ namespace Backend.Models.Database
         public async Task Seed()
         {
             var users = new List<User>
-                 {
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Yasir",
-                    LastName = "Bel Maalem",
-                    Mail = "yasir@gmail.com",
-                    Password = AuthService.HashPassword("passwordYasir"),
-                    Biography = "Living the Life",
-                    Phone = "631387444",
-                    AvatarUrl = "default-avatar-url",
-                    Role = Role.Administrator,
-                    School = "CPIFP Alan Turing",
-                    Degree = "Web Aplication Development",
-                    City = "Izmir",
-                    ErasmusCountry = "Turkey",
-                    Nationality = "Morocco",
-                    ErasmusDate = new DateOnly(2025, 3, 14),
-                    SocialMedias = new List<SocialMediaLink>
-                    {
-                        new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" }
-                    }
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Christian",
-                    LastName = "Rodriguez",
-                    Mail = "christian@gmail.com",
-                    Password = AuthService.HashPassword("passwordChristian"),
-                    Biography = "Biografía de Christian",
-                    Phone = "222222222",
-                    AvatarUrl = "default-avatar-url",
-                    Role = Role.Administrator,
-                    School = "Escuela de Christian",
-                    Degree = "Grado de Christian",
-                    Nationality = "Nacionalidad de Christian",
-                    SocialMedias = new List<SocialMediaLink>
-                    {
-                        new SocialMediaLink { SocialMedia = SocialMedia.Facebook, Url = "https://facebook.com/fakeChristian" },
-                        new SocialMediaLink { SocialMedia = SocialMedia.X, Url = "https://x.com/fakeChristian" }
-                    }
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Kilian",
-                    LastName = "Méndez Ávila",
-                    Mail = "kilian@gmail.com",
-                    Password = AuthService.HashPassword("passwordKilian"),
-                    Biography = "De erasmus en Barcelona",
-                    Phone = "635893667",
-                    AvatarUrl = "default-avatar-url",
-                    Role = Role.Administrator,
-                    School = "CPIFP Alan Turing",
-                    Degree = "Web Aplication Development",
-                    City = "Barcelona",
-                    ErasmusCountry = "Spain",
-                    Nationality = "Spain",
-                    ErasmusDate = new DateOnly(2025, 3, 14),
-                    SocialMedias = new List<SocialMediaLink>
-                    {
-                        new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" },
+{
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Yasir",
+        LastName = "Bel Maalem",
+        Mail = "yasir@gmail.com",
+        Password = AuthService.HashPassword("passwordYasir"),
+        Biography = "Living the Life",
+        Phone = "631387444",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.Administrator,
+        School = "CPIFP Alan Turing",
+        Degree = "Web Aplication Development",
+        City = "Izmir",
+        ErasmusCountry = "Turkey",
+        Nationality = "Morocco",
+        ErasmusDate = new DateOnly(2025, 3, 14),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Kilian",
+        LastName = "Méndez Ávila",
+        Mail = "kilian@gmail.com",
+        Password = AuthService.HashPassword("passwordKilian"),
+        Biography = "De erasmus en Barcelona",
+        Phone = "635893667",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.Administrator,
+        School = "CPIFP Alan Turing",
+        Degree = "Web Aplication Development",
+        City = "Barcelona",
+        ErasmusCountry = "Spain",
+        Nationality = "Spain",
+        ErasmusDate = new DateOnly(2025, 3, 14),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Christian",
+        LastName = "Rodriguez Lara",
+        Mail = "christian@gmail.com",
+        Password = AuthService.HashPassword("passwordchristian"),
+        Biography = "Hola Izmir!!!",
+        Phone = "667896654",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.Administrator,
+        School = "CPIFP Alan Turing",
+        Degree = "Web Aplication Development",
+        City = "Izmir",
+        ErasmusCountry = "Turkey",
+        Nationality = "Spain",
+        ErasmusDate = new DateOnly(2025, 3, 14),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Marco",
+        LastName = "Rivercci Corleone",
+        Mail = "marco@gmail.com",
+        Password = AuthService.HashPassword("passwordMarco"),
+        Biography = "Finally in Germany!!!",
+        Phone = "667896654",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University Fritz",
+        Degree = "Mechanical engeneering",
+        City = "Munich",
+        ErasmusCountry = "Germany",
+        Nationality = "Italian",
+        ErasmusDate = new DateOnly(2025, 3, 14),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yasiirr7" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Lina",
+        LastName = "Martinez Lopez",
+        Mail = "lina@gmail.com",
+        Password = AuthService.HashPassword("passwordLina"),
+        Biography = "Living my Erasmus dream in Lisbon!",
+        Phone = "641223344",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of Barcelona",
+        Degree = "Business Administration",
+        City = "Lisbon",
+        ErasmusCountry = "Portugal",
+        Nationality = "Spain",
+        ErasmusDate = new DateOnly(2025, 2, 1),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.X, Url = "https://twitter.com/linaerasmus" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Jonas",
+        LastName = "Schneider",
+        Mail = "jonas@gmail.com",
+        Password = AuthService.HashPassword("passwordJonas"),
+        Biography = "Exploring new cultures and food!",
+        Phone = "654789123",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "TU Berlin",
+        Degree = "Computer Science",
+        City = "Barcelona",
+        ErasmusCountry = "Spain",
+        Nationality = "Germany",
+        ErasmusDate = new DateOnly(2025, 4, 5),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://linkedin.com/in/jonass" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Maja",
+        LastName = "Nowak",
+        Mail = "maja@gmail.com",
+        Password = AuthService.HashPassword("passwordMaja"),
+        Biography = "Can't wait to visit the Sagrada Familia!",
+        Phone = "612345678",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of Warsaw",
+        Degree = "Architecture",
+        City = "Barcelona",
+        ErasmusCountry = "Spain",
+        Nationality = "Poland",
+        ErasmusDate = new DateOnly(2025, 3, 1),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/maja_travel" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Pierre",
+        LastName = "Dubois",
+        Mail = "pierre@gmail.com",
+        Password = AuthService.HashPassword("passwordPierre"),
+        Biography = "Studying and surfing in Lisbon 😎",
+        Phone = "698754321",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "Sorbonne University",
+        Degree = "Philosophy",
+        City = "Lisbon",
+        ErasmusCountry = "Portugal",
+        Nationality = "France",
+        ErasmusDate = new DateOnly(2025, 2, 20),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/pierre_d" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Sophia",
+        LastName = "Papadopoulos",
+        Mail = "sophia@gmail.com",
+        Password = AuthService.HashPassword("passwordSophia"),
+        Biography = "Erasmus in Prague - loving the culture!",
+        Phone = "699112233",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of Athens",
+        Degree = "International Relations",
+        City = "Prague",
+        ErasmusCountry = "Czech Republic",
+        Nationality = "Greece",
+        ErasmusDate = new DateOnly(2025, 3, 10),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Facebook, Url = "https://facebook.com/sophiaerasmus" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Lucas",
+        LastName = "Carvalho",
+        Mail = "lucas@gmail.com",
+        Password = AuthService.HashPassword("passwordLucas"),
+        Biography = "Soaking up the Italian sun and culture",
+        Phone = "676889900",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of São Paulo",
+        Degree = "Law",
+        City = "Rome",
+        ErasmusCountry = "Italy",
+        Nationality = "Brazil",
+        ErasmusDate = new DateOnly(2025, 3, 5),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://tiktok.com/@lucasitalia" }
+        }
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Anna",
+        LastName = "Ivanova",
+        Mail = "anna@gmail.com",
+        Password = AuthService.HashPassword("passwordAnna"),
+        Biography = "Exploring Vienna and Austrian culture!",
+        Phone = "644556677",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "Moscow State University",
+        Degree = "History",
+        City = "Vienna",
+        ErasmusCountry = "Austria",
+        Nationality = "Russia",
+        ErasmusDate = new DateOnly(2025, 2, 25),
+        SocialMedias = new List<SocialMediaLink>()
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Nora",
+        LastName = "Eriksen",
+        Mail = "nora@gmail.com",
+        Password = AuthService.HashPassword("passwordNora"),
+        Biography = "Enjoying student life in Italy 🍝",
+        Phone = "611223344",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of Oslo",
+        Degree = "Political Science",
+        City = "Florence",
+        ErasmusCountry = "Italy",
+        Nationality = "Norway",
+        ErasmusDate = new DateOnly(2025, 2, 18),
+        SocialMedias = new List<SocialMediaLink>()
+    },
+    new User
+    {
+        Id = Guid.NewGuid(),
+        Name = "Yuki",
+        LastName = "Takahashi",
+        Mail = "yuki@gmail.com",
+        Password = AuthService.HashPassword("passwordYuki"),
+        Biography = "Loving Paris and all the art 🎨",
+        Phone = "699887766",
+        AvatarUrl = "default-avatar-url",
+        Role = Role.User,
+        School = "University of Tokyo",
+        Degree = "Fine Arts",
+        City = "Paris",
+        ErasmusCountry = "France",
+        Nationality = "Japan",
+        ErasmusDate = new DateOnly(2025, 4, 10),
+        SocialMedias = new List<SocialMediaLink>
+        {
+            new SocialMediaLink { SocialMedia = SocialMedia.Instagram, Url = "https://instagram.com/yukiart" }
+        },
+        Languages = new List<UserLanguage>
+        {
+            new UserLanguage { Id = Guid.NewGuid(), Language = "Japanese", Level = LanguageLevel.Native },
+            new UserLanguage { Id = Guid.NewGuid(), Language = "French", Level = LanguageLevel.C1 }
+        }
+    }
+};
 
-                    }
-                }
-                };
+
             var recommendation1 = new Recommendation
             {
                 Id = Guid.NewGuid(),
@@ -266,6 +488,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 2,
                     Bathrooms = 1,
                     SquareMeters = 75,
+                    AcommodationType = AcommodationType.Apartment,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 6, 1),
                     AvailableTo = new DateTime(2025, 12, 25),
@@ -290,6 +513,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 1,
                     Bathrooms = 1,
                     SquareMeters = 40,
+                    AcommodationType = AcommodationType.Room,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 6, 1),
                     AvailableTo = new DateTime(2025, 12, 31),
@@ -313,6 +537,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 3,
                     Bathrooms = 2,
                     SquareMeters = 120,
+                    AcommodationType = AcommodationType.Apartment,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 1, 1),
                     AvailableTo = new DateTime(2025, 5, 31),
@@ -337,6 +562,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 3,
                     Bathrooms = 2,
                     SquareMeters = 120,
+                    AcommodationType = AcommodationType.Others,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 1, 1),
                     AvailableTo = new DateTime(2025, 5, 31),
@@ -361,6 +587,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 3,
                     Bathrooms = 2,
                     SquareMeters = 120,
+                    AcommodationType = AcommodationType.Rural,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 1, 1),
                     AvailableTo = new DateTime(2025, 5, 31),
@@ -385,6 +612,7 @@ namespace Backend.Models.Database
                     NumberOfRooms = 3,
                     Bathrooms = 2,
                     SquareMeters = 120,
+                    AcommodationType = AcommodationType.House,
                     HasWifi = true,
                     AvailableFrom = new DateTime(2025, 1, 1),
                     AvailableTo = new DateTime(2025, 5, 31),
@@ -480,7 +708,7 @@ namespace Backend.Models.Database
                 Title = "Foro de Prueba",
                 Description = "Este es un foro para pruebas.",
                 Country = "Spain",
-                Category = ForumCategory.QuedadasYEventos,
+                Category = ForumCategory.MeetupsAndEvents,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = users[0].Id,
                 Threads = new List<ForumThread>()
@@ -583,6 +811,112 @@ namespace Backend.Models.Database
                 ParentMessageId = messageA_thread2.Id
             };
 
+            var forumPosts = new List<Forum>
+            {
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "How to apply for TIE as an Erasmus student?",
+                    Description = "A guide based on my personal experience with getting the residence card in Spain.",
+                    Country = "Spain",
+                    Category = ForumCategory.ProceduresAndDocumentation,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[0].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "University life in Barcelona - what to expect?",
+                    Description = "Sharing how my classes are structured and tips for surviving your first month.",
+                    Country = "Spain",
+                    Category = ForumCategory.UniversityAndAcademicLife,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[1].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Culture shock in Germany 🇩🇪",
+                    Description = "From silence on the metro to bread with every meal. What surprised you the most?",
+                    Country = "Germany",
+                    Category = ForumCategory.CulturalAndSocialIntegration,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[2].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "How to get an Erasmus+ scholarship top-up?",
+                    Description = "Tips and links to apply for additional financial aid in Portugal.",
+                    Country = "Portugal",
+                    Category = ForumCategory.ScholarshipsAndFinances,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[3].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Public transport in Prague: best student cards",
+                    Description = "I compared all the options and here's what I found works best.",
+                    Country = "Czech Republic",
+                    Category = ForumCategory.MobilityAndTransportation,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[4].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Best nightlife spots in Lisbon 🍻",
+                    Description = "Bairro Alto or Pink Street? Share your favorite places to go out!",
+                    Country = "Portugal",
+                    Category = ForumCategory.LeisureTourismAndNightlife,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[5].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "June Erasmus Meetup – who’s in?",
+                    Description = "Let's organize a picnic or beach day. Drop your ideas here!",
+                    Country = "Spain",
+                    Category = ForumCategory.MeetupsAndEvents,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[6].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "10 things I wish I packed before Erasmus",
+                    Description = "Trust me, you'll thank yourself for bringing these essentials...",
+                    Country = "Italy",
+                    Category = ForumCategory.TipsAndExperiences,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[7].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Can I extend my Erasmus stay?",
+                    Description = "I heard it’s possible. Has anyone done it and how did it go?",
+                    Country = "France",
+                    Category = ForumCategory.FAQ,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[8].Id
+                },
+                new Forum
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Random reflections after 2 months abroad",
+                    Description = "Some thoughts about independence, growth, and unexpected lessons.",
+                    Country = "Spain",
+                    Category = ForumCategory.Other,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = users[9].Id
+                }
+            };
+
+            _dataContext.Forum.AddRange(forumPosts);
+
             thread2.Posts.Add(messageA_thread2);
             thread2.Posts.Add(messageB_thread2);
             thread2.Posts.Add(messageC_thread2);
@@ -651,20 +985,145 @@ namespace Backend.Models.Database
                     Date = new DateTime(2025, 06, 20, 18, 30, 0),
                     Location = "Centro Cultural de Sevilla",
                     Address = "Plaza Nueva, 1, 41001 Sevilla",
+                    City ="Malaga",
+                    Country ="Spain",
                     AttendeesCount = 0,
                     MaxAttendees = 50,
-                    Category = "Quedada",
+                    Category = "social",
                     Description = "Encuentro para estudiantes Erasmus. Habrá música, comida y visitas guiadas.",
                     ImageUrl = "events/erasmus-sevilla.jpg",
                     Tags = new List<string> { "erasmus", "intercambio", "sevilla" },
-                    CreatorId = users[0].Id,  // Yasir es el creador
-                    Participants = new List<User>
-                    {
-                        users[1], // Christian
-                        users[2]  // Kilian
-                    }
+                    CreatorId = users[0].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Excursión a Montserrat",
+                    Date = new DateTime(2025, 06, 22, 09, 00, 0),
+                    Location = "Montserrat, Barcelona",
+                    Address = "Estación Montserrat-Aeri",
+                    City="Barcelona",
+                    Country="Spain",
+                    AttendeesCount = 0,
+                    MaxAttendees = 30,
+                    Category = "trip",
+                    Description = "Excursión de día completo para explorar la montaña de Montserrat y su monasterio.",
+                    ImageUrl = "events/trip-montserrat.jpg",
+                    Tags = new List<string> { "aventura", "senderismo", "barcelona" },
+                    CreatorId = users[0].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Visita al Museo Picasso",
+                    Date = new DateTime(2025, 06, 25, 15, 00, 0),
+                    Location = "Museu Picasso, Barcelona",
+                    Address = "Carrer Montcada, 15-23, 08003 Barcelona",
+                    City="Izmir",
+                    Country="Turkey",
+                    AttendeesCount = 0,
+                    MaxAttendees = 40,
+                    Category = "cultural",
+                    Description = "Tour guiado por el Museo Picasso para conocer la historia y obras del artista.",
+                    ImageUrl = "events/museo-picasso.jpg",
+                    Tags = new List<string> { "arte", "historia", "barcelona" },
+                    CreatorId = users[1].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Charla sobre oportunidades académicas en Europa",
+                    Date = new DateTime(2025, 06, 27, 17, 00, 0),
+                    Location = "Universitat de Barcelona",
+                    Address = "Gran Via de les Corts Catalanes, 585, 08007 Barcelona",
+                    City="New york",
+                    Country="United States",
+                    AttendeesCount = 0,
+                    MaxAttendees = 100,
+                    Category = "academic",
+                    Description = "Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.Sesión informativa sobre becas y másters en universidades europeas.",
+                    ImageUrl = "events/academic-session.jpg",
+                    Tags = new List<string> { "becas", "educación", "europeo" },
+                    CreatorId = users[2].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Torneo de fútbol Erasmus",
+                    Date = new DateTime(2025, 07, 01, 10, 00, 0),
+                    Location = "Complejo Deportivo Mar Bella",
+                    Address = "Av. del Litoral, 86-96, 08005 Barcelona",
+                    City="Madrid",
+                    Country="Spain",
+                    AttendeesCount = 0,
+                    MaxAttendees = 60,
+                    Category = "sports",
+                    Description = "Participa o anima en nuestro torneo de fútbol entre estudiantes Erasmus.",
+                    ImageUrl = "events/football-tournament.jpg",
+                    Tags = new List<string> { "deporte", "fútbol", "amistad" },
+                    CreatorId = users[0].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Taller de cocina española",
+                    Date = new DateTime(2025, 07, 03, 18, 00, 0),
+                    Location = "Kitchen Lab BCN",
+                    Address = "Carrer de París, 143, 08036 Barcelona",
+                    City="Barcelona",
+                    Country="Spain",
+                    AttendeesCount = 0,
+                    MaxAttendees = 20,
+                    Category = "workshop",
+                    Description = "Aprende a cocinar tapas y paella como un verdadero chef español.",
+                    ImageUrl = "events/cooking-workshop.jpg",
+                    Tags = new List<string> { "paella", "gastronomía", "taller" },
+                    CreatorId = users[1].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Fiesta en la playa Barceloneta",
+                    Date = new DateTime(2025, 07, 05, 21, 00, 0),
+                    Location = "Playa de la Barceloneta",
+                    Address = "Passeig Marítim de la Barceloneta, 08003 Barcelona",
+                    City="Barcelona",
+                    Country="Spain",
+                    AttendeesCount = 0,
+                    MaxAttendees = 150,
+                    Category = "party",
+                    Description = "Música, bebidas y diversión bajo las estrellas en la playa.",
+                    ImageUrl = "events/beach-party.jpg",
+                    Tags = new List<string> { "playa", "música", "noche" },
+                    CreatorId = users[2].Id,
+                    
+                },
+                new Event
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Ruta gastronómica por el Born",
+                    Date = new DateTime(2025, 07, 08, 13, 00, 0),
+                    Location = "Barrio del Born, Barcelona",
+                    Address = "Passeig del Born, 08003 Barcelona",
+                    City="Barcelona",
+                    Country="Spain",
+                    AttendeesCount = 0,
+                    MaxAttendees = 25,
+                    Category = "food",
+                    Description = "Descubre los mejores sabores locales en una ruta por restaurantes auténticos.",
+                    ImageUrl = "events/food-tour-born.jpg",
+                    Tags = new List<string> { "tapas", "comida", "born" },
+                    CreatorId = users[0].Id,
+                    
                 }
             };
+
             _dataContext.Events.AddRange(events);
             _dataContext.Hosts.AddRange(hosts);
             await _dataContext.SaveChangesAsync();

@@ -11,6 +11,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordMatch, setPasswordMatch] = useState(true)
+  const [isNavigatingToLogin, setIsNavigatingToLogin] = useState(false)
   const router = useRouter()
   const { register, isLoading, error } = useAuth()
 
@@ -35,7 +36,7 @@ export default function RegisterForm() {
 
     try {
       await register(name, mail, password, phone)
-      router.push("/dashboard")
+        router.push("/dashboard")
     } catch (err) {
       console.error("Error en registro:", err)
     }
@@ -44,7 +45,7 @@ export default function RegisterForm() {
   return (
     <div className="w-full max-w-md">
       <Link href="/" passHref>
-        <Button variant="ghost" className="text-sm hover:bg-primary/10">
+        <Button variant="ghost" className="text-sm hover:bg-primary/10 text-primary dark:text-text-secondary">
           ← Back to Landing
         </Button>
       </Link>
@@ -57,7 +58,7 @@ export default function RegisterForm() {
         <p className="text-text-secondary">Create your account in just a few steps</p>
       </div>
 
-      <div className="border border-gray-200 rounded-lg p-6 bg-foreground shadow-sm">
+      <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-6 bg-foreground shadow-sm">
         <h2 className="font-semibold text-lg mb-1 text-text">Create your account</h2>
         <p className="text-sm text-text-secondary mb-6">
           Join the MoveInn community and start your Erasmus journey
@@ -89,7 +90,7 @@ export default function RegisterForm() {
                 name="name"
                 type="text"
                 placeholder="John Doe"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-text-secondary rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
                 required
               />
             </div>
@@ -109,7 +110,7 @@ export default function RegisterForm() {
                 name="phone"
                 type="tel"
                 placeholder="655555555"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-text-secondary rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
                 required
               />
             </div>
@@ -129,7 +130,7 @@ export default function RegisterForm() {
                 name="mail"
                 type="email"
                 placeholder="your.email@gmail.com"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-text-secondary rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
                 required
               />
             </div>
@@ -149,13 +150,14 @@ export default function RegisterForm() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••••"
-                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-text-secondary rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
                 required
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text"
+                aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -176,13 +178,14 @@ export default function RegisterForm() {
                 name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••••••"
-                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-text-secondary rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-text"
                 required
               />
               <button
                 type="button"
                 onClick={toggleConfirmPasswordVisibility}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text"
+                aria-label="Toggle password visibility"
               >
                 {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -195,19 +198,79 @@ export default function RegisterForm() {
             disabled={isLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:text-gray-900 bg-primary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
           >
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? (
+  <>
+    <svg
+      className="animate-spin h-5 w-5 text-white mr-2"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16 8 8 0 01-8-8z"
+      />
+    </svg>
+    Creating Account...
+  </>
+) : (
+  "Create Account"
+)}
+
           </button>
         </form>
 
         {/* Link to login */}
         <div className="mt-4 text-center text-sm text-text-secondary">
           Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-primary hover:text-primary-dark dark:text-gray-400 dark:hover:text-gray-200 font-medium inline-flex items-center transition-colors"
-          >
-            Login
-          </Link>
+          <button
+  onClick={() => {
+    setIsNavigatingToLogin(true)
+    router.push("/login")
+  }}
+  disabled={isNavigatingToLogin}
+  className="text-primary hover:text-primary-dark dark:text-gray-400 dark:hover:text-gray-200 font-medium inline-flex items-center transition-colors"
+>
+  {isNavigatingToLogin ? (
+    <>
+      <svg
+        className="animate-spin h-4 w-4 mr-2"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16 8 8 0 01-8-8z"
+        />
+      </svg>
+      Loading...
+    </>
+  ) : (
+    <>
+      Login
+    </>
+  )}
+</button>
+
         </div>
       </div>
     </div>

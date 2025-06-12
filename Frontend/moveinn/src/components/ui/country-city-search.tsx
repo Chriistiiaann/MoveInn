@@ -97,7 +97,7 @@ export function CountrySearch({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className} border-primary dark:border-text-secondary`}>
       <div className="relative flex items-center">
         {selectedFlag && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-7 overflow-hidden rounded-sm">
@@ -120,7 +120,7 @@ export function CountrySearch({
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
-          className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-800 ${
+          className={`w-full border border-primary dark:border-text-secondary rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-text ${
             selectedFlag ? "pl-12" : "pl-10"
           }`}
           placeholder={placeholder}
@@ -142,19 +142,19 @@ export function CountrySearch({
       {isOpen && (query.length >= 2 || countries.length > 0) && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto bg-foreground border-primary dark:border-text-secondary"
         >
           {isLoading ? (
-            <div className="flex items-center justify-center p-4">
+            <div className="flex items-center justify-center p-4 bg-background">
               <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-              <span className="ml-2 text-gray-600">Searching...</span>
+              <span className="ml-2 text-text">Searching...</span>
             </div>
           ) : countries.length > 0 ? (
-            <ul className="py-1">
+            <ul className="py-0 border-none">
               {countries.map((country) => (
                 <li
                   key={country.name}
-                  className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center px-3 py-2 bg-background hover:bg-foreground cursor-pointer"
                   onClick={() => handleSelect(country)}
                 >
                   <div className="h-5 w-7 mr-3 overflow-hidden rounded-sm">
@@ -167,12 +167,12 @@ export function CountrySearch({
                       unoptimized
                     />
                   </div>
-                  <span className="text-gray-800">{country.name}</span>
+                  <span className="text-text">{country.name}</span>
                 </li>
               ))}
             </ul>
           ) : query.length >= 2 ? (
-            <div className="p-3 text-gray-500 text-center">No countries found</div>
+            <div className="p-3 text-text text-center">No countries found</div>
           ) : null}
         </div>
       )}
@@ -273,7 +273,7 @@ export function CitySearch({
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
-          className="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-800"
+          className="w-full border border-primary dark:border-text-secondary rounded-lg p-3 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-text"
           placeholder={country ? placeholder : "Select a country first"}
           disabled={disabled || !country}
         />
@@ -294,19 +294,19 @@ export function CitySearch({
       {isOpen && !disabled && country && (query.length >= 2 || cities.length > 0) && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute z-10 mt-1 w-full bg-background border border-primary dark:border-text-secondary rounded-md shadow-lg max-h-60 overflow-auto"
         >
           {isLoading ? (
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-              <span className="ml-2 text-gray-600">Searching...</span>
+              <span className="ml-2 text-text">Searching...</span>
             </div>
           ) : cities.length > 0 ? (
             <ul className="py-1">
               {cities.map((city) => (
                 <li
                   key={city}
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-gray-800"
+                  className="px-3 py-2 hover:bg-foreground cursor-pointer text-text"
                   onClick={() => handleSelect(city)}
                 >
                   {city}
@@ -314,7 +314,7 @@ export function CitySearch({
               ))}
             </ul>
           ) : query.length >= 2 ? (
-            <div className="p-3 text-gray-500 text-center">No cities found</div>
+            <div className="p-3 text-text text-center">No cities found</div>
           ) : null}
         </div>
       )}

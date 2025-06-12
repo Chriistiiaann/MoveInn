@@ -31,3 +31,22 @@ public class HostSummaryDTO
     public DateTime? HostSince { get; set; }
     public List<string> Specialties { get; set; } = new();
 }
+
+public class HostSearchDTO
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string? Biography { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? School { get; set; }
+    public string? City { get; set; }
+    public string? Nationality { get; set; }
+    public string? ErasmusCountry { get; set; }
+    public List<SpecialityDTO> Specialties { get; set; } = new();
+}
+
+public class SpecialityDTO
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+}

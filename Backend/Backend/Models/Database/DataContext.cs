@@ -28,8 +28,8 @@ public class DataContext : DbContext
     public DbSet<UserLanguage> UserLanguages { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.LogTo(Console.WriteLine);
-        optionsBuilder.EnableSensitiveDataLogging();
+        //optionsBuilder.LogTo(Console.WriteLine);
+        //optionsBuilder.EnableSensitiveDataLogging();
 
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
         string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");

@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useState } from "react"
 import { Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,37 +20,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { API_GET_HOSTS } from "@/utils/endpoints/config"
+import axios from "axios";
+import { API_BASE_IMAGE_URL, API_HOST_REQUEST_REJECT } from "@/utils/endpoints/config";
+import { getCookie } from "cookies-next"
+
 
 interface Host {
-  hostId: string
-  userId: string
-  userName: string
-  avatarUrl: string
-  hostSince: string
-  specialties: string[]
+  hostId: string;
+  userId: string;
+  userName: string;
+  avatarUrl: string;
+  hostSince: string;
+  specialties: string[];
 }
 
-export function HostsTable() {
-  const [hosts, setHosts] = useState<Host[]>([])
+interface HostsTableProps {
+  hosts: Host[];
+  setHosts: React.Dispatch<React.SetStateAction<Host[]>>;
+}
+
+export function HostsTable({ hosts, setHosts }: HostsTableProps) {
+
   const [selectedHost, setSelectedHost] = useState<Host | null>(null)
   const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchHosts = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        const res = await axios.get<Host[]>(API_GET_HOSTS, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        setHosts(res.data)
-      } catch (err) {
-        console.error("Error fetching hosts", err)
-      }
-    }
-
-    fetchHosts()
-  }, [])
 
   const handleOpenChange = (value: boolean) => {
     if (!value) setSelectedHost(null)
@@ -75,11 +67,20 @@ export function HostsTable() {
             className="border-b border-gray-200 dark:border-gray-800 hover:bg-accent/10"
           >
             <TableCell className="flex items-center gap-2 text-text">
-              <img
-                src={host.avatarUrl}
-                alt={host.userName}
-                className="w-8 h-8 rounded-full object-cover"
-              />
+            <TableCell className="flex items-center gap-2 text-text">
+  {host.avatarUrl === "default-avatar-url" || !host.avatarUrl ? (
+    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-medium text-sm">
+      {host.userName?.charAt(0).toUpperCase()}
+    </div>
+  ) : (
+    <img
+      src={`${API_BASE_IMAGE_URL}/${host.avatarUrl}`}
+      alt={host.userName}
+      className="w-8 h-8 rounded-full object-cover"
+    />
+  )}
+</TableCell>
+
               {host.userName}
             </TableCell>
             <TableCell className="text-text">
@@ -124,10 +125,26 @@ export function HostsTable() {
                       <Button
                         variant="destructive"
                         className="bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => {
-                          console.log("🔧 Remove host status for", selectedHost?.userId)
-                          setOpen(false)
-                        }}
+                        onClick={async () => {
+                          if (!selectedHost) return;
+                        
+                          try {
+                            const token = getCookie("token");
+                            await axios.post(
+                              API_HOST_REQUEST_REJECT(selectedHost.hostId),
+                              {},
+                              {
+                                headers: { Authorization: `Bearer ${token}` },
+                              }
+                            );
+                        
+                            // 🆕 Actualizamos la lista de hosts en frontend
+                            setHosts((prev) => prev.filter((h) => h.hostId !== selectedHost.hostId));
+                            setOpen(false);
+                          } catch (err) {
+                            console.error("❌ Error removing host:", err);
+                          }
+                        }}                        
                       >
                         Remove Host
                       </Button>

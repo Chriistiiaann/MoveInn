@@ -46,9 +46,7 @@ public class AccommodationService : IAccommodationService
     {
         var userExists = await _context.Users.AnyAsync(u => u.Id == accommodationDto.OwnerId);
         if (!userExists)
-        {
             throw new Exception("El usuario especificado (OwnerId) no existe en la base de datos.");
-        }
 
         var accommodation = AccommodationMapper.ToEntity(accommodationDto);
         accommodation.Id = Guid.NewGuid();
@@ -59,9 +57,7 @@ public class AccommodationService : IAccommodationService
         if (accommodationDto.AccomodationImages != null && accommodationDto.AccomodationImages.Any())
         {
             if (accommodationDto.AccomodationImages.Count > 5)
-            {
                 throw new Exception("Solo se permiten hasta 5 imágenes por alojamiento.");
-            }
 
             foreach (var file in accommodationDto.AccomodationImages)
             {
@@ -70,6 +66,7 @@ public class AccommodationService : IAccommodationService
                 {
                     Id = Guid.NewGuid(),
                     Url = imageUrl,
+                    AccommodationId = accommodation.Id
                 };
                 _context.Set<ImageAccommodation>().Add(image);
             }
@@ -79,6 +76,7 @@ public class AccommodationService : IAccommodationService
 
         return AccommodationMapper.ToDto(accommodation);
     }
+
 
     public async Task<bool> UpdateAccommodationAsync(Guid accommodationId, AccommodationUpdateDTO updateDto, Guid currentUserId)
     {

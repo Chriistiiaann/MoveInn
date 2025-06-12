@@ -17,6 +17,14 @@ const typeMap: Record<number, { label: string; badgeColor: string; bgColor: stri
   4: { label: "Other", badgeColor: "bg-gray-300 text-gray-800", bgColor: "from-gray-200 dark:from-gray-400 to-foreground" },
 }
 
+const typeMapBorder: Record<number, { label: string; borderColor: string;}> = {
+  0: { label: "Room", borderColor: "border-pink-500" },
+  1: { label: "House", borderColor: "border-yellow-500" },
+  2: { label: "Apartment", borderColor: "border-primary" },
+  3: { label: "Rural", borderColor: "border-secondary-greenblue" },
+  4: { label: "Other", borderColor: "border-gray-500" },
+}
+
 export function AcommodationCard({ acommodation }: AcommodationCardProps) {
   const type = typeMap[acommodation.acommodationType] ?? typeMap[4]
 
@@ -54,7 +62,8 @@ export function AcommodationCard({ acommodation }: AcommodationCardProps) {
     </div>
 
     {/* Fondo degradado + título + localización */}
-    <div className={`w-full bg-gradient-to-br ${type.bgColor}`}>
+    <div className={`w-full bg-gradient-to-br ${type.bgColor} border-b-[3px] ${typeMapBorder[acommodation.acommodationType].borderColor}`}>
+
       <div className="px-4 pt-2 pb-3 flex flex-col justify-center">
         <h3 className="font-semibold text-lg text-text mb-1 line-clamp-1">{acommodation.title}</h3>
         <div className="flex items-center bg-foreground/10 dark:bg-foreground/40 w-fit px-2 py-1 rounded-full text-xs text-gray-700 dark:text-gray-200">

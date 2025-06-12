@@ -66,6 +66,7 @@ export function EventCalendarView({ events, selectedDate, setSelectedDate, activ
       case "sports": return "bg-purple-200 text-purple-900"
       case "workshop": return "bg-yellow-200 text-yellow-900"
       case "party": return "bg-[#0E1E40] text-white"
+      case "food": return "bg-green-200 text-green-900"
       case "other": return "bg-gray-300 text-gray-800"
       default: return "bg-gray-200 text-gray-700"
     }
@@ -181,9 +182,14 @@ export function EventCalendarView({ events, selectedDate, setSelectedDate, activ
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-[#0E1E40] rounded-sm" /> Party
           </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="w-3 h-3 bg-gray-300 border-l-2 border-white rounded-sm" />
-            You're attending
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-400 rounded-sm" /> Food
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-purple-200 rounded-sm" /> Sports
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-yellow-200 rounded-sm" /> Workshop
           </div>
         </div>
       </CardContent>

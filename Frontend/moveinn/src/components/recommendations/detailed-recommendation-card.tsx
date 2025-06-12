@@ -1,12 +1,14 @@
-import type { ReactNode } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Star, ExternalLink, Share2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { API_BASE } from "@/utils/endpoints/config"
+import { API_BASE, API_GET_USER } from "@/utils/endpoints/config"
 import { DetailedRecommendationCardProps } from "@/types/recommendation"
+import axios from "axios"
+import { getCookie } from "cookies-next"
 
 const categoryByNumber: Record<number, string> = {
   0: "Restaurant",
@@ -26,6 +28,7 @@ export function DetailedRecommendationCard({
 }: DetailedRecommendationCardProps) {
   const categoryName = categoryByNumber[recommendation.category] || "Other"
   const categorySlug = categoryName.toLowerCase()
+  const [recommenderName, setRecommenderName] = useState<string>("")
 
   const mainImage = recommendation.recommendationImages?.[0]?.url
     ? `/uploads/${recommendation.recommendationImages[0].url}`
@@ -61,6 +64,47 @@ export function DetailedRecommendationCard({
     }
   }
 
+  const getCategoryColorBorder = () => {
+    switch (categorySlug) {
+      case "restaurant": return "border-secondary"
+      case "cafeteria": return "border-pink-200"
+      case "museum": return "border-primary"
+      case "leisurezone": return "border-amber-400"
+      case "park": return "border-secondary-greenblue"
+      case "historicalsite": return "border-yellow-200"
+      case "shopping": return "border-purple-200"
+      case "bar": return "border-[#0E1E40]"
+      case "other": return "border-gray-200"
+      default: return "border-gray-200"
+    }
+  }
+
+  console.log(recommendation)
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (recommendation.userId && recommendation.userId !== "00000000-0000-0000-0000-000000000000") {
+        try {
+          const token = getCookie("token")
+          const response = await axios.get(API_GET_USER(recommendation.userId), {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          const userData = response.data
+          setRecommenderName(userData.name)
+        } catch (error) {
+          console.error("Error fetching user name:", error)
+          setRecommenderName("Unknown User")
+        }
+      } else {
+        setRecommenderName("System")
+      }
+    }
+
+    fetchUserName()
+  }, [recommendation.userId])
+
   return (
     <Card className="flex flex-col py-0 justify-between h-full min-h-[480px] overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 bg-foreground border-none">
       {/* Imagen + info superior + fondo de color */}
@@ -88,7 +132,7 @@ export function DetailedRecommendationCard({
           </div>
         </div>
 
-        <div className={`w-full bg-gradient-to-br ${getCategoryColor()}`}>
+        <div className={`w-full border-b-3 ${getCategoryColorBorder()} bg-gradient-to-br ${getCategoryColor()}`}>
           <div className="px-4 pt-2 pb-3 flex flex-col justify-center">
             <h3 className="font-semibold text-lg text-text mb-1 line-clamp-1">{recommendation.title}</h3>
             <div className="flex items-center bg-foreground/10 w-fit px-2 py-1 rounded-full text-xs text-gray-700 dark:text-gray-200">
@@ -117,22 +161,13 @@ export function DetailedRecommendationCard({
         <p className="text-gray-500 dark:text-gray-400 text-xs truncate">
           Recommended by{" "}
           <span className="font-semibold text-primary dark:text-text-secondary">
-            {recommendation.userId === "00000000-0000-0000-0000-000000000000" ? "system" : recommendation.userId}
+            {recommendation.userId === "00000000-0000-0000-0000-000000000000" ? "system" : recommenderName}
           </span>
         </p>
       </CardContent>
 
       <CardFooter className="p-3 pt-0 flex justify-between">
-        <Button variant="outline" size="sm" className="text-[#4C69DD] border-[#4C69DD]/30 hover:bg-[#4C69DD]/10">
-          <Share2 className="h-3.5 w-3.5 mr-1" />
-          Share
-        </Button>
-        <Link href={`/dashboard/recommendations/${recommendation.id}`}>
-          <Button size="sm" className="text-white bg-[#4C69DD] hover:bg-[#4C69DD]/90">
-            <ExternalLink className="h-3.5 w-3.5 mr-1" />
-            View Details
-          </Button>
-        </Link>
+        
       </CardFooter>
     </Card>
   )

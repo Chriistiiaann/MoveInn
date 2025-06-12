@@ -10,4 +10,6 @@ public interface IHostRepository
     Task ApproveAsync(Guid id);
     Task RejectAsync(Guid id);
     Task<List<User>> ListApprovedHostsAsync();
+    Task<IEnumerable<string>> GetAllCountriesAsync();
+    Task<IEnumerable<string>> GetCitiesByCountryAsync(string country);
 }

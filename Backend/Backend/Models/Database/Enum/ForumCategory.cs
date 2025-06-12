@@ -2,14 +2,14 @@
 
 public enum ForumCategory
 {
-    TramitesYDocumentacion,
-    UniversidadYVidaAcademica,
-    IntegracionCulturalYSocial,
-    BecasYFinanzas,
-    MovilidadYTransporte,
-    OcioTurismoYVidaNocturna,
-    QuedadasYEventos,
-    ConsejosYExperiencias,
+    ProceduresAndDocumentation,
+    UniversityAndAcademicLife,
+    CulturalAndSocialIntegration,
+    ScholarshipsAndFinances,
+    MobilityAndTransportation,
+    LeisureTourismAndNightlife,
+    MeetupsAndEvents,
+    TipsAndExperiences,
     FAQ,
-    Otro
+    Other
 }

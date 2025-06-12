@@ -71,6 +71,19 @@ export default function ForumDetailPage() {
 
   const { user } = useAuth()
 
+  const forumCategoryBorderColors: Record<number, string> = {
+    0: "border-secondary",
+    1: "border-yellow-200",
+    2: "border-pink-200",
+    3: "border-purple-200",
+    4: "border-secondary-greenblue",
+    5: "border-amber-400",
+    6: "border-[#0E1E40]",
+    7: "border-primary",
+    8: "border-gray-300",
+    9: "border-gray-200",
+  }
+
   const fetchForum = async () => {
     try {
       const token = localStorage.getItem('token')
@@ -196,28 +209,30 @@ export default function ForumDetailPage() {
         }
         placeholder="Write a reply..."
         rows={2}
-        className="text-sm text-primary-dark mb-2"
+        className="text-sm text-primary-dark mb-2 border-primary dark:border-text-secondary"
       />
       <div className="flex gap-2">
       <Button
         size="sm"
-        onClick={() => {
-          const threadId = getThreadIdByMessageId(parentId) || parentId
-          handleReplySubmit(parentId, threadId)
-        }}
-      >
-        Send
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="hover:bg-[#e84753] bg-red-500 text-white"
+        variant="default"
+        className="hover:bg-red-600 bg-red-500 text-white"
         onClick={() => {
           setActiveReply(null)
           setReplyContent((prev) => ({ ...prev, [parentId]: '' }))
         }}
       >
         Cancel
+      </Button>
+      <Button
+        size="sm"
+        variant="default"
+        className="hover:bg-accent hover:text-accent-dark bg-primary text-white"
+        onClick={() => {
+          const threadId = getThreadIdByMessageId(parentId) || parentId
+          handleReplySubmit(parentId, threadId)
+        }}
+      >
+        Send
       </Button>
       </div>
     </div>
@@ -227,13 +242,13 @@ export default function ForumDetailPage() {
     const nested = responses.filter((r) => r.parentMessageId === parentId)
     return nested.map((msg) => (
       <div key={msg.id} className={`ml-${depth * 6} mt-2 border-l pl-4`}>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 text-text  ">
           <Avatar className="h-6 w-6">
             <AvatarImage src={msg.creatorAvatar} />
             <AvatarFallback>{msg.creatorName?.charAt(0)}</AvatarFallback>
           </Avatar>
           <span className="font-medium text-sm">{msg.creatorName}</span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-600 dark:text-gray-300">
             {format(new Date(msg.createdAt), 'PPPp')}
           </span>
         </div>
@@ -261,8 +276,8 @@ export default function ForumDetailPage() {
 
   if (!forum) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading forum details...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
       </div>
     )
   }
@@ -272,16 +287,16 @@ export default function ForumDetailPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Forum Header */}
         <div className="shadow-lg rounded-lg p-6 bg-foreground">
-          <div className={`rounded-t-lg mb-6 -mx-6 -mt-6 px-6 pt-6 pb-4 bg-gradient-to-br ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white'} border-b border-gray-200 dark:border-gray-700`}>
+          <div className={`rounded-t-lg mb-6 -mx-6 -mt-6 px-6 pt-6 pb-4 bg-gradient-to-br ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white'} border-b-3 ${forumCategoryBorderColors[forum.category]}`}>
             <div className="flex items-center justify-between mb-4">
               <Badge className={`text-sm px-3 py-1 rounded-full ${forumCategoryBadgeColors[forum.category] || 'bg-gray-300 text-gray-800'}`}>
                 {categoryLabels[forum.category] || 'Other'}
               </Badge>
-              <span className="text-sm text-gray-500">{format(new Date(forum.createdAt), 'PPP')}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{format(new Date(forum.createdAt), 'PPP')}</span>
             </div>
             <h1 className="text-2xl font-bold text-text mb-4">{forum.title}</h1>
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2 bg-gray-200 dark:bg-foreground rounded-full px-2 py-1 w-fit">
-              <MapPin className="h-4 w-4 mr-1 text-[#4C69DD]" />
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 bg-background/50 rounded-full px-2 py-1 w-fit">
+              <MapPin className="h-4 w-4 mr-1 text-primary" />
               {forum.country}
             </div>
           </div>
@@ -298,7 +313,7 @@ export default function ForumDetailPage() {
               value={newThread}
               onChange={(e) => setNewThread(e.target.value)}
               placeholder="Share something with the community..."
-              className="mb-3 text-text"
+              className="mb-3 text-text border-primary dark:border-text-secondary"
             />
             <div className="flex justify-end">
               <Button onClick={handleSubmitThread} disabled={isSubmitting} className="bg-primary text-white hover:bg-primary/90">
@@ -319,18 +334,18 @@ export default function ForumDetailPage() {
                 <div key={thread.id} className="bg-foreground shadow-sm rounded-lg overflow-hidden">
                   
                   {/* Barra de color */}
-                  <div className={`h-3 w-full bg-gradient-to-r ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white border-b border-gray-200 dark:border-gray-700'}`} />
+                  <div className={`h-3 w-full border-b-2 ${forumCategoryBorderColors[forum.category]} bg-gradient-to-r ${forumCategoryGradients[forum.category] || 'from-gray-100 to-white'}`} />
 
             
                   {/* Contenido del hilo */}
                   <div className="p-4">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-2 text-text">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={thread.creatorAvatar} />
                         <AvatarFallback>{thread.creatorName?.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <div className="text-sm font-medium text-primary-dark">{thread.creatorName}</div>
-                      <span className="text-xs text-gray-500 ml-auto">
+                      <div className="text-sm font-medium text-text">{thread.creatorName}</div>
+                      <span className="text-xs text-gray-600 dark:text-gray-300 ml-auto">
                         {format(new Date(thread.createdAt), 'PPPp')}
                       </span>
                     </div>
@@ -347,13 +362,13 @@ export default function ForumDetailPage() {
             
                     {rootReplies.slice(0, 5).map((msg: any) => (
                       <div key={msg.id} className="ml-6 mt-2 pl-4 border-l">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 text-text">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={msg.creatorAvatar} />
                             <AvatarFallback>{msg.creatorName?.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <span className="font-medium text-sm">{msg.creatorName}</span>
-                          <span className="text-xs text-gray-400">{format(new Date(msg.createdAt), 'PPPp')}</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-300">{format(new Date(msg.createdAt), 'PPPp')}</span>
                         </div>
                         <p className="text-sm text-text ml-8">{msg.content}</p>
                         <Button

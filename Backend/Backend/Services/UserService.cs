@@ -1,11 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using System.Net;
-using Backend.Models.Database;
+﻿using Backend.Models.Database;
 using Backend.Models.Database.Entities;
 using Backend.Models.Database.Enum;
 using Backend.Models.Dtos;
 using Backend.Models.Mappers;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
 {
@@ -18,7 +15,6 @@ namespace Backend.Services
             _unitOfWork = unitOfWork;
         }
 
-        /*<------------->GET<------------->*/
         public async Task<UserDto?> GetUserByIdAsync(Guid id)
         {
             User? user = await _unitOfWork.UserRepository.GetUserDataByIdAsync(id);
@@ -42,9 +38,6 @@ namespace Backend.Services
             return _unitOfWork.UserRepository.IsLoginCorrect(mail.ToLowerInvariant(), password);
         }
 
-
-
-        /*<------------->POST<------------->*/
         public async Task<User> InsertAsync(User user)
         {
             await _unitOfWork.UserRepository.InsertAsync(user);
@@ -139,8 +132,14 @@ namespace Backend.Services
 
             await _unitOfWork.UserRepository.UpdateAsync(user);
             bool saved = await _unitOfWork.SaveAsync();
-            return saved ? user : null;
+
+            if (!saved)
+                return null;
+
+            var fullUser = await _unitOfWork.UserRepository.GetUserDataByIdAsync(id);
+            return fullUser;
         }
+
 
         public async Task<UserDto?> UpdateUserSocialMediaAsync(Guid userId, List<SocialMediaLinkDto> linksDto)
         {
@@ -180,7 +179,6 @@ namespace Backend.Services
             return await _unitOfWork.SaveAsync();
         }
 
-        /*<------------->IMAGES<------------->*/
         public async Task<string> StoreImageAsync(IFormFile file, string modelName)
         {
             var validImageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
@@ -212,7 +210,9 @@ namespace Backend.Services
             {
                 Id = u.Id,
                 Name = u.Name,
-                AvatarUrl = u.AvatarUrl
+                AvatarUrl = u.AvatarUrl,
+                ErasmusCountry = u.ErasmusCountry,
+                City = u.City
             }).ToList();
         }
 
@@ -223,8 +223,20 @@ namespace Backend.Services
             {
                 Id = u.Id,
                 Name = u.Name,
-                AvatarUrl = u.AvatarUrl
+                AvatarUrl = u.AvatarUrl,
+                ErasmusCountry = u.ErasmusCountry,
+                City = u.City
             }).ToList();
+        }
+
+        public async Task<IEnumerable<string>> GetAllCountriesAsync()
+        {
+            return await _unitOfWork.UserRepository.GetAllCountriesAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetCitiesByCountryAsync(string country)
+        {
+            return await _unitOfWork.UserRepository.GetCitiesByCountryAsync(country);
         }
     }
 }

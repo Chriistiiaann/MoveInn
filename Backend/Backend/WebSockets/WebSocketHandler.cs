@@ -1,49 +1,56 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Backend.Models.Interfaces;
-using Backend.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.WebSockets
 {
     public class WebsocketHandler
     {
         private static readonly ConcurrentDictionary<string, WebSocket> _connections = new();
-
-        private static readonly ConcurrentDictionary<Guid, ConcurrentBag<string>> _countSubscribers = new ConcurrentDictionary<Guid, ConcurrentBag<string>>();
+        private static readonly ConcurrentDictionary<Guid, ConcurrentBag<string>> _countSubscribers =
+            new ConcurrentDictionary<Guid, ConcurrentBag<string>>();
 
         public async Task HandleAsync(HttpContext context, WebSocket webSocket)
         {
-            var userId = context.Items["userId"]?.ToString();
+            // Extraer userId directamente del claim "id" del JWT
+            var userId = context.User.FindFirst("id")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
+                // Si no viene el claim "id", cerrar inmediatamente
                 await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Falta el userId", CancellationToken.None);
                 return;
             }
 
-            // Guardamos la conexión
+            // Guardar la conexión
             _connections[userId] = webSocket;
             Console.WriteLine($"🔗 Usuario {userId} conectado");
 
             try
             {
+                // Enviar mensajes pendientes (si hay)
                 var messagesService = context.RequestServices.GetRequiredService<IMessagesService>();
                 await messagesService.SendPendingMessagesAsync(userId);
 
                 var buffer = new byte[4 * 1024];
 
+                // Bucle para procesar mensajes mientras el socket esté abierto
                 while (webSocket.State == WebSocketState.Open)
                 {
                     var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
+                        // Si el cliente cierra, salimos
                         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Cierre normal", CancellationToken.None);
                         break;
                     }
+
                     if (result.MessageType != WebSocketMessageType.Text)
                         continue;
 
@@ -210,7 +217,6 @@ namespace Backend.WebSockets
                                     {
                                         if (subscriberId == targetStr)
                                             continue;
-
                                         await SendMessageToUser(subscriberId, payloadUn);
                                     }
                                 }
@@ -226,7 +232,6 @@ namespace Backend.WebSockets
                                     }));
                             }
                             break;
-
 
                         default:
                             await SendMessageToUser(userId,

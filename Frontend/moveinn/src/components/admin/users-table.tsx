@@ -23,8 +23,9 @@ interface User {
 }
 
 interface UsersTableProps {
-  renderRoleBadge: (role: number) => React.ReactNode
+  renderRoleBadge: (role: number, userId: string) => React.ReactNode;
 }
+
 
 export function UsersTable({ renderRoleBadge }: UsersTableProps) {
   const [users, setUsers] = useState<User[]>([])
@@ -81,7 +82,7 @@ export function UsersTable({ renderRoleBadge }: UsersTableProps) {
                   <td className="px-4 py-3">{u.phone}</td>
                   <td className="px-4 py-3 max-w-[200px] truncate">{u.biography}</td>
                   <td className="px-4 py-3">
-                    {renderRoleBadge(u.role)}
+                    {renderRoleBadge(u.role, u.id)}
                   </td>
                 </tr>
               ))}

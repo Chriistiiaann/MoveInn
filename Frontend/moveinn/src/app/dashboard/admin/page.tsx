@@ -11,7 +11,7 @@ import { useAuth } from "@/context/authcontext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_GET_ALL_USERS, API_GET_HOSTS } from "@/utils/endpoints/config";
+import { API_GET_ALL_USERS, API_GET_HOSTS, API_ADMIN_MODIFY_ROLE_USER } from "@/utils/endpoints/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -21,6 +21,12 @@ import { UsersTable } from "@/components/admin/users-table";
 import { RecommendationsTable } from "@/components/admin/recommendations-table"
 import { EventsTable } from "@/components/admin/events-table"
 import { AccommodationsTable } from "@/components/admin/accommodations-table";
+
+import { toast } from "sonner";
+
+import { getCookie } from "cookies-next";
+import { ReviewsTable } from "@/components/admin/reviews-table";
+
 
 interface User {
   id: string;
@@ -37,6 +43,12 @@ interface User {
   erasmusDate: number;
   erasmusCountry: string;
   phone: string;
+}
+
+
+interface RoleBadgeProps {
+  role: number;
+  userId: string;
 }
 
 export default function AdminPage() {
@@ -56,7 +68,7 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchUsersAndHosts = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const token = getCookie("token");
   
         const [usersRes, hostsRes] = await Promise.all([
           axios.get(API_GET_ALL_USERS, {
@@ -88,7 +100,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen px-4 py-8 space-y-8">
       {editModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-foreground rounded-lg shadow-xl w-full max-w-lg p-6 relative">
@@ -169,7 +181,7 @@ export default function AdminPage() {
         </section>
 
         {/* Quick Stats */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card className="bg-foreground border-none shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-text">
@@ -201,24 +213,32 @@ export default function AdminPage() {
         {/* Admin Tabs */}
         <section>
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5 bg-foreground border-none rounded-lg p-1 text-text">
-              <TabsTrigger className="text-text transition-colors duration-200 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="users">
-                Users
-              </TabsTrigger>
-              <TabsTrigger className="text-text transition-colors duration-200 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="recommendations">
-                Recommendations
-              </TabsTrigger>
-              <TabsTrigger className="text-text transition-colors duration-200 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="events">
-                Events
-              </TabsTrigger>
-              <TabsTrigger className="text-text transition-colors duration-200 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="housing">
-                Housing
-              </TabsTrigger>
-              <TabsTrigger value="hosts" className="text-text transition-colors duration-200 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg">Hosts</TabsTrigger> {/* ✅ nueva pestaña */}
-            </TabsList>
+          <div className="w-full flex justify-center">
+  <TabsList className="flex flex-wrap md:flex-nowrap md:justify-center overflow-x-auto gap-2 p-1 bg-foreground rounded-lg">
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="users">
+      Users
+    </TabsTrigger>
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="recommendations">
+      Recommendations
+    </TabsTrigger>
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="events">
+      Events
+    </TabsTrigger>
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="housing">
+      Housing
+    </TabsTrigger>
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="reviews">
+      Reviews
+    </TabsTrigger>
+    <TabsTrigger className="text-text min-w-[130px] text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:rounded-lg" value="hosts">
+      Hosts
+    </TabsTrigger>
+  </TabsList>
+</div>
+
 
             <TabsContent value="users">
-              <UsersTable renderRoleBadge={(role) => <RoleBadge role={role} />} />
+              <UsersTable renderRoleBadge={(role, userId) => <RoleBadge role={role} userId={userId} />} />
             </TabsContent>
 
             <TabsContent value="recommendations">
@@ -230,6 +250,9 @@ export default function AdminPage() {
             <TabsContent value="housing">
               <AccommodationsTable />
             </TabsContent>
+            <TabsContent value="reviews">
+              <ReviewsTable />
+            </TabsContent>
             <TabsContent value="hosts" className="space-y-4">
               <Card className="bg-foreground border-none shadow-md">
                 <CardHeader>
@@ -239,7 +262,7 @@ export default function AdminPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <HostRequests />
+                  <HostRequests setHosts={setHosts} />
                 </CardContent>
               </Card>
               <Card className="bg-foreground border-none shadow-md">
@@ -250,7 +273,7 @@ export default function AdminPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <HostsTable />
+                  <HostsTable hosts={hosts} setHosts={setHosts} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -262,18 +285,43 @@ export default function AdminPage() {
   );
 }
 
-function RoleBadge({ role }: { role: number }) {
+export function RoleBadge({ role, userId }: RoleBadgeProps) {
   const [showSelect, setShowSelect] = useState(false);
   const [currentRole, setCurrentRole] = useState(role);
+
+  const { user } = useAuth();
 
   const roleOptions = [
     { id: 0, label: "Administrator", className: "text-yellow-600 bg-yellow-100 border-yellow-200" },
     { id: 1, label: "Banned", className: "text-red-600 bg-red-100 border-red-200" },
     { id: 2, label: "User", className: "text-blue-600 bg-blue-100 border-blue-200" },
-    { id: 3, label: "Host", className: "text-green-600 bg-green-100 border-green-200" },
   ];
 
-  const selected = roleOptions.find(r => r.id === currentRole);
+  const selected = roleOptions.find((r) => r.id === currentRole);
+
+  const handleRoleChange = async (newRole: number) => {
+    try {
+      const token = getCookie("token");
+
+      if (token) {
+        console.log("Token desde cookie:", token);
+      }
+      console.log("token", token);
+      await axios.put(API_ADMIN_MODIFY_ROLE_USER(userId, newRole), null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentRole(newRole);
+
+      toast.success("Role updated successfully");
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast.error("Error updating user role");
+    } finally {
+      setShowSelect(false);
+    }
+  };
 
   return (
     <div className="relative inline-block">
@@ -287,23 +335,19 @@ function RoleBadge({ role }: { role: number }) {
 
       {showSelect && (
         <div className="absolute z-10 mt-2 bg-white dark:bg-background border rounded-md shadow-md w-36 overflow-hidden">
-        {roleOptions.map((r, index) => (
-          <button
-            key={r.id}
-            onClick={() => {
-              setCurrentRole(r.id);
-              setShowSelect(false);
-            }}
-            className={`block w-full text-left text-sm px-4 py-2 hover:bg-accent/20
-              ${r.className}
-              ${index === 0 ? "rounded-t-md" : ""}
-              ${index === roleOptions.length - 1 ? "rounded-b-md border-t" : "border-t"}`}
-          >
-            {r.label}
-          </button>
-        ))}
-      </div>
-      
+          {roleOptions.map((r, index) => (
+            <button
+              key={r.id}
+              onClick={() => handleRoleChange(r.id)}
+              className={`block w-full text-left text-sm px-4 py-2 hover:bg-accent/20
+                ${r.className}
+                ${index === 0 ? "rounded-t-md" : ""}
+                ${index === roleOptions.length - 1 ? "rounded-b-md border-t" : "border-t"}`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

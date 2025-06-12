@@ -130,9 +130,10 @@ export function ChatWindow({ contact, onSend }: ChatWindowProps) {
   // Render con separadores
   let lastDateLabel = ""
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Mensajes */}
-<div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 w-full max-w-full">
+
   {messages.length === 0 ? (
     <div className="text-center text-gray-400 py-20 text-sm flex flex-col items-center">
       <MessageCircleDashed className="h-12 w-12 text-text mb-2" />
@@ -154,7 +155,8 @@ export function ChatWindow({ contact, onSend }: ChatWindowProps) {
             </div>
           )}
           <div className={`flex ${isMine ? "justify-end" : ""} mb-4`}>
-            <div className={`flex flex-col max-w-[75%]`}>
+          <div className="flex flex-col max-w-[85%] sm:max-w-[70%] break-words">
+
               <div
                 className={`${
                   isMine ? "bg-primary dark:bg-primary/50 text-white dark:text-text" : "bg-gray-200 dark:bg-gray-600 text-text"
@@ -184,7 +186,7 @@ export function ChatWindow({ contact, onSend }: ChatWindowProps) {
           e.preventDefault()
           handleSend()
         }}
-        className="p-1 dark:bg-primary/50 bg-primary rounded-full my-4 mx-4"
+        className="p-1 dark:bg-primary/50 bg-primary rounded-full my-4 mx-0 px-1"
       >
         <div className="flex items-center gap-2 bg-background rounded-full px-4 py-2">
           <Smile className="h-5 w-5 text-text cursor-pointer hover:text-primary" />

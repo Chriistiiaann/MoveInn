@@ -73,6 +73,13 @@ namespace Backend.Controllers
                         .ToList();
                 }
 
+                if (request.Category.HasValue)
+                {
+                    accommodations = accommodations
+                        .Where(a => a.Category == request.Category.Value)
+                        .ToList();
+                }
+
                 if (request.SortField?.ToLower() == "name")
                 {
                     accommodations = request.SortOrder?.ToLower() == "asc"
