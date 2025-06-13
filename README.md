@@ -41,7 +41,7 @@ _La arquitectura se basa en un cliente Next.js que consume una API RESTful desar
 |    | Requisito       | Versión |
 |----|-----------------|---------|
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="24" alt="Node.js"/> | **Node.js**   | v16+    |
-| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg" width="24" alt=".NET SDK"/> | **.NET SDK**  | 6.0+    |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg" width="24" alt=".NET SDK"/> | **.NET SDK**  | 8.0+    |
 | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg" width="24" alt="SQLite"/> | **SQLite**    | –       |
 | <img src="https://cdn.jsdelivr.net/npm/simple-icons@v10/icons/amazonaws.svg" width="24" alt="AWS"/> | **Cuenta AWS** | –       |
 
@@ -113,6 +113,9 @@ A continuación, sigue estos pasos para empezar a disfrutar de la plataforma:
 ### 🎨 Diseño y Documentación Frontend
 - [Prototipos en Figma](https://www.figma.com/design/Fk9dHAUrLTsE9YpQ6nX2WV/MoveInn?node-id=0-1&t=hEjniRgTCOvDUPk0-1)  
 - [Documentación Frontend](https://docs.google.com/document/d/1sNPZV_LL11qH76SVsSsHjmcT2MHdQJ64DWNDYb_xRQQ/edit?usp=sharing)  
+
+### 📄 Presentación  
+[Descarga aquí el PDF de la presentación](https://www.canva.com/design/DAGqEuAxORs/n7iwwAJkZjOFoPJ0UVb1TQ/edit?utm_content=DAGqEuAxORs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 <a id="arquitecturaDelSistema"></a>
 ## 🏗️ Arquitectura del Sistema
