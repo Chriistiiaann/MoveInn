@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 import { useAuth } from '@/context/authcontext'
 import { toast } from 'sonner'
+import { API_BASE_SOCKET_URL } from '@/utils/endpoints/config'
 
 export interface IWebsocketContext {
   socket: WebSocket | null
@@ -70,7 +71,7 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!token) return
 
-    const wsUrl = `wss://localhost:7023/api/WebSocket/ws?token=${token}&v=${wsVersion}`
+    const wsUrl = `${API_BASE_SOCKET_URL}/api/WebSocket/ws?token=${token}&v=${wsVersion}`
     console.log('[WS] Connecting to:', wsUrl)
 
     const ws = new WebSocket(wsUrl)
